@@ -15,7 +15,7 @@ namespace EEPhysics
         public double Y { get; internal set; }
         public int Horizontal { get; internal set; }
         public int Vertical { get; internal set; }
-        private int lastTile;
+        //private int lastTile;
         private int current;
         private double speedX = 0;
         private double speedY = 0;
@@ -29,7 +29,8 @@ namespace EEPhysics
         private double mx, my;
         private bool isInvulnerable;
         private bool donex, doney;
-        //private Queue<int> queue = new Queue<int>(PhysicsConfig.QueueLength);
+        private int[] queue = new int[PhysicsConfig.QueueLength];
+        private int delayed;
         private Point lastPortal;
         private List<Point> gotCoins = new List<Point>();
         private List<Point> gotBlueCoins = new List<Point>();
@@ -137,172 +138,21 @@ namespace EEPhysics
             double oy = double.NaN;
             double ty = double.NaN;
 
-            Action stepX = delegate
-            {
-                if (currentSX > 0)
-                {
-                    if ((currentSX + reminderX) >= 1)
-                    {
-                        X = (X + (1 - reminderX));
-                        X = ((int)X >> 0);
-                        currentSX = (currentSX - (1 - reminderX));
-                        reminderX = 0;
-                    }
-                    else
-                    {
-                        X = (X + currentSX);
-                        currentSX = 0;
-                    }
-                }
-                else
-                {
-                    if (currentSX < 0)
-                    {
-                        if (reminderX != 0 && (reminderX + currentSX) < 0)
-                        {
-                            currentSX = (currentSX + reminderX);
-                            X = (X - reminderX);
-                            X = ((int)X >> 0);
-                            reminderX = 1;
-                        }
-                        else
-                        {
-                            X = (X + currentSX);
-                            currentSX = 0;
-                        }
-                    }
-                }
-                if (HostWorld.overlaps(this))
-                {
-                    X = ox;
-                    speedX = 0;
-                    currentSX = osx;
-                    donex = true;
-                }
-            };
-            Action stepY = delegate
-            {
-                if (currentSY > 0)
-                {
-                    if ((currentSY + reminderY) >= 1)
-                    {
-                        Y = (Y + (1 - reminderY));
-                        Y = ((int)Y >> 0);
-                        currentSY = (currentSY - (1 - reminderY));
-                        reminderY = 0;
-                    }
-                    else
-                    {
-                        Y = (Y + currentSY);
-                        currentSY = 0;
-                    };
-                }
-                else
-                {
-                    if (currentSY < 0)
-                    {
-                        if (((!((reminderY == 0))) && (((reminderY + currentSY) < 0))))
-                        {
-                            Y = (Y - reminderY);
-                            Y = ((int)Y >> 0);
-                            currentSY = (currentSY + reminderY);
-                            reminderY = 1;
-                        }
-                        else
-                        {
-                            Y = (Y + currentSY);
-                            currentSY = 0;
-                        }
-                    }
-                }
-                if (HostWorld.overlaps(this))
-                {
-                    Y = oy;
-                    speedY = 0;
-                    currentSY = osy;
-                    doney = true;
-                }
-            };
-            Action processPortals = delegate
-            {
-                double multiplier = 1.42;
-                current = HostWorld.GetBlock(cx, cy);
-                if (!isGodMode && (current == ItemId.PORTAL || current == ItemId.PORTAL_INVISIBLE))
-                {
-                    if (lastPortal == null)
-                    {
-                        lastPortal = new Point(cx, cy);
-                        int[] data = HostWorld.GetBlockData(cx, cy);
-                        if (data != null && data.Length == 3)
-                        {
-                            Point portalPoint = HostWorld.GetPortalById(data[2]);
-                            if (portalPoint != null)
-                            {
-                                int rot1 = HostWorld.GetBlockData(lastPortal.x, lastPortal.y)[0];
-                                int rot2 = HostWorld.GetBlockData(portalPoint.x, portalPoint.y)[0];
-                                if (rot1 < rot2)
-                                {
-                                    rot1 += 4;
-                                }
-                                switch (rot1 - rot2)
-                                {
-                                    case 1:
-                                        SpeedX = (SpeedY * multiplier);
-                                        SpeedY = (-SpeedX * multiplier);
-                                        ModifierX = (ModifierY * multiplier);
-                                        ModifierY = (-ModifierX * multiplier);
-                                        reminderY = -reminderY;
-                                        currentSY = -currentSY;
-                                        break;
-                                    case 2:
-                                        SpeedX = (-SpeedX * multiplier);
-                                        SpeedY = (-SpeedY * multiplier);
-                                        ModifierX = (-(ModifierX) * multiplier);
-                                        ModifierY = (-(ModifierY) * multiplier);
-                                        reminderY = -(reminderY);
-                                        currentSY = -(currentSY);
-                                        reminderX = -(reminderX);
-                                        currentSX = -(currentSX);
-                                        break;
-                                    case 3:
-                                        SpeedX = (-SpeedY * multiplier);
-                                        SpeedY = (SpeedX * multiplier);
-                                        ModifierX = (-(ModifierY) * multiplier);
-                                        ModifierY = (ModifierX * multiplier);
-                                        reminderX = -(reminderX);
-                                        currentSX = -(currentSX);
-                                        break;
-                                }
-                                X = portalPoint.x * 16;
-                                Y = portalPoint.y * 16;
-                                lastPortal = portalPoint;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    lastPortal = null;
-                }
-            };
-
             cx = ((int)(X + 8) >> 4);
             cy = ((int)(Y + 8) >> 4);
 
-            int delayed = lastTile;
-            /*if (queue.Count > 0)
-                delayed = queue.Dequeue();
-            else
-                delayed = 0;*/
             current = HostWorld.GetBlock(cx, cy);
-            //queue.Enqueue(current);
-            lastTile = current;
-
             if (current == 4 || ItemId.isClimbable(current))
             {
-                delayed = lastTile;
-                lastTile = current;
+                delayed = queue[1];
+                queue[0] = current;
             }
+            else
+            {
+                delayed = queue[0];
+                queue[0] = queue[1];
+            }
+            queue[1] = current;
 
             if (IsDead)
             {
@@ -371,15 +221,15 @@ namespace EEPhysics
                 switch (delayed)
                 {
                     case 1:
-                        mox = -((int)gravity);
+                        mox = -gravity;
                         moy = 0;
                         break;
                     case 2:
                         mox = 0;
-                        moy = -((int)gravity);
+                        moy = -gravity;
                         break;
                     case 3:
-                        mox = (int)gravity;
+                        mox = gravity;
                         moy = 0;
                         break;
                     case ItemId.SPEED_LEFT:
@@ -396,15 +246,15 @@ namespace EEPhysics
                         break;
                     case ItemId.WATER:
                         mox = 0;
-                        moy = (int)PhysicsConfig.WaterBuoyancy;
+                        moy = PhysicsConfig.WaterBuoyancy;
                         break;
                     case ItemId.MUD:
                         mox = 0;
-                        moy = (int)PhysicsConfig.MudBuoyancy;
+                        moy = PhysicsConfig.MudBuoyancy;
                         break;
                     default:
                         mox = 0;
-                        moy = (int)gravity;
+                        moy = gravity;
                         break;
                 }
             }
@@ -553,18 +403,162 @@ namespace EEPhysics
 
             while ((currentSX != 0 && !donex) || (currentSY != 0 && !doney))
             {
-                processPortals();
+                #region processPortals()
+                double multiplier = 1.42;
+                current = HostWorld.GetBlock(cx, cy);
+                if (!isGodMode && (current == ItemId.PORTAL || current == ItemId.PORTAL_INVISIBLE))
+                {
+                    if (lastPortal == null)
+                    {
+                        lastPortal = new Point(cx, cy);
+                        int[] data = HostWorld.GetBlockData(cx, cy);
+                        if (data != null && data.Length == 3)
+                        {
+                            Point portalPoint = HostWorld.GetPortalById(data[2]);
+                            if (portalPoint != null)
+                            {
+                                int rot1 = HostWorld.GetBlockData(lastPortal.x, lastPortal.y)[0];
+                                int rot2 = HostWorld.GetBlockData(portalPoint.x, portalPoint.y)[0];
+                                if (rot1 < rot2)
+                                {
+                                    rot1 += 4;
+                                }
+                                switch (rot1 - rot2)
+                                {
+                                    case 1:
+                                        SpeedX = (SpeedY * multiplier);
+                                        SpeedY = (-SpeedX * multiplier);
+                                        ModifierX = (ModifierY * multiplier);
+                                        ModifierY = (-ModifierX * multiplier);
+                                        reminderY = -reminderY;
+                                        currentSY = -currentSY;
+                                        break;
+                                    case 2:
+                                        SpeedX = (-SpeedX * multiplier);
+                                        SpeedY = (-SpeedY * multiplier);
+                                        ModifierX = (-(ModifierX) * multiplier);
+                                        ModifierY = (-(ModifierY) * multiplier);
+                                        reminderY = -(reminderY);
+                                        currentSY = -(currentSY);
+                                        reminderX = -(reminderX);
+                                        currentSX = -(currentSX);
+                                        break;
+                                    case 3:
+                                        SpeedX = (-SpeedY * multiplier);
+                                        SpeedY = (SpeedX * multiplier);
+                                        ModifierX = (-(ModifierY) * multiplier);
+                                        ModifierY = (ModifierX * multiplier);
+                                        reminderX = -(reminderX);
+                                        currentSX = -(currentSX);
+                                        break;
+                                }
+                                X = portalPoint.x * 16;
+                                Y = portalPoint.y * 16;
+                                lastPortal = portalPoint;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    lastPortal = null;
+                }
+                #endregion
+
                 ox = X;
                 oy = Y;
                 osx = currentSX;
                 osy = currentSY;
-                stepX();
-                stepY();
+
+                #region stepX()
+                if (currentSX > 0)
+                {
+                    if ((currentSX + reminderX) >= 1)
+                    {
+                        X = (X + (1 - reminderX));
+                        X = ((int)X >> 0);
+                        currentSX = (currentSX - (1 - reminderX));
+                        reminderX = 0;
+                    }
+                    else
+                    {
+                        X = (X + currentSX);
+                        currentSX = 0;
+                    }
+                }
+                else
+                {
+                    if (currentSX < 0)
+                    {
+                        if (reminderX != 0 && (reminderX + currentSX) < 0)
+                        {
+                            currentSX = (currentSX + reminderX);
+                            X = (X - reminderX);
+                            X = ((int)X >> 0);
+                            reminderX = 1;
+                        }
+                        else
+                        {
+                            X = (X + currentSX);
+                            currentSX = 0;
+                        }
+                    }
+                }
+                if (HostWorld.overlaps(this))
+                {
+                    X = ox;
+                    speedX = 0;
+                    currentSX = osx;
+                    donex = true;
+                }
+                #endregion
+
+                #region stepY()
+                if (currentSY > 0)
+                {
+                    if ((currentSY + reminderY) >= 1)
+                    {
+                        Y = (Y + (1 - reminderY));
+                        Y = ((int)Y >> 0);
+                        currentSY = (currentSY - (1 - reminderY));
+                        reminderY = 0;
+                    }
+                    else
+                    {
+                        Y = (Y + currentSY);
+                        currentSY = 0;
+                    };
+                }
+                else
+                {
+                    if (currentSY < 0)
+                    {
+                        if (((!((reminderY == 0))) && (((reminderY + currentSY) < 0))))
+                        {
+                            Y = (Y - reminderY);
+                            Y = ((int)Y >> 0);
+                            currentSY = (currentSY + reminderY);
+                            reminderY = 1;
+                        }
+                        else
+                        {
+                            Y = (Y + currentSY);
+                            currentSY = 0;
+                        }
+                    }
+                }
+                if (HostWorld.overlaps(this))
+                {
+                    Y = oy;
+                    speedY = 0;
+                    currentSY = osy;
+                    doney = true;
+                }
+                #endregion
             }
 
             if (!IsDead)
             {
-                //cchanged = false;
                 if (pastx != cx || pasty != cy)
                 {
                     switch (current)
@@ -653,77 +647,70 @@ namespace EEPhysics
 
             var imx = ((int)speedX << 8);
             var imy = ((int)speedY << 8);
-            //moving = false;
 
-            if (imx != 0 || current == ItemId.WATER || current == ItemId.MUD)
+            if (current != ItemId.WATER && current != ItemId.MUD)
             {
-                //moving = true;
-            }
-            else
-            {
-                if (modifierX < 0.1 && modifierX > -0.1)
+                if (imx == 0)
                 {
-                    tx = (X % 16);
-                    if (tx < 2)
+                    if (modifierX < 0.1 && modifierX > -0.1)
                     {
-                        if (tx < 0.2)
+                        tx = (X % 16);
+                        if (tx < 2)
                         {
-                            X = ((int)X >> 0);
-                        }
-                        else
-                        {
-                            X = (X - (tx / 15));
-                        };
-                    }
-                    else
-                    {
-                        if (tx > 14)
-                        {
-                            if (tx > 15.8)
+                            if (tx < 0.2)
                             {
-                                X = ((int)X >> 0);
-                                X++;
+                                X = Math.Floor(X);
                             }
                             else
                             {
-                                X = (X + ((tx - 14) / 15));
+                                X = (X - (tx / 15));
+                            };
+                        }
+                        else
+                        {
+                            if (tx > 14)
+                            {
+                                if (tx > 15.8)
+                                {
+                                    X = Math.Ceiling(X);
+                                }
+                                else
+                                {
+                                    X = (X + ((tx - 14) / 15));
+                                }
                             }
                         }
                     }
                 }
-            }
-            if (imy != 0 || current == ItemId.WATER || current == ItemId.MUD)
-            {
-                //moving = true;
-            }
-            else
-            {
-                if ((modifierY < 0.1) && (modifierY > -0.1))
+
+                if (imy == 0)
                 {
-                    ty = (Y % 16);
-                    if (ty < 2)
+                    if ((modifierY < 0.1) && (modifierY > -0.1))
                     {
-                        if (ty < 0.2)
+                        ty = (Y % 16);
+                        if (ty < 2)
                         {
-                            Y = ((int)Y >> 0);
-                        }
-                        else
-                        {
-                            Y = (Y - (ty / 15));
-                        }
-                    }
-                    else
-                    {
-                        if (ty > 14)
-                        {
-                            if (ty > 15.8)
+                            if (ty < 0.2)
                             {
-                                Y = ((int)Y >> 0);
-                                Y++;
+                                Y = Math.Floor(Y);
                             }
                             else
                             {
-                                Y = (Y + ((ty - 14) / 15));
+                                Y = (Y - (ty / 15));
+                            }
+                        }
+                        else
+                        {
+                            if (ty > 14)
+                            {
+                                if (ty > 15.8)
+                                {
+                                    Y = Math.Ceiling(Y);
+                                }
+                                else
+                                {
+                                    Y = (Y + ((ty - 14) / 15));
+                                }
                             }
                         }
                     }
@@ -790,7 +777,13 @@ namespace EEPhysics
         /// Player which caused the event.
         /// </summary>
         public PhysicsPlayer Player { get; set; }
+        /// <summary>
+        /// Block X where event happened.
+        /// </summary>
         public int BlockX { get; set; }
+        /// <summary>
+        /// Block Y where event happened.
+        /// </summary>
         public int BlockY { get; set; }
     }
 

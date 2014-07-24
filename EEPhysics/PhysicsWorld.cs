@@ -14,10 +14,9 @@ namespace EEPhysics
     {
         internal const int Size = 16;
         internal Stopwatch sw = new Stopwatch();
-        private long currentTime, waitTime;
-        private ulong updateTime;
         private List<Message> earlyMessages = new List<Message>();
         private bool inited;
+        private bool running;
         private Thread physicsThread;
 
         private int[][] foregroundTiles;
@@ -36,9 +35,13 @@ namespace EEPhysics
         /// Whether bot adds itself from init message. Defaults to true.
         /// </summary>
         public bool AddBotPlayer { get; set; }
+        /// <summary>
+        /// Whether physics simulation thread has been started.
+        /// </summary>
+        public bool PhysicsRunning { get; private set; }
 
         /// <summary>
-        /// You shouldn't add or remove any items from this dictionary outside EEPhysics. If you want to add players, use void addPlayer.
+        /// You shouldn't add or remove any items from this dictionary outside EEPhysics.
         /// </summary>
         public ConcurrentDictionary<int, PhysicsPlayer> Players { get; private set; }
         public string WorldKey { get; private set; }
@@ -56,19 +59,26 @@ namespace EEPhysics
         /// </summary>
         public void Run()
         {
+            running = true;
+            PhysicsRunning = true;
+
             sw.Start();
-            while (true)
+            long waitTime, frameStartTime, frameEndTime;
+            while (running)
             {
+                frameStartTime = sw.ElapsedMilliseconds;
                 foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
                 {
                     pair.Value.tick();
                 }
                 OnTick(this, null);
-                currentTime = sw.ElapsedMilliseconds;
-                waitTime = 10 - (currentTime - (long)updateTime++ * PhysicsConfig.MsPerTick);
+                frameEndTime = sw.ElapsedMilliseconds;
+                waitTime = 10 - (frameEndTime - frameStartTime);
                 if (waitTime > 0)
                     Thread.Sleep((int)waitTime);
             }
+
+            PhysicsRunning = false;
         }
 
         public void HandleMessage(Message m)
@@ -180,7 +190,7 @@ namespace EEPhysics
                         int xx = m.GetInt(0);
                         int yy = m.GetInt(1);
                         foregroundTiles[xx][yy] = m.GetInt(2);
-                        tileData[xx][yy] = new int[m.Count - 4];
+                        tileData[xx][yy] = new int[m.Count - 3];
                         for (uint i = 3; i < 6; i++)
                         {
                             tileData[xx][yy][i - 3] = m.GetInt(i);
@@ -307,10 +317,9 @@ namespace EEPhysics
                         earlyMessages.Clear();
                         earlyMessages = null;
 
-                        if (AutoStart)
+                        if (AutoStart && (physicsThread == null || !physicsThread.IsAlive))
                         {
-                            physicsThread = new Thread(new ThreadStart(Run));
-                            physicsThread.Start();
+                            StartSimulation();
                         }
                     }
                     break;
@@ -375,6 +384,44 @@ namespace EEPhysics
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Starts the physics simulation thread.
+        /// </summary>
+        public void StartSimulation()
+        {
+            if (!PhysicsRunning)
+            {
+                if (inited)
+                {
+                    physicsThread = new Thread(new ThreadStart(Run));
+                    physicsThread.Start();
+                }
+                else
+                {
+                    throw new Exception("Cannot start before bot has received init message. ");
+                }
+            }
+            else
+            {
+                throw new Exception("Simulation thread has already been started.");
+            }
+        }
+
+        /// <summary>
+        /// Stops physics simulation thread.
+        /// </summary>
+        public void StopSimulation()
+        {
+            if (PhysicsRunning)
+            {
+                running = false;
+            }
+            else
+            {
+                throw new Exception("Simulation thread is not running.");
+            }
         }
 
         internal bool overlaps(PhysicsPlayer p)
