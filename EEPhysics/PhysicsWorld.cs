@@ -326,30 +326,6 @@ namespace EEPhysics
             }
         }
 
-        public PhysicsPlayer GetPlayer(int id)
-        {
-            PhysicsPlayer p;
-            if (Players.TryGetValue(id, out p))
-            {
-                return p;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        public PhysicsPlayer GetPlayer(string name)
-        {
-            foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-            {
-                if (pair.Value.Name == name)
-                {
-                    return pair.Value;
-                }
-            }
-            return null;
-        }
-
         /// <returns>Foreground block ID</returns>
         public int GetBlock(int xx, int yy)
         {
