@@ -117,10 +117,7 @@ namespace EEPhysics
             gravity = (int)PhysicsConfig.Gravity;
         }
 
-        /// <summary>
-        /// Updates player's position. This is run automatically from World.run() method every 10ms. You shouldn't run this unless you know what you're doing.
-        /// </summary>
-        public void tick()
+        internal void tick()
         {
             int cx = 0;
             int cy = 0;
