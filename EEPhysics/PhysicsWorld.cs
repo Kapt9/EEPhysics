@@ -302,7 +302,7 @@ namespace EEPhysics
                         if (AddBotPlayer)
                         {
                             PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(9));
-                            p.X = m.GetInt(7) * 16; p.Y = m.GetInt(8) * 16;
+                            p.X = m.GetInt(7); p.Y = m.GetInt(8);
                             p.HostWorld = this;
                             Players.TryAdd(p.ID, p);
                         }

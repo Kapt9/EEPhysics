@@ -372,7 +372,7 @@ namespace EEPhysics
                     }
                 }
             }
-            if (isGodMode)
+            if (!isGodMode)
             {
                 switch (this.current)
                 {
