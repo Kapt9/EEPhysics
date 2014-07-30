@@ -6,7 +6,6 @@
 //   The physics world.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace EEPhysics
 {
     using System;
@@ -243,9 +242,9 @@ namespace EEPhysics
                     {
                         if (m.GetInt(0) == 0)
                         {
-                            int xx = m.GetInt(1);
-                            int yy = m.GetInt(2);
-                            int blockId = m.GetInt(3);
+                            var xx = m.GetInt(1);
+                            var yy = m.GetInt(2);
+                            var blockId = m.GetInt(3);
                             this.foregroundTiles[xx][yy] = blockId;
                             if (blockId == 100)
                             {
@@ -290,7 +289,7 @@ namespace EEPhysics
                 case "show":
                 case "hide":
                     {
-                        bool b = m.Type == "hide";
+                        var b = m.Type == "hide";
                         switch (m.GetString(0))
                         {
                             case "timedoor":
@@ -313,8 +312,8 @@ namespace EEPhysics
                 case "br":
                 case "bs":
                     {
-                        int xx = m.GetInt(0);
-                        int yy = m.GetInt(1);
+                        var xx = m.GetInt(0);
+                        var yy = m.GetInt(1);
                         this.foregroundTiles[xx][yy] = m.GetInt(2);
                         this.tileData[xx][yy] = new int[m.Count - 4];
                         for (uint i = 3; i < 4; i++)
@@ -326,8 +325,8 @@ namespace EEPhysics
                     break;
                 case "pt":
                     {
-                        int xx = m.GetInt(0);
-                        int yy = m.GetInt(1);
+                        var xx = m.GetInt(0);
+                        var yy = m.GetInt(1);
                         this.foregroundTiles[xx][yy] = m.GetInt(2);
                         this.tileData[xx][yy] = new int[m.Count - 3];
                         for (uint i = 3; i < 6; i++)
@@ -354,7 +353,7 @@ namespace EEPhysics
                     break;
                 case "tele":
                     {
-                        bool b = m.GetBoolean(0);
+                        var b = m.GetBoolean(0);
                         uint i = 1;
                         while (i + 2 < m.Count)
                         {
@@ -402,11 +401,11 @@ namespace EEPhysics
                     break;
                 case "clear":
                     {
-                        int border = m.GetInt(2);
-                        int fill = m.GetInt(3);
-                        for (int i = 0; i < this.foregroundTiles.Length; i++)
+                        var border = m.GetInt(2);
+                        var fill = m.GetInt(3);
+                        for (var i = 0; i < this.foregroundTiles.Length; i++)
                         {
-                            for (int ii = 0; ii < this.foregroundTiles[i].Length; ii++)
+                            for (var ii = 0; ii < this.foregroundTiles[i].Length; ii++)
                             {
                                 if (i == 0 || ii == 0 || i == this.WorldWidth - 1 || ii == this.WorldHeight - 1)
                                 {
@@ -440,13 +439,13 @@ namespace EEPhysics
                         this.WorldHeight = m.GetInt(13);
 
                         this.foregroundTiles = new int[this.WorldWidth][];
-                        for (int i = 0; i < this.foregroundTiles.Length; i++)
+                        for (var i = 0; i < this.foregroundTiles.Length; i++)
                         {
                             this.foregroundTiles[i] = new int[this.WorldHeight];
                         }
 
                         this.tileData = new int[this.WorldWidth][][];
-                        for (int i = 0; i < this.foregroundTiles.Length; i++)
+                        for (var i = 0; i < this.foregroundTiles.Length; i++)
                         {
                             this.tileData[i] = new int[this.WorldHeight][];
                         }
@@ -466,7 +465,7 @@ namespace EEPhysics
                         this.desBlocks(m, 18);
                         this.inited = true;
 
-                        foreach (Message m2 in this.earlyMessages)
+                        foreach (var m2 in this.earlyMessages)
                         {
                             this.HandleMessage(m2);
                         }
@@ -568,9 +567,9 @@ namespace EEPhysics
         internal static string derot(string arg1)
         {
             // by Capasha (http://pastebin.com/Pj6tvNNx)
-            int num = 0;
-            string str = string.Empty;
-            for (int i = 0; i < arg1.Length; i++)
+            var num = 0;
+            var str = string.Empty;
+            for (var i = 0; i < arg1.Length; i++)
             {
                 num = arg1[i];
                 if ((num >= 0x61) && (num <= 0x7a))
@@ -613,9 +612,9 @@ namespace EEPhysics
         /// </returns>
         internal Point GetPortalById(int id)
         {
-            for (int i = 0; i < this.foregroundTiles.Length; i++)
+            for (var i = 0; i < this.foregroundTiles.Length; i++)
             {
-                for (int ii = 0; ii < this.foregroundTiles[i].Length; ii++)
+                for (var ii = 0; ii < this.foregroundTiles[i].Length; ii++)
                 {
                     if (this.foregroundTiles[i][ii] == 242 || this.foregroundTiles[i][ii] == 381)
                     {
@@ -646,7 +645,7 @@ namespace EEPhysics
             // > https://github.com/Seist/Skylight/blob/master/Skylight/Miscellaneous/Tools.cs, method ConvertMessageToBlockList
             try
             {
-                uint messageIndex = start;
+                var messageIndex = start;
                 while (messageIndex < m.Count)
                 {
                     if (m[messageIndex] is string)
@@ -654,22 +653,22 @@ namespace EEPhysics
                         break;
                     }
 
-                    int blockId = m.GetInteger(messageIndex);
+                    var blockId = m.GetInteger(messageIndex);
                     messageIndex++;
 
-                    int z = m.GetInteger(messageIndex);
+                    var z = m.GetInteger(messageIndex);
                     messageIndex++;
 
-                    byte[] xa = m.GetByteArray(messageIndex);
+                    var xa = m.GetByteArray(messageIndex);
                     messageIndex++;
 
-                    byte[] ya = m.GetByteArray(messageIndex);
+                    var ya = m.GetByteArray(messageIndex);
                     messageIndex++;
 
                     var data = new List<int>();
                     if (blockId == 242 || blockId == 381)
                     {
-                        for (int i = 0; i < 3; i++)
+                        for (var i = 0; i < 3; i++)
                         {
                             data.Add(m.GetInteger(messageIndex));
                             messageIndex++;
@@ -688,7 +687,7 @@ namespace EEPhysics
 
                     int x = 0, y = 0;
 
-                    for (int pos = 0; pos < ya.Length; pos += 2)
+                    for (var pos = 0; pos < ya.Length; pos += 2)
                     {
                         x = (xa[pos] * 256) + xa[pos + 1];
                         y = (ya[pos] * 256) + ya[pos + 1];
@@ -732,14 +731,14 @@ namespace EEPhysics
             }
 
             int tileId;
-            int firstX = (int)p.X >> 4;
-            int firstY = (int)p.Y >> 4;
-            double lastX = (p.X + PhysicsPlayer.Height) / Size;
-            double lastY = (p.Y + PhysicsPlayer.Width) / Size;
-            bool _local7 = false;
+            var firstX = (int)p.X >> 4;
+            var firstY = (int)p.Y >> 4;
+            var lastX = (p.X + PhysicsPlayer.Height) / Size;
+            var lastY = (p.Y + PhysicsPlayer.Width) / Size;
+            var _local7 = false;
 
             int x;
-            int y = firstY;
+            var y = firstY;
             while (y < lastY)
             {
                 x = firstX;

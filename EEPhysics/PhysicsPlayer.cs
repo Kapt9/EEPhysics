@@ -6,7 +6,6 @@
 //   The physics player.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace EEPhysics
 {
     using System;
@@ -465,8 +464,8 @@ namespace EEPhysics
         /// </returns>
         public bool OverlapsTile(int tx, int ty)
         {
-            int xx = tx * 16;
-            int yy = ty * 16;
+            var xx = tx * 16;
+            var yy = ty * 16;
             return (this.X > xx - 16 && this.X <= xx + 16) && (this.Y > yy - 16 && this.Y <= yy + 16);
         }
 
@@ -493,13 +492,15 @@ namespace EEPhysics
         /// </param>
         internal void removeBlueCoin(int xx, int yy)
         {
-            for (int i = 0; i < this.gotCoins.Count; i++)
+            for (var i = 0; i < this.gotCoins.Count; i++)
             {
-                if (this.gotCoins[i].x == xx && this.gotCoins[i].y == yy)
+                if (this.gotCoins[i].x != xx || this.gotCoins[i].y != yy)
                 {
-                    this.gotCoins.RemoveAt(i);
-                    break;
+                    continue;
                 }
+
+                this.gotCoins.RemoveAt(i);
+                break;
             }
         }
 
@@ -514,7 +515,7 @@ namespace EEPhysics
         /// </param>
         internal void removeCoin(int xx, int yy)
         {
-            for (int i = 0; i < this.gotCoins.Count; i++)
+            for (var i = 0; i < this.gotCoins.Count; i++)
             {
                 if (this.gotCoins[i].x == xx && this.gotCoins[i].y == yy)
                 {
@@ -651,6 +652,7 @@ namespace EEPhysics
                         this.mory = this.gravity;
                         break;
                 }
+
                 switch (this.delayed)
                 {
                     case 1:
@@ -691,6 +693,7 @@ namespace EEPhysics
                         break;
                 }
             }
+
             if (Math.Abs(this.moy - PhysicsConfig.WaterBuoyancy) < 0.00000001 || Math.Abs(this.moy - PhysicsConfig.MudBuoyancy) < 0.00000001)
             {
                 this.mx = this.Horizontal;
@@ -717,6 +720,7 @@ namespace EEPhysics
                     }
                 }
             }
+
             this.mx = this.mx * this.SpeedMultiplier;
             this.my = this.my * this.SpeedMultiplier;
             this.mox = this.mox * this.GravityMultiplier;
@@ -766,6 +770,7 @@ namespace EEPhysics
                     }
                 }
             }
+
             if (Math.Abs(this.speedY) > 0.00000001 || Math.Abs(this.modifierY) > 0.00000001)
             {
                 this.speedY = this.speedY + this.modifierY;
@@ -789,6 +794,7 @@ namespace EEPhysics
                         }
                     }
                 }
+
                 if (this.speedY > 16)
                 {
                     this.speedY = 16;
@@ -808,6 +814,7 @@ namespace EEPhysics
                     }
                 }
             }
+
             if (!isGodMode)
             {
                 switch (this.current)
@@ -826,6 +833,7 @@ namespace EEPhysics
                         break;
                 }
             }
+
             reminderX = this.X % 1;
             currentSX = this.speedX;
             reminderY = this.Y % 1;
@@ -834,25 +842,26 @@ namespace EEPhysics
             this.doney = false;
             while ((Math.Abs(currentSX) > 0.00000001 && !this.donex) || (Math.Abs(currentSY) > 0.00000001 && !this.doney))
             {
-                double multiplier = 1.42;
+                var multiplier = 1.42;
                 this.current = this.HostWorld.GetBlock(cx, cy);
                 if (!isGodMode && (this.current == ItemId.PORTAL || this.current == ItemId.PORTAL_INVISIBLE))
                 {
                     if (this.lastPortal == null)
                     {
                         this.lastPortal = new Point(cx, cy);
-                        int[] data = this.HostWorld.GetBlockData(cx, cy);
+                        var data = this.HostWorld.GetBlockData(cx, cy);
                         if (data != null && data.Length == 3)
                         {
-                            Point portalPoint = this.HostWorld.GetPortalById(data[2]);
+                            var portalPoint = this.HostWorld.GetPortalById(data[2]);
                             if (portalPoint != null)
                             {
-                                int rot1 = this.HostWorld.GetBlockData(this.lastPortal.x, this.lastPortal.y)[0];
-                                int rot2 = this.HostWorld.GetBlockData(portalPoint.x, portalPoint.y)[0];
+                                var rot1 = this.HostWorld.GetBlockData(this.lastPortal.x, this.lastPortal.y)[0];
+                                var rot2 = this.HostWorld.GetBlockData(portalPoint.x, portalPoint.y)[0];
                                 if (rot1 < rot2)
                                 {
                                     rot1 += 4;
                                 }
+
                                 switch (rot1 - rot2)
                                 {
                                     case 1:
@@ -882,6 +891,7 @@ namespace EEPhysics
                                         currentSX = -currentSX;
                                         break;
                                 }
+
                                 this.X = portalPoint.x * 16;
                                 this.Y = portalPoint.y * 16;
                                 this.lastPortal = portalPoint;
@@ -899,7 +909,7 @@ namespace EEPhysics
                 osx = currentSX;
                 osy = currentSY;
 
-                #region stepX()
+                
 
                 if (currentSX > 0)
                 {
@@ -943,7 +953,7 @@ namespace EEPhysics
                     this.donex = true;
                 }
 
-                #endregion
+                
 
                 #region stepY()
 
@@ -968,14 +978,14 @@ namespace EEPhysics
                     {
                         if ((!(Math.Abs(reminderY) < 0.00000001)) && ((reminderY + currentSY) < 0))
                         {
-                            this.Y = (this.Y - reminderY);
-                            this.Y = ((int)this.Y >> 0);
-                            currentSY = (currentSY + reminderY);
+                            this.Y = this.Y - reminderY;
+                            this.Y = (int)this.Y >> 0;
+                            currentSY = currentSY + reminderY;
                             reminderY = 1;
                         }
                         else
                         {
-                            this.Y = (this.Y + currentSY);
+                            this.Y = this.Y + currentSY;
                             currentSY = 0;
                         }
                     }
@@ -1000,7 +1010,7 @@ namespace EEPhysics
                     {
                         case 100: // coin
                             this.OnHitCoin(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
-                            for (int i = 0; i < this.gotCoins.Count; i++)
+                            for (var i = 0; i < this.gotCoins.Count; i++)
                             {
                                 if (this.gotCoins[i].x == cx && this.gotCoins[i].y == cy)
                                 {
@@ -1014,7 +1024,7 @@ namespace EEPhysics
                             break;
                         case 101: // bluecoin
                             this.OnHitBlueCoin(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
-                            for (int i = 0; i < this.gotBlueCoins.Count; i++)
+                            for (var i = 0; i < this.gotBlueCoins.Count; i++)
                             {
                                 if (this.gotBlueCoins[i].x == cx && this.gotBlueCoins[i].y == cy)
                                 {
@@ -1096,8 +1106,8 @@ namespace EEPhysics
                 }
             }
 
-            int imx = (int)this.speedX << 8;
-            int imy = (int)this.speedY << 8;
+            var imx = (int)this.speedX << 8;
+            var imy = (int)this.speedY << 8;
 
             if (this.current != ItemId.WATER && this.current != ItemId.MUD)
             {
