@@ -34,9 +34,9 @@ namespace EEPhysics
         public const double JumpHeight = 26;
 
         /// <summary>
-        /// The ms per tick.
+        /// The milliseconds per tick.
         /// </summary>
-        public const int MsPerTick = 10;
+        private const int MsPerTick = 10;
 
         /// <summary>
         /// The mud buoyancy.

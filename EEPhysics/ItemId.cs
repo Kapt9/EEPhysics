@@ -19,197 +19,197 @@ namespace EEPhysics
         /// <summary>
         /// The brick complete option.
         /// </summary>
-        public const int BRICK_COMPLETE = 121;
+        public const int BrickComplete = 121;
 
         /// <summary>
         /// The cake.
         /// </summary>
-        public const int CAKE = 337;
+        public const int Cake = 337;
 
         /// <summary>
         /// The chain.
         /// </summary>
-        public const int CHAIN = 118;
+        public const int Chain = 118;
 
         /// <summary>
         /// The checkpoint.
         /// </summary>
-        public const int CHECKPOINT = 360;
+        public const int Checkpoint = 360;
 
         /// <summary>
-        /// The coindoor.
+        /// The coin door.
         /// </summary>
-        public const int COINDOOR = 43;
+        public const int Coindoor = 43;
 
         /// <summary>
-        /// The coingate.
+        /// The coin gate.
         /// </summary>
-        public const int COINGATE = 165;
+        public const int Coingate = 165;
 
         /// <summary>
         /// The diamond.
         /// </summary>
-        public const int DIAMOND = 241;
+        public const int Diamond = 241;
 
         /// <summary>
         /// The door club.
         /// </summary>
-        public const int DOOR_CLUB = 200;
+        public const int DoorClub = 200;
 
         /// <summary>
         /// The purple door.
         /// </summary>
-        public const int DOOR_PURPLE = 184;
+        public const int DoorPurple = 184;
 
         /// <summary>
         /// The fire.
         /// </summary>
-        public const int FIRE = 368;
+        public const int Fire = 368;
 
         /// <summary>
         /// The gate club.
         /// </summary>
-        public const int GATE_CLUB = 201;
+        public const int GateClub = 201;
 
         /// <summary>
         /// The purple gate.
         /// </summary>
-        public const int GATE_PURPLE = 185;
+        public const int GatePurple = 185;
 
         /// <summary>
-        /// The glowy-line blue slope.
+        /// The glowy line blue slope.
         /// </summary>
-        public const int GLOWYLINE_BLUE_SLOPE = 375;
+        public const int GlowylineBlueSlope = 375;
 
         /// <summary>
-        /// The glowy-line blue straight.
+        /// The glowy line blue straight.
         /// </summary>
-        public const int GLOWY_LINE_BLUE_STRAIGHT = 376;
+        public const int GlowyLineBlueStraight = 376;
 
         /// <summary>
-        /// The glowy-line green slope.
+        /// The glowy line green slope.
         /// </summary>
-        public const int GLOWY_LINE_GREEN_SLOPE = 379;
+        public const int GlowyLineGreenSlope = 379;
 
         /// <summary>
         /// The glowy line green straight.
         /// </summary>
-        public const int GLOWY_LINE_GREEN_STRAIGHT = 380;
+        public const int GlowyLineGreenStraight = 380;
 
         /// <summary>
         /// The glowy line yellow slope.
         /// </summary>
-        public const int GLOWY_LINE_YELLOW_SLOPE = 377;
+        public const int GlowyLineYellowSlope = 377;
 
         /// <summary>
         /// The glowy line yellow straight.
         /// </summary>
-        public const int GLOWY_LINE_YELLOW_STRAIGHT = 378;
+        public const int GlowyLineYellowStraight = 378;
 
         /// <summary>
         /// The mud.
         /// </summary>
-        public const int MUD = 369;
+        public const int Mud = 369;
 
         /// <summary>
         /// The mud bubble.
         /// </summary>
-        public const int MUD_BUBBLE = 370;
+        public const int MudBubble = 370;
 
         /// <summary>
-        /// The ninj a_ ladder.
+        /// The ninja ladder.
         /// </summary>
-        public const int NINJA_LADDER = 120;
+        public const int NinjaLadder = 120;
 
         /// <summary>
         /// The portal.
         /// </summary>
-        public const int PORTAL = 242;
+        public const int Portal = 242;
 
         /// <summary>
         /// The invisible portal.
         /// </summary>
-        public const int PORTAL_INVISIBLE = 381;
+        public const int PortalInvisible = 381;
 
         /// <summary>
         /// The speed down.
         /// </summary>
-        public const int SPEED_DOWN = 117;
+        public const int SpeedDown = 117;
 
         /// <summary>
         /// The speed left.
         /// </summary>
-        public const int SPEED_LEFT = 114;
+        public const int SpeedLeft = 114;
 
         /// <summary>
         /// The speed right.
         /// </summary>
-        public const int SPEED_RIGHT = 115;
+        public const int SpeedRight = 115;
 
         /// <summary>
         /// The speed up.
         /// </summary>
-        public const int SPEED_UP = 116;
+        public const int SpeedUp = 116;
 
         /// <summary>
         /// The spike.
         /// </summary>
-        public const int SPIKE = 361;
+        public const int Spike = 361;
 
         /// <summary>
         /// The switch purple.
         /// </summary>
-        public const int SWITCH_PURPLE = 113;
+        public const int SwitchPurple = 113;
 
         /// <summary>
         /// The text sign.
         /// </summary>
-        public const int TEXT_SIGN = 385;
+        public const int TextSign = 385;
 
         /// <summary>
-        /// The timedoor.
+        /// The time door.
         /// </summary>
-        public const int TIMEDOOR = 156;
+        public const int Timedoor = 156;
 
         /// <summary>
-        /// The timegate.
+        /// The time gate.
         /// </summary>
-        public const int TIMEGATE = 157;
+        public const int Timegate = 157;
 
         /// <summary>
         /// The water.
         /// </summary>
-        public const int WATER = 119;
+        public const int Water = 119;
 
         /// <summary>
         /// The wave.
         /// </summary>
-        public const int WAVE = 300;
+        public const int Wave = 300;
 
         /// <summary>
-        /// The horizonal vine.
+        /// The horizontal vine.
         /// </summary>
-        public const int WINE_H = 99;
+        public const int WineH = 99;
 
         /// <summary>
         /// The vertical vine.
         /// </summary>
-        public const int WINE_V = 98;
+        public const int WineV = 98;
 
         /// <summary>
         /// The world portal.
         /// </summary>
-        public const int WORLD_PORTAL = 374;
+        public const int WorldPortal = 374;
 
         /// <summary>
         /// The zombie door.
         /// </summary>
-        public const int ZOMBIE_DOOR = 207;
+        public const int ZombieDoor = 207;
 
         /// <summary>
         /// The zombie gate.
         /// </summary>
-        public const int ZOMBIE_GATE = 206;
+        public const int ZombieGate = 206;
 
         #endregion
 
@@ -224,14 +224,14 @@ namespace EEPhysics
         /// <returns>
         /// The <see cref="bool"/>.
         /// </returns>
-        public static bool isClimbable(int id)
+        public static bool IsClimbable(int id)
         {
             switch (id)
             {
-                case NINJA_LADDER:
-                case CHAIN:
-                case WINE_V:
-                case WINE_H:
+                case NinjaLadder:
+                case Chain:
+                case WineV:
+                case WineH:
                     return true;
             }
 
@@ -241,15 +241,15 @@ namespace EEPhysics
         /// <summary>
         /// The is solid.
         /// </summary>
-        /// <param name="_arg1">
+        /// <param name="arg1">
         /// The first argument.
         /// </param>
         /// <returns>
         /// The <see cref="bool"/>.
         /// </returns>
-        public static bool isSolid(int _arg1)
+        public static bool IsSolid(int arg1)
         {
-            return (9 <= _arg1 && _arg1 <= 97) || (122 <= _arg1 && _arg1 <= 217);
+            return (9 <= arg1 && arg1 <= 97) || (122 <= arg1 && arg1 <= 217);
         }
 
         #endregion

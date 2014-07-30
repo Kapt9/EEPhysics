@@ -750,7 +750,7 @@ namespace EEPhysics
                 for (; x < lastX; x++)
                 {
                     tileId = this.foregroundTiles[x][y];
-                    if (!ItemId.isSolid(tileId))
+                    if (!ItemId.IsSolid(tileId))
                     {
                         continue;
                     }
@@ -813,55 +813,55 @@ namespace EEPhysics
                             }
 
                             break;
-                        case ItemId.DOOR_PURPLE:
+                        case ItemId.DoorPurple:
                             if (p.Purple)
                             {
                                 continue;
                             }
 
                             break;
-                        case ItemId.GATE_PURPLE:
+                        case ItemId.GatePurple:
                             if (!p.Purple)
                             {
                                 continue;
                             }
 
                             break;
-                        case ItemId.DOOR_CLUB:
+                        case ItemId.DoorClub:
                             if (p.IsClubMember)
                             {
                                 continue;
                             }
 
                             break;
-                        case ItemId.GATE_CLUB:
+                        case ItemId.GateClub:
                             if (!p.IsClubMember)
                             {
                                 continue;
                             }
 
                             break;
-                        case ItemId.COINDOOR:
+                        case ItemId.Coindoor:
                             if (this.tileData[x][y][0] <= p.Coins)
                             {
                                 continue;
                             }
 
                             break;
-                        case ItemId.COINGATE:
+                        case ItemId.Coingate:
                             if (this.tileData[x][y][0] > p.Coins)
                             {
                                 continue;
                             }
 
                             break;
-                        case ItemId.ZOMBIE_GATE:
+                        case ItemId.ZombieGate:
 
                             /*if (p.Zombie) {
                                     continue;
                                 };*/
                             break;
-                        case ItemId.ZOMBIE_DOOR:
+                        case ItemId.ZombieDoor:
 
                             /*if (!p.Zombie) {
                                     continue;
