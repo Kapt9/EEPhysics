@@ -59,6 +59,7 @@ namespace EEPhysics
         private readonly int[] queue = new int[PhysicsConfig.QueueLength];
 
         // private int lastTile;
+
         /// <summary>
         /// The current.
         /// </summary>
@@ -553,21 +554,21 @@ namespace EEPhysics
         /// </summary>
         internal void tick()
         {
-            int cx = 0;
-            int cy = 0;
-            bool isGodMode = false;
+            int cx;
+            int cy;
+            bool isGodMode;
 
-            double reminderX = double.NaN;
-            double currentSX = double.NaN;
-            double osx = double.NaN;
-            double ox = double.NaN;
-            double tx = double.NaN;
+            double reminderX;
+            double currentSX;
+            double osx;
+            double ox;
+            double tx;
 
-            double reminderY = double.NaN;
-            double currentSY = double.NaN;
-            double osy = double.NaN;
-            double oy = double.NaN;
-            double ty = double.NaN;
+            double reminderY;
+            double currentSY;
+            double osy;
+            double oy;
+            double ty;
 
             cx = (int)(this.X + 8) >> 4;
             cy = (int)(this.Y + 8) >> 4;
@@ -644,7 +645,6 @@ namespace EEPhysics
                             this.OnDie(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                         }
 
-                        ;
                         break;
                     default:
                         this.morx = 0;
