@@ -246,19 +246,22 @@ namespace EEPhysics
                             var yy = m.GetInt(2);
                             var blockId = m.GetInt(3);
                             this.foregroundTiles[xx][yy] = blockId;
-                            if (blockId == 100)
+                            switch (blockId)
                             {
-                                foreach (var pair in this.Players)
-                                {
-                                    pair.Value.removeCoin(xx, yy);
-                                }
-                            }
-                            else if (blockId == 101)
-                            {
-                                foreach (var pair in this.Players)
-                                {
-                                    pair.Value.removeBlueCoin(xx, yy);
-                                }
+                                case 100:
+                                    foreach (var pair in this.Players)
+                                    {
+                                        pair.Value.removeCoin(xx, yy);
+                                    }
+
+                                    break;
+                                case 101:
+                                    foreach (var pair in this.Players)
+                                    {
+                                        pair.Value.removeBlueCoin(xx, yy);
+                                    }
+
+                                    break;
                             }
                         }
                     }
