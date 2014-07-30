@@ -691,21 +691,21 @@ namespace EEPhysics
                         break;
                 }
             }
-            if (this.moy == PhysicsConfig.WaterBuoyancy || this.moy == PhysicsConfig.MudBuoyancy)
+            if (Math.Abs(this.moy - PhysicsConfig.WaterBuoyancy) < 0.00000001 || Math.Abs(this.moy - PhysicsConfig.MudBuoyancy) < 0.00000001)
             {
                 this.mx = this.Horizontal;
                 this.my = this.Vertical;
             }
             else
             {
-                if (this.moy != 0)
+                if (Math.Abs(this.moy) > 0.00000001)
                 {
                     this.mx = this.Horizontal;
                     this.my = 0;
                 }
                 else
                 {
-                    if (this.mox != 0)
+                    if (Math.Abs(this.mox) > 0.00000001)
                     {
                         this.mx = 0;
                         this.my = this.Vertical;
@@ -723,11 +723,11 @@ namespace EEPhysics
             this.moy = this.moy * this.GravityMultiplier;
             this.ModifierX = this.mox + this.mx;
             this.ModifierY = this.moy + this.my;
-            if (this.speedX != 0 || this.modifierX != 0)
+            if (Math.Abs(this.speedX) > 0.00000001 || Math.Abs(this.modifierX) > 0.00000001)
             {
                 this.speedX = this.speedX + this.modifierX;
                 this.speedX = this.speedX * PhysicsConfig.BaseDrag;
-                if (((this.mx == 0 && this.moy != 0) || this.speedX < 0 && this.mx > 0)
+                if (((Math.Abs(this.mx) < 0.00000001 && Math.Abs(this.moy) > 0.00000001) || this.speedX < 0 && this.mx > 0)
                     || (this.speedX > 0 && this.mx < 0) || (ItemId.isClimbable(this.current) && !isGodMode))
                 {
                     this.speedX = this.speedX * PhysicsConfig.NoModifierDrag;
@@ -746,6 +746,7 @@ namespace EEPhysics
                         }
                     }
                 }
+
                 if (this.speedX > 16)
                 {
                     this.speedX = 16;
@@ -765,11 +766,11 @@ namespace EEPhysics
                     }
                 }
             }
-            if (this.speedY != 0 || this.modifierY != 0)
+            if (Math.Abs(this.speedY) > 0.00000001 || Math.Abs(this.modifierY) > 0.00000001)
             {
                 this.speedY = this.speedY + this.modifierY;
                 this.speedY = this.speedY * PhysicsConfig.BaseDrag;
-                if ((this.my == 0 && this.mox != 0) || (this.speedY < 0 && this.my > 0)
+                if ((Math.Abs(this.my) < 0.00000001 && Math.Abs(this.mox) > 0.00000001) || (this.speedY < 0 && this.my > 0)
                     || (this.speedY > 0 && this.my < 0) || (ItemId.isClimbable(this.current) && !isGodMode))
                 {
                     this.speedY = this.speedY * PhysicsConfig.NoModifierDrag;
@@ -831,7 +832,7 @@ namespace EEPhysics
             currentSY = this.speedY;
             this.donex = false;
             this.doney = false;
-            while ((currentSX != 0 && !this.donex) || (currentSY != 0 && !this.doney))
+            while ((Math.Abs(currentSX) > 0.00000001 && !this.donex) || (Math.Abs(currentSY) > 0.00000001 && !this.doney))
             {
                 double multiplier = 1.42;
                 this.current = this.HostWorld.GetBlock(cx, cy);
@@ -919,7 +920,7 @@ namespace EEPhysics
                 {
                     if (currentSX < 0)
                     {
-                        if (reminderX != 0 && (reminderX + currentSX) < 0)
+                        if (Math.Abs(reminderX) > 0.00000001 && (reminderX + currentSX) < 0)
                         {
                             currentSX = currentSX + reminderX;
                             this.X = this.X - reminderX;
@@ -965,7 +966,7 @@ namespace EEPhysics
                 {
                     if (currentSY < 0)
                     {
-                        if ((!((reminderY == 0))) && (((reminderY + currentSY) < 0)))
+                        if ((!(Math.Abs(reminderY) < 0.00000001)) && ((reminderY + currentSY) < 0))
                         {
                             this.Y = (this.Y - reminderY);
                             this.Y = ((int)this.Y >> 0);
