@@ -651,7 +651,6 @@ namespace EEPhysics
                         this.mory = this.gravity;
                         break;
                 }
-
                 switch (this.delayed)
                 {
                     case 1:
@@ -692,7 +691,6 @@ namespace EEPhysics
                         break;
                 }
             }
-
             if (this.moy == PhysicsConfig.WaterBuoyancy || this.moy == PhysicsConfig.MudBuoyancy)
             {
                 this.mx = this.Horizontal;
@@ -719,15 +717,12 @@ namespace EEPhysics
                     }
                 }
             }
-
             this.mx = this.mx * this.SpeedMultiplier;
             this.my = this.my * this.SpeedMultiplier;
             this.mox = this.mox * this.GravityMultiplier;
             this.moy = this.moy * this.GravityMultiplier;
-
             this.ModifierX = this.mox + this.mx;
             this.ModifierY = this.moy + this.my;
-
             if (this.speedX != 0 || this.modifierX != 0)
             {
                 this.speedX = this.speedX + this.modifierX;
@@ -751,7 +746,6 @@ namespace EEPhysics
                         }
                     }
                 }
-
                 if (this.speedX > 16)
                 {
                     this.speedX = 16;
@@ -771,7 +765,6 @@ namespace EEPhysics
                     }
                 }
             }
-
             if (this.speedY != 0 || this.modifierY != 0)
             {
                 this.speedY = this.speedY + this.modifierY;
@@ -795,7 +788,6 @@ namespace EEPhysics
                         }
                     }
                 }
-
                 if (this.speedY > 16)
                 {
                     this.speedY = 16;
@@ -815,7 +807,6 @@ namespace EEPhysics
                     }
                 }
             }
-
             if (!isGodMode)
             {
                 switch (this.current)
@@ -834,18 +825,14 @@ namespace EEPhysics
                         break;
                 }
             }
-
             reminderX = this.X % 1;
             currentSX = this.speedX;
             reminderY = this.Y % 1;
             currentSY = this.speedY;
             this.donex = false;
             this.doney = false;
-
             while ((currentSX != 0 && !this.donex) || (currentSY != 0 && !this.doney))
             {
-                
-
                 double multiplier = 1.42;
                 this.current = this.HostWorld.GetBlock(cx, cy);
                 if (!isGodMode && (this.current == ItemId.PORTAL || this.current == ItemId.PORTAL_INVISIBLE))
@@ -865,7 +852,6 @@ namespace EEPhysics
                                 {
                                     rot1 += 4;
                                 }
-
                                 switch (rot1 - rot2)
                                 {
                                     case 1:
@@ -879,8 +865,8 @@ namespace EEPhysics
                                     case 2:
                                         this.SpeedX = -this.SpeedX * multiplier;
                                         this.SpeedY = -this.SpeedY * multiplier;
-                                        this.ModifierX = -(this.ModifierX) * multiplier;
-                                        this.ModifierY = -(this.ModifierY) * multiplier;
+                                        this.ModifierX = -this.ModifierX * multiplier;
+                                        this.ModifierY = -this.ModifierY * multiplier;
                                         reminderY = -reminderY;
                                         currentSY = -currentSY;
                                         reminderX = -reminderX;
@@ -889,13 +875,12 @@ namespace EEPhysics
                                     case 3:
                                         this.SpeedX = -this.SpeedY * multiplier;
                                         this.SpeedY = this.SpeedX * multiplier;
-                                        this.ModifierX = -(this.ModifierY) * multiplier;
+                                        this.ModifierX = -this.ModifierY * multiplier;
                                         this.ModifierY = this.ModifierX * multiplier;
                                         reminderX = -reminderX;
                                         currentSX = -currentSX;
                                         break;
                                 }
-
                                 this.X = portalPoint.x * 16;
                                 this.Y = portalPoint.y * 16;
                                 this.lastPortal = portalPoint;
@@ -906,9 +891,7 @@ namespace EEPhysics
                 else
                 {
                     this.lastPortal = null;
-                }
-
-                
+                }       
 
                 ox = this.X;
                 oy = this.Y;
@@ -977,8 +960,6 @@ namespace EEPhysics
                         this.Y = this.Y + currentSY;
                         currentSY = 0;
                     }
-
-                    ;
                 }
                 else
                 {
@@ -1134,8 +1115,6 @@ namespace EEPhysics
                             {
                                 this.X = this.X - (tx / 15);
                             }
-
-                            ;
                         }
                         else
                         {
