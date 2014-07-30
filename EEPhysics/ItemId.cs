@@ -17,7 +17,7 @@ namespace EEPhysics
         #region Constants
 
         /// <summary>
-        /// The bric k_ complete.
+        /// The brick complete option.
         /// </summary>
         public const int BRICK_COMPLETE = 121;
 
@@ -52,12 +52,12 @@ namespace EEPhysics
         public const int DIAMOND = 241;
 
         /// <summary>
-        /// The doo r_ club.
+        /// The door club.
         /// </summary>
         public const int DOOR_CLUB = 200;
 
         /// <summary>
-        /// The doo r_ purple.
+        /// The purple door.
         /// </summary>
         public const int DOOR_PURPLE = 184;
 
@@ -67,42 +67,42 @@ namespace EEPhysics
         public const int FIRE = 368;
 
         /// <summary>
-        /// The gat e_ club.
+        /// The gate club.
         /// </summary>
         public const int GATE_CLUB = 201;
 
         /// <summary>
-        /// The gat e_ purple.
+        /// The purple gate.
         /// </summary>
         public const int GATE_PURPLE = 185;
 
         /// <summary>
-        /// The glowylin e_ blu e_ slope.
+        /// The glowy-line blue slope.
         /// </summary>
         public const int GLOWYLINE_BLUE_SLOPE = 375;
 
         /// <summary>
-        /// The glow y_ lin e_ blu e_ straight.
+        /// The glowy-line blue straight.
         /// </summary>
         public const int GLOWY_LINE_BLUE_STRAIGHT = 376;
 
         /// <summary>
-        /// The glow y_ lin e_ gree n_ slope.
+        /// The glowy-line green slope.
         /// </summary>
         public const int GLOWY_LINE_GREEN_SLOPE = 379;
 
         /// <summary>
-        /// The glow y_ lin e_ gree n_ straight.
+        /// The glowy line green straight.
         /// </summary>
         public const int GLOWY_LINE_GREEN_STRAIGHT = 380;
 
         /// <summary>
-        /// The glow y_ lin e_ yello w_ slope.
+        /// The glowy line yellow slope.
         /// </summary>
         public const int GLOWY_LINE_YELLOW_SLOPE = 377;
 
         /// <summary>
-        /// The glow y_ lin e_ yello w_ straight.
+        /// The glowy line yellow straight.
         /// </summary>
         public const int GLOWY_LINE_YELLOW_STRAIGHT = 378;
 
@@ -112,7 +112,7 @@ namespace EEPhysics
         public const int MUD = 369;
 
         /// <summary>
-        /// The mu d_ bubble.
+        /// The mud bubble.
         /// </summary>
         public const int MUD_BUBBLE = 370;
 
@@ -127,27 +127,27 @@ namespace EEPhysics
         public const int PORTAL = 242;
 
         /// <summary>
-        /// The porta l_ invisible.
+        /// The invisible portal.
         /// </summary>
         public const int PORTAL_INVISIBLE = 381;
 
         /// <summary>
-        /// The spee d_ down.
+        /// The speed down.
         /// </summary>
         public const int SPEED_DOWN = 117;
 
         /// <summary>
-        /// The spee d_ left.
+        /// The speed left.
         /// </summary>
         public const int SPEED_LEFT = 114;
 
         /// <summary>
-        /// The spee d_ right.
+        /// The speed right.
         /// </summary>
         public const int SPEED_RIGHT = 115;
 
         /// <summary>
-        /// The spee d_ up.
+        /// The speed up.
         /// </summary>
         public const int SPEED_UP = 116;
 
@@ -157,12 +157,12 @@ namespace EEPhysics
         public const int SPIKE = 361;
 
         /// <summary>
-        /// The switc h_ purple.
+        /// The switch purple.
         /// </summary>
         public const int SWITCH_PURPLE = 113;
 
         /// <summary>
-        /// The tex t_ sign.
+        /// The text sign.
         /// </summary>
         public const int TEXT_SIGN = 385;
 
@@ -187,27 +187,27 @@ namespace EEPhysics
         public const int WAVE = 300;
 
         /// <summary>
-        /// The win e_ h.
+        /// The horizonal vine.
         /// </summary>
         public const int WINE_H = 99;
 
         /// <summary>
-        /// The win e_ v.
+        /// The vertical vine.
         /// </summary>
         public const int WINE_V = 98;
 
         /// <summary>
-        /// The worl d_ portal.
+        /// The world portal.
         /// </summary>
         public const int WORLD_PORTAL = 374;
 
         /// <summary>
-        /// The zombi e_ door.
+        /// The zombie door.
         /// </summary>
         public const int ZOMBIE_DOOR = 207;
 
         /// <summary>
-        /// The zombi e_ gate.
+        /// The zombie gate.
         /// </summary>
         public const int ZOMBIE_GATE = 206;
 
@@ -242,7 +242,7 @@ namespace EEPhysics
         /// The is solid.
         /// </summary>
         /// <param name="_arg1">
-        /// The _arg 1.
+        /// The first argument.
         /// </param>
         /// <returns>
         /// The <see cref="bool"/>.
