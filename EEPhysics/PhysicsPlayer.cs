@@ -1,13 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="PhysicsPlayer.cs" company="">
-//   
-// </copyright>
-// <summary>
-//   The physics player.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
-
-namespace EEPhysics
+﻿namespace EEPhysics
 {
     using System;
     using System.Collections.Generic;
@@ -34,9 +25,9 @@ namespace EEPhysics
         #region Fields
 
         /// <summary>
-        /// The overlapy.
+        /// The overlap y.
         /// </summary>
-        internal int overlapy;
+        internal int Overlapy;
 
         /// <summary>
         /// The got blue coins.
@@ -491,7 +482,7 @@ namespace EEPhysics
         /// <param name="yy">
         /// The yy.
         /// </param>
-        internal void removeBlueCoin(int xx, int yy)
+        internal void RemoveBlueCoin(int xx, int yy)
         {
             for (var i = 0; i < this.gotCoins.Count; i++)
             {
@@ -514,7 +505,7 @@ namespace EEPhysics
         /// <param name="yy">
         /// The yy.
         /// </param>
-        internal void removeCoin(int xx, int yy)
+        internal void RemoveCoin(int xx, int yy)
         {
             for (var i = 0; i < this.gotCoins.Count; i++)
             {
@@ -529,7 +520,7 @@ namespace EEPhysics
         /// <summary>
         /// The reset coins.
         /// </summary>
-        internal void resetCoins()
+        internal void ResetCoins()
         {
             this.gotCoins.Clear();
             this.gotBlueCoins.Clear();
@@ -538,7 +529,7 @@ namespace EEPhysics
         /// <summary>
         /// The respawn.
         /// </summary>
-        internal void respawn()
+        internal void Respawn()
         {
             this.modifierX = 0;
             this.modifierY = 0;
@@ -554,7 +545,7 @@ namespace EEPhysics
         /// <summary>
         /// The tick.
         /// </summary>
-        internal void tick()
+        internal void Tick()
         {
             int cx;
             int cy;
@@ -576,7 +567,7 @@ namespace EEPhysics
             cy = (int)(this.Y + 8) >> 4;
 
             this.current = this.HostWorld.GetBlock(cx, cy);
-            if (this.current == 4 || ItemId.isClimbable(this.current))
+            if (this.current == 4 || ItemId.IsClimbable(this.current))
             {
                 this.delayed = this.queue[1];
                 this.queue[0] = this.current;
@@ -619,28 +610,28 @@ namespace EEPhysics
                         this.morx = this.gravity;
                         this.mory = 0;
                         break;
-                    case ItemId.SPEED_LEFT:
-                    case ItemId.SPEED_RIGHT:
-                    case ItemId.SPEED_UP:
-                    case ItemId.SPEED_DOWN:
-                    case ItemId.CHAIN:
-                    case ItemId.NINJA_LADDER:
-                    case ItemId.WINE_H:
-                    case ItemId.WINE_V:
+                    case ItemId.SpeedLeft:
+                    case ItemId.SpeedRight:
+                    case ItemId.SpeedUp:
+                    case ItemId.SpeedDown:
+                    case ItemId.Chain:
+                    case ItemId.NinjaLadder:
+                    case ItemId.WineH:
+                    case ItemId.WineV:
                     case 4:
                         this.morx = 0;
                         this.mory = 0;
                         break;
-                    case ItemId.WATER:
+                    case ItemId.Water:
                         this.morx = 0;
                         this.mory = (int)PhysicsConfig.WaterBuoyancy;
                         break;
-                    case ItemId.MUD:
+                    case ItemId.Mud:
                         this.morx = 0;
                         this.mory = (int)PhysicsConfig.MudBuoyancy;
                         break;
-                    case ItemId.FIRE:
-                    case ItemId.SPIKE:
+                    case ItemId.Fire:
+                    case ItemId.Spike:
                         if (!this.IsDead && !this.isInvulnerable)
                         {
                             this.killPlayer();
@@ -668,23 +659,23 @@ namespace EEPhysics
                         this.mox = this.gravity;
                         this.moy = 0;
                         break;
-                    case ItemId.SPEED_LEFT:
-                    case ItemId.SPEED_RIGHT:
-                    case ItemId.SPEED_UP:
-                    case ItemId.SPEED_DOWN:
-                    case ItemId.CHAIN:
-                    case ItemId.NINJA_LADDER:
-                    case ItemId.WINE_H:
-                    case ItemId.WINE_V:
+                    case ItemId.SpeedLeft:
+                    case ItemId.SpeedRight:
+                    case ItemId.SpeedUp:
+                    case ItemId.SpeedDown:
+                    case ItemId.Chain:
+                    case ItemId.NinjaLadder:
+                    case ItemId.WineH:
+                    case ItemId.WineV:
                     case 4:
                         this.mox = 0;
                         this.moy = 0;
                         break;
-                    case ItemId.WATER:
+                    case ItemId.Water:
                         this.mox = 0;
                         this.moy = PhysicsConfig.WaterBuoyancy;
                         break;
-                    case ItemId.MUD:
+                    case ItemId.Mud:
                         this.mox = 0;
                         this.moy = PhysicsConfig.MudBuoyancy;
                         break;
@@ -733,19 +724,19 @@ namespace EEPhysics
                 this.speedX = this.speedX + this.modifierX;
                 this.speedX = this.speedX * PhysicsConfig.BaseDrag;
                 if (((Math.Abs(this.mx) < 0.00000001 && Math.Abs(this.moy) > 0.00000001) || this.speedX < 0 && this.mx > 0)
-                    || (this.speedX > 0 && this.mx < 0) || (ItemId.isClimbable(this.current) && !isGodMode))
+                    || (this.speedX > 0 && this.mx < 0) || (ItemId.IsClimbable(this.current) && !isGodMode))
                 {
                     this.speedX = this.speedX * PhysicsConfig.NoModifierDrag;
                 }
                 else
                 {
-                    if (this.current == ItemId.WATER && !isGodMode)
+                    if (this.current == ItemId.Water && !isGodMode)
                     {
                         this.speedX = this.speedX * PhysicsConfig.WaterDrag;
                     }
                     else
                     {
-                        if (this.current == ItemId.MUD && !isGodMode)
+                        if (this.current == ItemId.Mud && !isGodMode)
                         {
                             this.speedX = this.speedX * PhysicsConfig.MudDrag;
                         }
@@ -777,19 +768,19 @@ namespace EEPhysics
                 this.speedY = this.speedY + this.modifierY;
                 this.speedY = this.speedY * PhysicsConfig.BaseDrag;
                 if ((Math.Abs(this.my) < 0.00000001 && Math.Abs(this.mox) > 0.00000001) || (this.speedY < 0 && this.my > 0)
-                    || (this.speedY > 0 && this.my < 0) || (ItemId.isClimbable(this.current) && !isGodMode))
+                    || (this.speedY > 0 && this.my < 0) || (ItemId.IsClimbable(this.current) && !isGodMode))
                 {
                     this.speedY = this.speedY * PhysicsConfig.NoModifierDrag;
                 }
                 else
                 {
-                    if (this.current == ItemId.WATER && !isGodMode)
+                    if (this.current == ItemId.Water && !isGodMode)
                     {
                         this.speedY = this.speedY * PhysicsConfig.WaterDrag;
                     }
                     else
                     {
-                        if (this.current == ItemId.MUD && !isGodMode)
+                        if (this.current == ItemId.Mud && !isGodMode)
                         {
                             this.speedY = this.speedY * PhysicsConfig.MudDrag;
                         }
@@ -820,21 +811,20 @@ namespace EEPhysics
             {
                 switch (this.current)
                 {
-                    case ItemId.SPEED_LEFT:
+                    case ItemId.SpeedLeft:
                         this.speedX = -PhysicsConfig.Boost;
                         break;
-                    case ItemId.SPEED_RIGHT:
+                    case ItemId.SpeedRight:
                         this.speedX = PhysicsConfig.Boost;
                         break;
-                    case ItemId.SPEED_UP:
+                    case ItemId.SpeedUp:
                         this.speedY = -PhysicsConfig.Boost;
                         break;
-                    case ItemId.SPEED_DOWN:
+                    case ItemId.SpeedDown:
                         this.speedY = PhysicsConfig.Boost;
                         break;
                 }
             }
-
             reminderX = this.X % 1;
             currentSX = this.speedX;
             reminderY = this.Y % 1;
@@ -843,9 +833,9 @@ namespace EEPhysics
             this.doney = false;
             while ((Math.Abs(currentSX) > 0.00000001 && !this.donex) || (Math.Abs(currentSY) > 0.00000001 && !this.doney))
             {
-                var multiplier = 1.42;
+                const double Multiplier = 1.42;
                 this.current = this.HostWorld.GetBlock(cx, cy);
-                if (!isGodMode && (this.current == ItemId.PORTAL || this.current == ItemId.PORTAL_INVISIBLE))
+                if (!isGodMode && (this.current == ItemId.Portal || this.current == ItemId.PortalInvisible))
                 {
                     if (this.lastPortal == null)
                     {
@@ -866,28 +856,28 @@ namespace EEPhysics
                                 switch (rot1 - rot2)
                                 {
                                     case 1:
-                                        this.SpeedX = this.SpeedY * multiplier;
-                                        this.SpeedY = -this.SpeedX * multiplier;
-                                        this.ModifierX = this.ModifierY * multiplier;
-                                        this.ModifierY = -this.ModifierX * multiplier;
+                                        this.SpeedX = this.SpeedY * Multiplier;
+                                        this.SpeedY = -this.SpeedX * Multiplier;
+                                        this.ModifierX = this.ModifierY * Multiplier;
+                                        this.ModifierY = -this.ModifierX * Multiplier;
                                         reminderY = -reminderY;
                                         currentSY = -currentSY;
                                         break;
                                     case 2:
-                                        this.SpeedX = -this.SpeedX * multiplier;
-                                        this.SpeedY = -this.SpeedY * multiplier;
-                                        this.ModifierX = -this.ModifierX * multiplier;
-                                        this.ModifierY = -this.ModifierY * multiplier;
+                                        this.SpeedX = -this.SpeedX * Multiplier;
+                                        this.SpeedY = -this.SpeedY * Multiplier;
+                                        this.ModifierX = -this.ModifierX * Multiplier;
+                                        this.ModifierY = -this.ModifierY * Multiplier;
                                         reminderY = -reminderY;
                                         currentSY = -currentSY;
                                         reminderX = -reminderX;
                                         currentSX = -currentSX;
                                         break;
                                     case 3:
-                                        this.SpeedX = -this.SpeedY * multiplier;
-                                        this.SpeedY = this.SpeedX * multiplier;
-                                        this.ModifierX = -this.ModifierY * multiplier;
-                                        this.ModifierY = this.ModifierX * multiplier;
+                                        this.SpeedX = -this.SpeedY * Multiplier;
+                                        this.SpeedY = this.SpeedX * Multiplier;
+                                        this.ModifierX = -this.ModifierY * Multiplier;
+                                        this.ModifierY = this.ModifierX * Multiplier;
                                         reminderX = -reminderX;
                                         currentSX = -currentSX;
                                         break;
@@ -903,14 +893,12 @@ namespace EEPhysics
                 else
                 {
                     this.lastPortal = null;
-                }       
-
+                }
+       
                 ox = this.X;
                 oy = this.Y;
                 osx = currentSX;
-                osy = currentSY;
-
-                
+                osy = currentSY;    
 
                 if (currentSX > 0)
                 {
@@ -954,10 +942,6 @@ namespace EEPhysics
                     this.donex = true;
                 }
 
-                
-
-                
-
                 if (currentSY > 0)
                 {
                     if ((currentSY + reminderY) >= 1)
@@ -999,8 +983,6 @@ namespace EEPhysics
                     currentSY = osy;
                     this.doney = true;
                 }
-
-                
             }
 
             if (!this.IsDead)
@@ -1011,9 +993,9 @@ namespace EEPhysics
                     {
                         case 100: // coin
                             this.OnHitCoin(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
-                            for (var i = 0; i < this.gotCoins.Count; i++)
+                            foreach (Point t in this.gotCoins)
                             {
-                                if (this.gotCoins[i].x == cx && this.gotCoins[i].y == cy)
+                                if (t.x == cx && t.y == cy)
                                 {
                                     goto found;
                                 }
@@ -1025,9 +1007,9 @@ namespace EEPhysics
                             break;
                         case 101: // bluecoin
                             this.OnHitBlueCoin(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
-                            for (var i = 0; i < this.gotBlueCoins.Count; i++)
+                            foreach (Point t in this.gotBlueCoins)
                             {
-                                if (this.gotBlueCoins[i].x == cx && this.gotBlueCoins[i].y == cy)
+                                if (t.x == cx && t.y == cy)
                                 {
                                     goto found2;
                                 }
@@ -1057,7 +1039,7 @@ namespace EEPhysics
                             // blue
                             this.OnHitBlueKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case ItemId.SWITCH_PURPLE:
+                        case ItemId.SwitchPurple:
 
                             // purple (switch)
                             this.Purple = !this.Purple;
@@ -1073,17 +1055,17 @@ namespace EEPhysics
                             // drum
                             this.OnHitDrum(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case ItemId.DIAMOND:
+                        case ItemId.Diamond:
 
                             // diamond
                             this.OnHitDiamond(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case ItemId.CAKE:
+                        case ItemId.Cake:
 
                             // cake
                             this.OnHitCake(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case ItemId.CHECKPOINT:
+                        case ItemId.Checkpoint:
 
                             // checkpoint
                             if (!isGodMode)
@@ -1094,7 +1076,7 @@ namespace EEPhysics
                             }
 
                             break;
-                        case ItemId.BRICK_COMPLETE:
+                        case ItemId.BrickComplete:
 
                             // level completed
                             this.OnHitCompleteLevelBrick(
@@ -1110,7 +1092,7 @@ namespace EEPhysics
             var imx = (int)this.speedX << 8;
             var imy = (int)this.speedY << 8;
 
-            if (this.current != ItemId.WATER && this.current != ItemId.MUD)
+            if (this.current != ItemId.Water && this.current != ItemId.Mud)
             {
                 if (imx == 0)
                 {
@@ -1145,36 +1127,42 @@ namespace EEPhysics
                     }
                 }
 
-                if (imy == 0)
+                if (imy != 0)
                 {
-                    if ((this.modifierY < 0.1) && (this.modifierY > -0.1))
+                    return;
+                }
+
+                if ((!(this.modifierY < 0.1)) || (!(this.modifierY > -0.1)))
+                {
+                    return;
+                }
+
+                ty = this.Y % 16;
+                if (ty < 2)
+                {
+                    if (ty < 0.2)
                     {
-                        ty = this.Y % 16;
-                        if (ty < 2)
-                        {
-                            if (ty < 0.2)
-                            {
-                                this.Y = Math.Floor(this.Y);
-                            }
-                            else
-                            {
-                                this.Y = this.Y - (ty / 15);
-                            }
-                        }
-                        else
-                        {
-                            if (ty > 14)
-                            {
-                                if (ty > 15.8)
-                                {
-                                    this.Y = Math.Ceiling(this.Y);
-                                }
-                                else
-                                {
-                                    this.Y = this.Y + ((ty - 14) / 15);
-                                }
-                            }
-                        }
+                        this.Y = Math.Floor(this.Y);
+                    }
+                    else
+                    {
+                        this.Y = this.Y - (ty / 15);
+                    }
+                }
+                else
+                {
+                    if (!(ty > 14))
+                    {
+                        return;
+                    }
+
+                    if (ty > 15.8)
+                    {
+                        this.Y = Math.Ceiling(this.Y);
+                    }
+                    else
+                    {
+                        this.Y = this.Y + ((ty - 14) / 15);
                     }
                 }
             }

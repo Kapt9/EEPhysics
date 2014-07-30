@@ -252,14 +252,14 @@ namespace EEPhysics
                                 case 100:
                                     foreach (var pair in this.Players)
                                     {
-                                        pair.Value.removeCoin(xx, yy);
+                                        pair.Value.RemoveCoin(xx, yy);
                                     }
 
                                     break;
                                 case 101:
                                     foreach (var pair in this.Players)
                                     {
-                                        pair.Value.removeBlueCoin(xx, yy);
+                                        pair.Value.RemoveBlueCoin(xx, yy);
                                     }
 
                                     break;
@@ -349,7 +349,7 @@ namespace EEPhysics
                             p.InGodMode = m.GetBoolean(1);
                             if (p.InGodMode)
                             {
-                                p.respawn();
+                                p.Respawn();
                             }
                         }
                     }
@@ -368,7 +368,7 @@ namespace EEPhysics
                                 p.Y = m.GetInt(i + 2);
                                 if (b)
                                 {
-                                    p.respawn();
+                                    p.Respawn();
                                 }
                             }
 
@@ -393,7 +393,7 @@ namespace EEPhysics
                         this.desBlocks(m, 0);
                         foreach (var pair in this.Players)
                         {
-                            pair.Value.resetCoins();
+                            pair.Value.ResetCoins();
                         }
 
                         /*for (int i = 0; i < players.Count; i++) {
@@ -424,7 +424,7 @@ namespace EEPhysics
 
                         foreach (var pair in this.Players)
                         {
-                            pair.Value.resetCoins();
+                            pair.Value.ResetCoins();
                         }
                     }
 
@@ -503,7 +503,7 @@ namespace EEPhysics
                 long frameStartTime = this.sw.ElapsedMilliseconds;
                 foreach (var pair in this.Players)
                 {
-                    pair.Value.tick();
+                    pair.Value.Tick();
                 }
 
                 this.OnTick(this, null);
@@ -887,11 +887,11 @@ namespace EEPhysics
                         case 158:
                         case 194:
                         case 211:
-                            if (p.SpeedY < 0 || y <= p.overlapy)
+                            if (p.SpeedY < 0 || y <= p.Overlapy)
                             {
-                                if (y != firstY || p.overlapy == -1)
+                                if (y != firstY || p.Overlapy == -1)
                                 {
-                                    p.overlapy = y;
+                                    p.Overlapy = y;
                                 }
 
                                 _local7 = true;
@@ -912,7 +912,7 @@ namespace EEPhysics
 
             if (!_local7)
             {
-                p.overlapy = -1;
+                p.Overlapy = -1;
             }
 
             return false;
