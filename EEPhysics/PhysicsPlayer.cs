@@ -6,6 +6,7 @@
 //   The physics player.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace EEPhysics
 {
     using System;
@@ -955,7 +956,7 @@ namespace EEPhysics
 
                 
 
-                #region stepY()
+                
 
                 if (currentSY > 0)
                 {
@@ -999,7 +1000,7 @@ namespace EEPhysics
                     this.doney = true;
                 }
 
-                #endregion
+                
             }
 
             if (!this.IsDead)

@@ -6,6 +6,7 @@
 //   The physics world.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace EEPhysics
 {
     using System;
@@ -458,10 +459,12 @@ namespace EEPhysics
 
                         if (this.AddBotPlayer)
                         {
-                            var p = new PhysicsPlayer(m.GetInt(6), m.GetString(9));
-                            p.X = m.GetInt(7);
-                            p.Y = m.GetInt(8);
-                            p.HostWorld = this;
+                            var p = new PhysicsPlayer(m.GetInt(6), m.GetString(9))
+                                        {
+                                            X = m.GetInt(7), 
+                                            Y = m.GetInt(8), 
+                                            HostWorld = this
+                                        };
                             this.Players.TryAdd(p.ID, p);
                         }
 
@@ -495,18 +498,17 @@ namespace EEPhysics
             this.PhysicsRunning = true;
 
             this.sw.Start();
-            long waitTime, frameStartTime, frameEndTime;
             while (this.running)
             {
-                frameStartTime = this.sw.ElapsedMilliseconds;
+                long frameStartTime = this.sw.ElapsedMilliseconds;
                 foreach (var pair in this.Players)
                 {
                     pair.Value.tick();
                 }
 
                 this.OnTick(this, null);
-                frameEndTime = this.sw.ElapsedMilliseconds;
-                waitTime = 10 - (frameEndTime - frameStartTime);
+                long frameEndTime = this.sw.ElapsedMilliseconds;
+                var waitTime = 10 - (frameEndTime - frameStartTime);
                 if (waitTime > 0)
                 {
                     Thread.Sleep((int)waitTime);
@@ -619,12 +621,14 @@ namespace EEPhysics
             {
                 for (var ii = 0; ii < this.foregroundTiles[i].Length; ii++)
                 {
-                    if (this.foregroundTiles[i][ii] == 242 || this.foregroundTiles[i][ii] == 381)
+                    if (this.foregroundTiles[i][ii] != 242 && this.foregroundTiles[i][ii] != 381)
                     {
-                        if (this.tileData[i][ii][1] == id)
-                        {
-                            return new Point(i, ii);
-                        }
+                        continue;
+                    }
+
+                    if (this.tileData[i][ii][1] == id)
+                    {
+                        return new Point(i, ii);
                     }
                 }
             }
@@ -658,8 +662,6 @@ namespace EEPhysics
 
                     var blockId = m.GetInteger(messageIndex);
                     messageIndex++;
-
-                    var z = m.GetInteger(messageIndex);
                     messageIndex++;
 
                     var xa = m.GetByteArray(messageIndex);
@@ -748,176 +750,161 @@ namespace EEPhysics
                 for (; x < lastX; x++)
                 {
                     tileId = this.foregroundTiles[x][y];
-                    if (ItemId.isSolid(tileId))
+                    if (!ItemId.isSolid(tileId))
                     {
-                        switch (tileId)
-                        {
-                            case 23:
-                                if (this.hideRed)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case 24:
-                                if (this.hideGreen)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case 25:
-                                if (this.hideBlue)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case 26:
-                                if (!this.hideRed)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case 27:
-                                if (!this.hideGreen)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case 28:
-                                if (!this.hideBlue)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case 156:
-                                if (this.hideTimedoor)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case 157:
-                                if (!this.hideTimedoor)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case ItemId.DOOR_PURPLE:
-                                if (p.Purple)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case ItemId.GATE_PURPLE:
-                                if (!p.Purple)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case ItemId.DOOR_CLUB:
-                                if (p.IsClubMember)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case ItemId.GATE_CLUB:
-                                if (!p.IsClubMember)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case ItemId.COINDOOR:
-                                if (this.tileData[x][y][0] <= p.Coins)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case ItemId.COINGATE:
-                                if (this.tileData[x][y][0] > p.Coins)
-                                {
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case ItemId.ZOMBIE_GATE:
-
-                                /*if (p.Zombie) {
-                                    continue;
-                                };*/
-                                break;
-                            case ItemId.ZOMBIE_DOOR:
-
-                                /*if (!p.Zombie) {
-                                    continue;
-                                };*/
-                                continue;
-                            case 61:
-                            case 62:
-                            case 63:
-                            case 64:
-                            case 89:
-                            case 90:
-                            case 91:
-                            case 96:
-                            case 97:
-                            case 122:
-                            case 123:
-                            case 124:
-                            case 125:
-                            case 126:
-                            case 127:
-                            case 146:
-                            case 154:
-                            case 158:
-                            case 194:
-                            case 211:
-                                if (p.SpeedY < 0 || y <= p.overlapy)
-                                {
-                                    if (y != firstY || p.overlapy == -1)
-                                    {
-                                        p.overlapy = y;
-                                    }
-
-                                    ;
-                                    _local7 = true;
-                                    continue;
-                                }
-
-                                ;
-                                break;
-                            case 83:
-                            case 77:
-                                continue;
-                        }
-
-                        ;
-                        return true;
+                        continue;
                     }
+
+                    switch (tileId)
+                    {
+                        case 23:
+                            if (this.hideRed)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case 24:
+                            if (this.hideGreen)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case 25:
+                            if (this.hideBlue)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case 26:
+                            if (!this.hideRed)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case 27:
+                            if (!this.hideGreen)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case 28:
+                            if (!this.hideBlue)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case 156:
+                            if (this.hideTimedoor)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case 157:
+                            if (!this.hideTimedoor)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case ItemId.DOOR_PURPLE:
+                            if (p.Purple)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case ItemId.GATE_PURPLE:
+                            if (!p.Purple)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case ItemId.DOOR_CLUB:
+                            if (p.IsClubMember)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case ItemId.GATE_CLUB:
+                            if (!p.IsClubMember)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case ItemId.COINDOOR:
+                            if (this.tileData[x][y][0] <= p.Coins)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case ItemId.COINGATE:
+                            if (this.tileData[x][y][0] > p.Coins)
+                            {
+                                continue;
+                            }
+
+                            break;
+                        case ItemId.ZOMBIE_GATE:
+
+                            /*if (p.Zombie) {
+                                    continue;
+                                };*/
+                            break;
+                        case ItemId.ZOMBIE_DOOR:
+
+                            /*if (!p.Zombie) {
+                                    continue;
+                                };*/
+                            continue;
+                        case 61:
+                        case 62:
+                        case 63:
+                        case 64:
+                        case 89:
+                        case 90:
+                        case 91:
+                        case 96:
+                        case 97:
+                        case 122:
+                        case 123:
+                        case 124:
+                        case 125:
+                        case 126:
+                        case 127:
+                        case 146:
+                        case 154:
+                        case 158:
+                        case 194:
+                        case 211:
+                            if (p.SpeedY < 0 || y <= p.overlapy)
+                            {
+                                if (y != firstY || p.overlapy == -1)
+                                {
+                                    p.overlapy = y;
+                                }
+
+                                _local7 = true;
+                                continue;
+                            }
+
+                            break;
+                        case 83:
+                        case 77:
+                            continue;
+                    }
+
+                    return true;
                 }
 
                 y++;
