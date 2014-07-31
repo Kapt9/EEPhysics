@@ -15,7 +15,6 @@ namespace EEPhysics
         public double Y { get; internal set; }
         public int Horizontal { get; internal set; }
         public int Vertical { get; internal set; }
-        //private int lastTile;
         private int current;
         private double speedX = 0;
         private double speedY = 0;
@@ -117,26 +116,22 @@ namespace EEPhysics
             gravity = (int)PhysicsConfig.Gravity;
         }
 
-        internal void tick()
+        internal void Tick()
         {
-            int cx = 0;
-            int cy = 0;
-            bool isGodMode = false;
+            double reminderX;
+            double currentSX;
+            double osx;
+            double ox;
+            double tx;
 
-            double reminderX = double.NaN;
-            double currentSX = double.NaN;
-            double osx = double.NaN;
-            double ox = double.NaN;
-            double tx = double.NaN;
+            double reminderY;
+            double currentSY;
+            double osy;
+            double oy;
+            double ty;
 
-            double reminderY = double.NaN;
-            double currentSY = double.NaN;
-            double osy = double.NaN;
-            double oy = double.NaN;
-            double ty = double.NaN;
-
-            cx = ((int)(X + 8) >> 4);
-            cy = ((int)(Y + 8) >> 4);
+            int cx = ((int)(X + 8) >> 4);
+            int cy = ((int)(Y + 8) >> 4);
 
             current = HostWorld.GetBlock(cx, cy);
             if (current == 4 || ItemId.isClimbable(current))
@@ -157,7 +152,7 @@ namespace EEPhysics
                 Vertical = 0;
             }
 
-            isGodMode = InGodMode;
+            bool isGodMode = InGodMode;
             if (InGodMode)
             {
                 morx = 0;
@@ -181,31 +176,31 @@ namespace EEPhysics
                         morx = (int)gravity;
                         mory = 0;
                         break;
-                    case ItemId.SPEED_LEFT:
-                    case ItemId.SPEED_RIGHT:
-                    case ItemId.SPEED_UP:
-                    case ItemId.SPEED_DOWN:
-                    case ItemId.CHAIN:
-                    case ItemId.NINJA_LADDER:
-                    case ItemId.WINE_H:
-                    case ItemId.WINE_V:
+                    case ItemId.SpeedLeft:
+                    case ItemId.SpeedRight:
+                    case ItemId.SpeedUp:
+                    case ItemId.SpeedDown:
+                    case ItemId.Chain:
+                    case ItemId.NinjaLadder:
+                    case ItemId.WineH:
+                    case ItemId.WineV:
                     case 4:
                         morx = 0;
                         mory = 0;
                         break;
-                    case ItemId.WATER:
+                    case ItemId.Water:
                         morx = 0;
                         mory = (int)PhysicsConfig.WaterBuoyancy;
                         break;
-                    case ItemId.MUD:
+                    case ItemId.Mud:
                         morx = 0;
                         mory = (int)PhysicsConfig.MudBuoyancy;
                         break;
-                    case ItemId.FIRE:
-                    case ItemId.SPIKE:
+                    case ItemId.Fire:
+                    case ItemId.Spike:
                         if (!IsDead && !isInvulnerable)
                         {
-                            killPlayer();
+                            KillPlayer();
                             OnDie(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                         };
                         break;
@@ -229,23 +224,23 @@ namespace EEPhysics
                         mox = gravity;
                         moy = 0;
                         break;
-                    case ItemId.SPEED_LEFT:
-                    case ItemId.SPEED_RIGHT:
-                    case ItemId.SPEED_UP:
-                    case ItemId.SPEED_DOWN:
-                    case ItemId.CHAIN:
-                    case ItemId.NINJA_LADDER:
-                    case ItemId.WINE_H:
-                    case ItemId.WINE_V:
+                    case ItemId.SpeedLeft:
+                    case ItemId.SpeedRight:
+                    case ItemId.SpeedUp:
+                    case ItemId.SpeedDown:
+                    case ItemId.Chain:
+                    case ItemId.NinjaLadder:
+                    case ItemId.WineH:
+                    case ItemId.WineV:
                     case 4:
                         mox = 0;
                         moy = 0;
                         break;
-                    case ItemId.WATER:
+                    case ItemId.Water:
                         mox = 0;
                         moy = PhysicsConfig.WaterBuoyancy;
                         break;
-                    case ItemId.MUD:
+                    case ItemId.Mud:
                         mox = 0;
                         moy = PhysicsConfig.MudBuoyancy;
                         break;
@@ -282,31 +277,31 @@ namespace EEPhysics
                     }
                 }
             }
-            mx = (mx * SpeedMultiplier);
-            my = (my * SpeedMultiplier);
-            mox = (mox * GravityMultiplier);
-            moy = (moy * GravityMultiplier);
+            mx *= SpeedMultiplier;
+            my *= SpeedMultiplier;
+            mox *= GravityMultiplier;
+            moy *= GravityMultiplier;
 
             ModifierX = (mox + mx);
             ModifierY = (moy + my);
 
-            if (speedX != 0 || modifierX != 0)
+            if (!DoubleIsEqual(speedX, 0) || modifierX != 0)
             {
                 speedX = (speedX + modifierX);
                 speedX = (speedX * PhysicsConfig.BaseDrag);
-                if (((mx == 0 && moy != 0) || speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || (ItemId.isClimbable(current) && !isGodMode))
+                if ((mx == 0 && moy != 0) || (speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || (ItemId.isClimbable(current) && !isGodMode))
                 {
                     speedX = (speedX * PhysicsConfig.NoModifierDrag);
                 }
                 else
                 {
-                    if (current == ItemId.WATER && !isGodMode)
+                    if (current == ItemId.Water && !isGodMode)
                     {
                         speedX = (speedX * PhysicsConfig.WaterDrag);
                     }
                     else
                     {
-                        if (current == ItemId.MUD && !isGodMode)
+                        if (current == ItemId.Mud && !isGodMode)
                         {
                             speedX = (speedX * PhysicsConfig.MudDrag);
                         }
@@ -331,7 +326,7 @@ namespace EEPhysics
                     }
                 }
             }
-            if (speedY != 0 || modifierY != 0)
+            if (!DoubleIsEqual(speedY, 0) || modifierY != 0)
             {
                 speedY = (speedY + modifierY);
                 speedY = (speedY * PhysicsConfig.BaseDrag);
@@ -341,13 +336,13 @@ namespace EEPhysics
                 }
                 else
                 {
-                    if (current == ItemId.WATER && !isGodMode)
+                    if (current == ItemId.Water && !isGodMode)
                     {
                         speedY = (speedY * PhysicsConfig.WaterDrag);
                     }
                     else
                     {
-                        if (current == ItemId.MUD && !isGodMode)
+                        if (current == ItemId.Mud && !isGodMode)
                         {
                             speedY = (speedY * PhysicsConfig.MudDrag);
                         }
@@ -376,16 +371,16 @@ namespace EEPhysics
             {
                 switch (this.current)
                 {
-                    case ItemId.SPEED_LEFT:
+                    case ItemId.SpeedLeft:
                         speedX = -PhysicsConfig.Boost;
                         break;
-                    case ItemId.SPEED_RIGHT:
+                    case ItemId.SpeedRight:
                         speedX = PhysicsConfig.Boost;
                         break;
-                    case ItemId.SPEED_UP:
+                    case ItemId.SpeedUp:
                         speedY = -PhysicsConfig.Boost;
                         break;
-                    case ItemId.SPEED_DOWN:
+                    case ItemId.SpeedDown:
                         speedY = PhysicsConfig.Boost;
                         break;
                 }
@@ -401,9 +396,9 @@ namespace EEPhysics
             while ((currentSX != 0 && !donex) || (currentSY != 0 && !doney))
             {
                 #region processPortals()
-                double multiplier = 1.42;
+                const double multiplier = 1.42;
                 current = HostWorld.GetBlock(cx, cy);
-                if (!isGodMode && (current == ItemId.PORTAL || current == ItemId.PORTAL_INVISIBLE))
+                if (!isGodMode && (current == ItemId.Portal || current == ItemId.PortalInvisible))
                 {
                     if (lastPortal == null)
                     {
@@ -423,30 +418,30 @@ namespace EEPhysics
                                 switch (rot1 - rot2)
                                 {
                                     case 1:
-                                        SpeedX = (SpeedY * multiplier);
-                                        SpeedY = (-SpeedX * multiplier);
-                                        ModifierX = (ModifierY * multiplier);
-                                        ModifierY = (-ModifierX * multiplier);
+                                        SpeedX = SpeedY * multiplier;
+                                        SpeedY = -SpeedX * multiplier;
+                                        ModifierX = ModifierY * multiplier;
+                                        ModifierY = -ModifierX * multiplier;
                                         reminderY = -reminderY;
                                         currentSY = -currentSY;
                                         break;
                                     case 2:
-                                        SpeedX = (-SpeedX * multiplier);
-                                        SpeedY = (-SpeedY * multiplier);
-                                        ModifierX = (-(ModifierX) * multiplier);
-                                        ModifierY = (-(ModifierY) * multiplier);
-                                        reminderY = -(reminderY);
-                                        currentSY = -(currentSY);
-                                        reminderX = -(reminderX);
-                                        currentSX = -(currentSX);
+                                        SpeedX = -SpeedX * multiplier;
+                                        SpeedY = -SpeedY * multiplier;
+                                        ModifierX = -ModifierX * multiplier;
+                                        ModifierY = -ModifierY * multiplier;
+                                        reminderY = -reminderY;
+                                        currentSY = -currentSY;
+                                        reminderX = -reminderX;
+                                        currentSX = -currentSX;
                                         break;
                                     case 3:
-                                        SpeedX = (-SpeedY * multiplier);
-                                        SpeedY = (SpeedX * multiplier);
-                                        ModifierX = (-(ModifierY) * multiplier);
-                                        ModifierY = (ModifierX * multiplier);
-                                        reminderX = -(reminderX);
-                                        currentSX = -(currentSX);
+                                        SpeedX = -SpeedY * multiplier;
+                                        SpeedY = SpeedX * multiplier;
+                                        ModifierX = -ModifierY * multiplier;
+                                        ModifierY = ModifierX * multiplier;
+                                        reminderX = -reminderX;
+                                        currentSX = -currentSX;
                                         break;
                                 }
                                 X = portalPoint.x * 16;
@@ -472,14 +467,14 @@ namespace EEPhysics
                 {
                     if ((currentSX + reminderX) >= 1)
                     {
-                        X = (X + (1 - reminderX));
-                        X = ((int)X >> 0);
-                        currentSX = (currentSX - (1 - reminderX));
+                        X += 1 - reminderX;
+                        X = Math.Floor(X);
+                        currentSX -= 1 - reminderX;
                         reminderX = 0;
                     }
                     else
                     {
-                        X = (X + currentSX);
+                        X += currentSX;
                         currentSX = 0;
                     }
                 }
@@ -487,21 +482,21 @@ namespace EEPhysics
                 {
                     if (currentSX < 0)
                     {
-                        if (reminderX != 0 && (reminderX + currentSX) < 0)
+                        if (!DoubleIsEqual(reminderX, 0) && (reminderX + currentSX) < 0)
                         {
-                            currentSX = (currentSX + reminderX);
-                            X = (X - reminderX);
-                            X = ((int)X >> 0);
+                            currentSX += reminderX;
+                            X -= reminderX;
+                            X = Math.Floor(X);
                             reminderX = 1;
                         }
                         else
                         {
-                            X = (X + currentSX);
+                            X += currentSX;
                             currentSX = 0;
                         }
                     }
                 }
-                if (HostWorld.overlaps(this))
+                if (HostWorld.Overlaps(this))
                 {
                     X = ox;
                     speedX = 0;
@@ -515,14 +510,14 @@ namespace EEPhysics
                 {
                     if ((currentSY + reminderY) >= 1)
                     {
-                        Y = (Y + (1 - reminderY));
-                        Y = ((int)Y >> 0);
-                        currentSY = (currentSY - (1 - reminderY));
+                        Y += 1 - reminderY;
+                        Y = Math.Floor(Y);
+                        currentSY -= 1 - reminderY;
                         reminderY = 0;
                     }
                     else
                     {
-                        Y = (Y + currentSY);
+                        Y += currentSY;
                         currentSY = 0;
                     };
                 }
@@ -530,21 +525,21 @@ namespace EEPhysics
                 {
                     if (currentSY < 0)
                     {
-                        if (((!((reminderY == 0))) && (((reminderY + currentSY) < 0))))
+                        if (!DoubleIsEqual(reminderY, 0) && (reminderY + currentSY) < 0)
                         {
-                            Y = (Y - reminderY);
-                            Y = ((int)Y >> 0);
-                            currentSY = (currentSY + reminderY);
+                            Y -= reminderY;
+                            Y = Math.Floor(Y);
+                            currentSY += reminderY;
                             reminderY = 1;
                         }
                         else
                         {
-                            Y = (Y + currentSY);
+                            Y += currentSY;
                             currentSY = 0;
                         }
                     }
                 }
-                if (HostWorld.overlaps(this))
+                if (HostWorld.Overlaps(this))
                 {
                     Y = oy;
                     speedY = 0;
@@ -602,7 +597,7 @@ namespace EEPhysics
                             // blue
                             OnHitBlueKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case ItemId.SWITCH_PURPLE:
+                        case ItemId.SwitchPurple:
                             // purple (switch)
                             Purple = !Purple;
                             OnHitSwitch(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
@@ -615,15 +610,15 @@ namespace EEPhysics
                             // drum
                             OnHitDrum(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case ItemId.DIAMOND:
+                        case ItemId.Diamond:
                             // diamond
                             OnHitDiamond(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case ItemId.CAKE:
+                        case ItemId.Cake:
                             // cake
                             OnHitCake(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case ItemId.CHECKPOINT:
+                        case ItemId.Checkpoint:
                             // checkpoint
                             if (!isGodMode)
                             {
@@ -632,7 +627,7 @@ namespace EEPhysics
                                 OnHitCheckpoint(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             }
                             break;
-                        case ItemId.BRICK_COMPLETE:
+                        case ItemId.BrickComplete:
                             // level completed
                             OnHitCompleteLevelBrick(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
@@ -645,7 +640,7 @@ namespace EEPhysics
             var imx = ((int)speedX << 8);
             var imy = ((int)speedY << 8);
 
-            if (current != ItemId.WATER && current != ItemId.MUD)
+            if (current != ItemId.Water && current != ItemId.Mud)
             {
                 if (imx == 0)
                 {
@@ -660,7 +655,7 @@ namespace EEPhysics
                             }
                             else
                             {
-                                X = (X - (tx / 15));
+                                X -= tx / 15;
                             };
                         }
                         else
@@ -673,7 +668,7 @@ namespace EEPhysics
                                 }
                                 else
                                 {
-                                    X = (X + ((tx - 14) / 15));
+                                    X += (tx - 14) / 15;
                                 }
                             }
                         }
@@ -693,7 +688,7 @@ namespace EEPhysics
                             }
                             else
                             {
-                                Y = (Y - (ty / 15));
+                                Y -= ty / 15;
                             }
                         }
                         else
@@ -706,7 +701,7 @@ namespace EEPhysics
                                 }
                                 else
                                 {
-                                    Y = (Y + ((ty - 14) / 15));
+                                    Y += (ty - 14) / 15;
                                 }
                             }
                         }
@@ -723,7 +718,7 @@ namespace EEPhysics
             return ((X > xx - 16 && X <= xx + 16) && (Y > yy - 16 && Y <= yy + 16));
         }
 
-        internal void respawn()
+        internal void Respawn()
         {
             modifierX = 0;
             modifierY = 0;
@@ -735,16 +730,16 @@ namespace EEPhysics
             SpeedY = 0;
             IsDead = false;
         }
-        internal void killPlayer()
+        internal void KillPlayer()
         {
             IsDead = true;
         }
-        internal void resetCoins()
+        internal void ResetCoins()
         {
             gotCoins.Clear();
             gotBlueCoins.Clear();
         }
-        internal void removeCoin(int xx, int yy)
+        internal void RemoveCoin(int xx, int yy)
         {
             for (int i = 0; i < gotCoins.Count; i++)
             {
@@ -755,7 +750,7 @@ namespace EEPhysics
                 }
             }
         }
-        internal void removeBlueCoin(int xx, int yy)
+        internal void RemoveBlueCoin(int xx, int yy)
         {
             for (int i = 0; i < gotCoins.Count; i++)
             {
@@ -765,6 +760,12 @@ namespace EEPhysics
                     break;
                 }
             }
+        }
+
+        // this is used because: http://stackoverflow.com/questions/3103782/rule-of-thumb-to-test-the-equality-of-two-doubles-in-c
+        internal bool DoubleIsEqual(double d1, double d2)
+        {
+            return Math.Abs(d1 - d2) < 0.00000001;
         }
     }
 

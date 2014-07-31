@@ -7,61 +7,62 @@ namespace EEPhysics
 {
     internal static class ItemId
     {
-        public const int SWITCH_PURPLE = 113;
-        public const int DOOR_PURPLE = 184;
-        public const int GATE_PURPLE = 185;
-        public const int DOOR_CLUB = 200;
-        public const int GATE_CLUB = 201;
-        public const int SPEED_LEFT = 114;
-        public const int SPEED_RIGHT = 115;
-        public const int SPEED_UP = 116;
-        public const int SPEED_DOWN = 117;
-        public const int CHAIN = 118;
-        public const int WATER = 119;
-        public const int NINJA_LADDER = 120;
-        public const int BRICK_COMPLETE = 121;
-        public const int TIMEDOOR = 156;
-        public const int TIMEGATE = 157;
-        public const int COINDOOR = 43;
-        public const int COINGATE = 165;
-        public const int WINE_V = 98;
-        public const int WINE_H = 99;
-        public const int DIAMOND = 241;
-        public const int WAVE = 300;
-        public const int CAKE = 337;
-        public const int CHECKPOINT = 360;
-        public const int SPIKE = 361;
-        public const int FIRE = 368;
-        public const int MUD = 369;
-        public const int MUD_BUBBLE = 370;
-        public const int PORTAL = 242;
-        public const int WORLD_PORTAL = 374;
-        public const int ZOMBIE_GATE = 206;
-        public const int ZOMBIE_DOOR = 207;
-        public const int GLOWYLINE_BLUE_SLOPE = 375;
-        public const int GLOWY_LINE_BLUE_STRAIGHT = 376;
-        public const int GLOWY_LINE_YELLOW_SLOPE = 377;
-        public const int GLOWY_LINE_YELLOW_STRAIGHT = 378;
-        public const int GLOWY_LINE_GREEN_SLOPE = 379;
-        public const int GLOWY_LINE_GREEN_STRAIGHT = 380;
-        public const int PORTAL_INVISIBLE = 381;
-        public const int TEXT_SIGN = 385;
+        public const int SwitchPurple = 113;
+        public const int DoorPurple = 184;
+        public const int GatePurple = 185;
+        public const int DoorClub = 200;
+        public const int GateClub = 201;
+        public const int SpeedLeft = 114;
+        public const int SpeedRight = 115;
+        public const int SpeedUp = 116;
+        public const int SpeedDown = 117;
+        public const int Chain = 118;
+        public const int Water = 119;
+        public const int NinjaLadder = 120;
+        public const int BrickComplete = 121;
+        public const int Timedoor = 156;
+        public const int Timegate = 157;
+        public const int Coindoor = 43;
+        public const int Coingate = 165;
+        public const int WineV = 98;
+        public const int WineH = 99;
+        public const int Diamond = 241;
+        public const int Wave = 300;
+        public const int Cake = 337;
+        public const int Checkpoint = 360;
+        public const int Spike = 361;
+        public const int Fire = 368;
+        public const int Mud = 369;
+        public const int MudBubble = 370;
+        public const int Portal = 242;
+        public const int WorldPortal = 374;
+        public const int ZombieGate = 206;
+        public const int ZombieDoor = 207;
+        public const int GlowylineBlueSlope = 375;
+        public const int GlowyLineBlueStraight = 376;
+        public const int GlowyLineYellowSlope = 377;
+        public const int GlowyLineYellowStraight = 378;
+        public const int GlowyLineGreenSlope = 379;
+        public const int GlowyLineGreenStraight = 380;
+        public const int PortalInvisible = 381;
+        public const int TextSign = 385;
 
-        public static bool isSolid(int _arg1)
+        public static bool isSolid(int blockId)
         {
-            return ((9 <= _arg1 && _arg1 <= 97) || (122 <= _arg1 && _arg1 <= 217));
+            return (9 <= blockId && blockId <= 97) || (122 <= blockId && blockId <= 217);
         }
 
         public static bool isClimbable(int id)
         {
             switch (id)
             {
-                case ItemId.NINJA_LADDER:
-                case ItemId.CHAIN:
-                case ItemId.WINE_V:
-                case ItemId.WINE_H:
+                case ItemId.NinjaLadder:
+                case ItemId.Chain:
+                case ItemId.WineV:
+                case ItemId.WineH:
                     return true;
             }
+
             return false;
         }
     }

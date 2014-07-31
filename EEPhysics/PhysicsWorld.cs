@@ -63,17 +63,16 @@ namespace EEPhysics
             PhysicsRunning = true;
 
             sw.Start();
-            long waitTime, frameStartTime, frameEndTime;
             while (running)
             {
-                frameStartTime = sw.ElapsedMilliseconds;
+                long frameStartTime = sw.ElapsedMilliseconds;
                 foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
                 {
-                    pair.Value.tick();
+                    pair.Value.Tick();
                 }
                 OnTick(this, null);
-                frameEndTime = sw.ElapsedMilliseconds;
-                waitTime = 10 - (frameEndTime - frameStartTime);
+                long frameEndTime = sw.ElapsedMilliseconds;
+                long waitTime = 10 - (frameEndTime - frameStartTime);
                 if (waitTime > 0)
                     Thread.Sleep((int)waitTime);
             }
@@ -117,15 +116,20 @@ namespace EEPhysics
                             int yy = m.GetInt(2);
                             int blockId = m.GetInt(3);
                             foregroundTiles[xx][yy] = blockId;
-                            if (blockId == 100)
+                            switch (blockId)
                             {
-                                foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                                    pair.Value.removeCoin(xx, yy);
-                            }
-                            else if (blockId == 101)
-                            {
-                                foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                                    pair.Value.removeBlueCoin(xx, yy);
+                                case 100:
+                                    foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
+                                    {
+                                        pair.Value.RemoveCoin(xx, yy);
+                                    }
+                                    break;
+                                case 101:
+                                    foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
+                                    {
+                                        pair.Value.RemoveBlueCoin(xx, yy);
+                                    }
+                                    break;
                             }
                         }
                     }
@@ -206,7 +210,7 @@ namespace EEPhysics
                             p.InGodMode = m.GetBoolean(1);
                             if (p.InGodMode)
                             {
-                                p.respawn();
+                                p.Respawn();
                             }
                         }
                     }
@@ -224,7 +228,7 @@ namespace EEPhysics
                                 p.Y = m.GetInt(i + 2);
                                 if (b)
                                 {
-                                    p.respawn();
+                                    p.Respawn();
                                 }
                             }
                             i += 3;
@@ -243,10 +247,10 @@ namespace EEPhysics
                     break;
                 case "reset":
                     {
-                        desBlocks(m, 0);
+                        DeserializeBlocks(m, 0);
                         foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
                         {
-                            pair.Value.resetCoins();
+                            pair.Value.ResetCoins();
                         }
                         /*for (int i = 0; i < players.Count; i++) {
                             players[i].Coins = 0;
@@ -273,7 +277,7 @@ namespace EEPhysics
                             }
                         }
                         foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                            pair.Value.resetCoins();
+                            pair.Value.ResetCoins();
                     }
                     break;
                 case "ts":
@@ -296,18 +300,21 @@ namespace EEPhysics
                         for (int i = 0; i < foregroundTiles.Length; i++)
                             tileData[i] = new int[WorldHeight][];
 
-                        WorldKey = derot(m.GetString(5));
+                        WorldKey = Derot(m.GetString(5));
                         WorldGravity = m.GetDouble(15);
 
                         if (AddBotPlayer)
                         {
-                            PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(9));
-                            p.X = m.GetInt(7); p.Y = m.GetInt(8);
-                            p.HostWorld = this;
+                            PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(9))
+                                {
+                                    X = m.GetInt(7),
+                                    Y = m.GetInt(8),
+                                    HostWorld = this
+                                };
                             Players.TryAdd(p.ID, p);
                         }
 
-                        desBlocks(m, 18);
+                        DeserializeBlocks(m, 18);
                         inited = true;
 
                         foreach (Message m2 in earlyMessages)
@@ -400,7 +407,7 @@ namespace EEPhysics
             }
         }
 
-        internal bool overlaps(PhysicsPlayer p)
+        internal bool Overlaps(PhysicsPlayer p)
         {
             if ((p.X < 0 || p.Y < 0) || ((p.X > WorldWidth * 16 - 16) || (p.Y > WorldHeight * 16 - 16)))
             {
@@ -433,92 +440,92 @@ namespace EEPhysics
                                 if (hideRed)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
                             case 24:
                                 if (hideGreen)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
                             case 25:
                                 if (hideBlue)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
                             case 26:
                                 if (!hideRed)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
                             case 27:
                                 if (!hideGreen)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
                             case 28:
                                 if (!hideBlue)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
                             case 156:
                                 if (hideTimedoor)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
                             case 157:
                                 if (!hideTimedoor)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
-                            case ItemId.DOOR_PURPLE:
+                            case ItemId.DoorPurple:
                                 if (p.Purple)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
-                            case ItemId.GATE_PURPLE:
+                            case ItemId.GatePurple:
                                 if (!p.Purple)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
-                            case ItemId.DOOR_CLUB:
+                            case ItemId.DoorClub:
                                 if (p.IsClubMember)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
-                            case ItemId.GATE_CLUB:
+                            case ItemId.GateClub:
                                 if (!p.IsClubMember)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
-                            case ItemId.COINDOOR:
+                            case ItemId.Coindoor:
                                 if (tileData[x][y][0] <= p.Coins)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
-                            case ItemId.COINGATE:
+                            case ItemId.Coingate:
                                 if (tileData[x][y][0] > p.Coins)
                                 {
                                     continue;
-                                };
+                                }
                                 break;
-                            case ItemId.ZOMBIE_GATE:
+                            case ItemId.ZombieGate:
                                 /*if (p.Zombie) {
                                     continue;
                                 };*/
                                 break;
-                            case ItemId.ZOMBIE_DOOR:
+                            case ItemId.ZombieDoor:
                                 /*if (!p.Zombie) {
                                     continue;
                                 };*/
@@ -548,10 +555,10 @@ namespace EEPhysics
                                     if (y != firstY || p.overlapy == -1)
                                     {
                                         p.overlapy = y;
-                                    };
+                                    }
                                     _local7 = true;
                                     continue;
-                                };
+                                }
                                 break;
                             case 83:
                             case 77:
@@ -570,7 +577,7 @@ namespace EEPhysics
         }
 
 
-        internal static string derot(string arg1)
+        internal static string Derot(string arg1)
         {
             // by Capasha (http://pastebin.com/Pj6tvNNx)
             int num = 0;
@@ -593,7 +600,7 @@ namespace EEPhysics
             return str;
         }
 
-        internal void desBlocks(Message m, uint start)
+        internal void DeserializeBlocks(Message m, uint start)
         {
             // Got and modified from Skylight by TakoMan02 (made originally in VB by Bass5098), credit to them
             // (http://seist.github.io/Skylight/)
