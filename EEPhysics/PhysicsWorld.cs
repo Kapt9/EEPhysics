@@ -45,6 +45,9 @@ namespace EEPhysics
         /// </summary>
         public ConcurrentDictionary<int, PhysicsPlayer> Players { get; private set; }
         public string WorldKey { get; private set; }
+        /// <summary>
+        /// Called upon every physics simulation tick. (every 10ms)
+        /// </summary>
         public event EventHandler OnTick = delegate { };
 
         public PhysicsWorld()

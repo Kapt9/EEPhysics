@@ -91,6 +91,11 @@ namespace EEPhysics
         /// </summary>
         public event PlayerEvent OnGetBlueCoin = delegate { };
 
+        /// <summary>
+        /// Includes invisible portals.
+        /// </summary>
+        public event PlayerEvent OnHitPortal = delegate { };
+
         public event PlayerEvent OnHitRedKey = delegate { };
         public event PlayerEvent OnHitBlueKey = delegate { };
         public event PlayerEvent OnHitGreenKey = delegate { };
@@ -446,6 +451,7 @@ namespace EEPhysics
                                 }
                                 X = portalPoint.x * 16;
                                 Y = portalPoint.y * 16;
+                                OnHitPortal(new PlayerEventArgs() { Player = this, BlockX = lastPortal.x, BlockY = lastPortal.y });
                                 lastPortal = portalPoint;
                             }
                         }
