@@ -251,7 +251,7 @@ namespace EEPhysics
                     break;
                 case "reset":
                     {
-                        DeserializeBlocks(m, 0);
+                        DeserializeBlocks(m, 1);
                         foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
                         {
                             pair.Value.ResetCoins();
