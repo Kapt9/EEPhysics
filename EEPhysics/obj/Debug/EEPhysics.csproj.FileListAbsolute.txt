@@ -1,6 +1,0 @@
-C:\Users\Esra\documents\visual studio 2010\Projects\EEPhysics\EEPhysics\bin\Debug\EEPhysics.dll
-C:\Users\Esra\documents\visual studio 2010\Projects\EEPhysics\EEPhysics\bin\Debug\EEPhysics.pdb
-C:\Users\Esra\documents\visual studio 2010\Projects\EEPhysics\EEPhysics\bin\Debug\PlayerIOClient.dll
-C:\Users\Esra\documents\visual studio 2010\Projects\EEPhysics\EEPhysics\obj\Debug\EEPhysics.dll
-C:\Users\Esra\documents\visual studio 2010\Projects\EEPhysics\EEPhysics\obj\Debug\EEPhysics.pdb
-C:\Users\Esra\documents\visual studio 2010\Projects\EEPhysics\EEPhysics\obj\Debug\EEPhysics.csprojResolveAssemblyReference.cache
