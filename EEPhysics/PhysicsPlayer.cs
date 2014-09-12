@@ -71,6 +71,8 @@ namespace EEPhysics
 
         public delegate void PlayerEvent(PlayerEventArgs e);
 
+        private Dictionary<int, PlayerEvent> blockIdEvents = new Dictionary<int, PlayerEvent>();
+
         public event PlayerEvent OnHitCrown = delegate { };
 
         /// <summary>
@@ -559,10 +561,17 @@ namespace EEPhysics
             {
                 if (pastx != cx || pasty != cy)
                 {
+                    PlayerEvent e;
+                    if (blockIdEvents.Count != 0 && blockIdEvents.TryGetValue(current, out e))
+                    {
+                        e(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                    }
+
+                    // Might remove specific events soon, because you can make them now with void AddBlockEvent. (except OnGetCoin and OnGetBlueCoin)
                     switch (current)
                     {
                         case 100:   //coin
-                            OnHitCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            //OnHitCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             for (int i = 0; i < gotCoins.Count; i++)
                             {
                                 if (gotCoins[i].x == cx && gotCoins[i].y == cy)
@@ -575,7 +584,7 @@ namespace EEPhysics
                         found:
                             break;
                         case 101:   // bluecoin
-                            OnHitBlueCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            //OnHitBlueCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             for (int i = 0; i < gotBlueCoins.Count; i++)
                             {
                                 if (gotBlueCoins[i].x == cx && gotBlueCoins[i].y == cy)
@@ -714,6 +723,28 @@ namespace EEPhysics
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Makes PhysicsPlayer raise event when player touches blockId block. Event is not raised every tick, but only at when player first touches a block.
+        /// </summary>
+        /// <param name="blockId">Block ID to upon touching raise the event.</param>
+        /// <param name="e">Method which is run when event occurs.</param>
+        public void AddBlockEvent(int blockId, PlayerEvent e)
+        {
+            blockIdEvents[blockId] = e;
+        }
+        /// <returns>Whether there's block event with specified blockId.</returns>
+        public bool HasBlockEvent(int blockId)
+        {
+            return blockIdEvents.ContainsKey(blockId);
+        }
+        /// <summary>
+        /// Removes block event added with AddBlockEvent with specified blockId.
+        /// </summary>
+        public void RemoveBlockEvent(int blockId)
+        {
+            blockIdEvents.Remove(blockId);
         }
 
         /// <returns>True if player overlaps block at x,y.</returns>
