@@ -306,7 +306,7 @@ namespace EEPhysics
                         }
 
                         blockData = new int[WorldWidth][][];
-                        for (int i = 0; i < blocks.Length; i++)
+                        for (int i = 0; i < WorldWidth; i++)
                             blockData[i] = new int[WorldHeight][];
 
                         WorldKey = Derot(m.GetString(5));
