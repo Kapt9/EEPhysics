@@ -140,7 +140,7 @@ namespace EEPhysics
             int cx = ((int)(X + 8) >> 4);
             int cy = ((int)(Y + 8) >> 4);
 
-            current = HostWorld.GetBlock(cx, cy);
+            current = HostWorld.GetBlock(0, cx, cy);
             if (current == 4 || ItemId.isClimbable(current))
             {
                 delayed = queue[1];
@@ -571,7 +571,7 @@ namespace EEPhysics
                     switch (current)
                     {
                         case 100:   //coin
-                            //OnHitCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             for (int i = 0; i < gotCoins.Count; i++)
                             {
                                 if (gotCoins[i].x == cx && gotCoins[i].y == cy)
@@ -584,7 +584,7 @@ namespace EEPhysics
                         found:
                             break;
                         case 101:   // bluecoin
-                            //OnHitBlueCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitBlueCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             for (int i = 0; i < gotBlueCoins.Count; i++)
                             {
                                 if (gotBlueCoins[i].x == cx && gotBlueCoins[i].y == cy)
@@ -726,9 +726,10 @@ namespace EEPhysics
         }
 
         /// <summary>
-        /// Makes PhysicsPlayer raise event when player touches blockId block. Event is not raised every tick, but only at when player first touches a block.
+        /// Makes PhysicsPlayer raise event when player overlaps blockId block. Event is not raised every tick, but only at when player first touches a block.
+        /// (Event isn't raised if player only touches the block, the player needs to be inside it)
         /// </summary>
-        /// <param name="blockId">Block ID to upon touching raise the event.</param>
+        /// <param name="blockId">Block ID to upon overlaps raise the event.</param>
         /// <param name="e">Method which is run when event occurs.</param>
         public void AddBlockEvent(int blockId, PlayerEvent e)
         {

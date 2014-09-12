@@ -19,8 +19,8 @@ namespace EEPhysics
         private bool running;
         private Thread physicsThread;
 
-        private int[][] foregroundTiles;
-        private int[][][] tileData;
+        private int[][][] blocks;
+        private int[][][] blockData;
         private bool hideRed, hideBlue, hideGreen, hideTimedoor;
         internal double WorldGravity = 1;
 
@@ -113,27 +113,25 @@ namespace EEPhysics
                     break;
                 case "b":
                     {
-                        if (m.GetInt(0) == 0)
+                        int zz = m.GetInt(0);
+                        int xx = m.GetInt(1);
+                        int yy = m.GetInt(2);
+                        int blockId = m.GetInt(3);
+                        blocks[zz][xx][yy] = blockId;
+                        switch (blockId)
                         {
-                            int xx = m.GetInt(1);
-                            int yy = m.GetInt(2);
-                            int blockId = m.GetInt(3);
-                            foregroundTiles[xx][yy] = blockId;
-                            switch (blockId)
-                            {
-                                case 100:
-                                    foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                                    {
-                                        pair.Value.RemoveCoin(xx, yy);
-                                    }
-                                    break;
-                                case 101:
-                                    foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                                    {
-                                        pair.Value.RemoveBlueCoin(xx, yy);
-                                    }
-                                    break;
-                            }
+                            case 100:
+                                foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
+                                {
+                                    pair.Value.RemoveCoin(xx, yy);
+                                }
+                                break;
+                            case 101:
+                                foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
+                                {
+                                    pair.Value.RemoveBlueCoin(xx, yy);
+                                }
+                                break;
                         }
                     }
                     break;
@@ -184,11 +182,11 @@ namespace EEPhysics
                     {
                         int xx = m.GetInt(0);
                         int yy = m.GetInt(1);
-                        foregroundTiles[xx][yy] = m.GetInt(2);
-                        tileData[xx][yy] = new int[m.Count - 4];
+                        blocks[0][xx][yy] = m.GetInt(2);
+                        blockData[xx][yy] = new int[m.Count - 4];
                         for (uint i = 3; i < 4; i++)
                         {
-                            tileData[xx][yy][i - 3] = m.GetInt(i);
+                            blockData[xx][yy][i - 3] = m.GetInt(i);
                         }
                     }
                     break;
@@ -196,11 +194,11 @@ namespace EEPhysics
                     {
                         int xx = m.GetInt(0);
                         int yy = m.GetInt(1);
-                        foregroundTiles[xx][yy] = m.GetInt(2);
-                        tileData[xx][yy] = new int[m.Count - 3];
+                        blocks[0][xx][yy] = m.GetInt(2);
+                        blockData[xx][yy] = new int[m.Count - 3];
                         for (uint i = 3; i < 6; i++)
                         {
-                            tileData[xx][yy][i - 3] = m.GetInt(i);
+                            blockData[xx][yy][i - 3] = m.GetInt(i);
                         }
                     }
                     break;
@@ -265,18 +263,19 @@ namespace EEPhysics
                     {
                         int border = m.GetInt(2);
                         int fill = m.GetInt(3);
-                        for (int i = 0; i < foregroundTiles.Length; i++)
+                        for (int i = 0; i < WorldWidth; i++)
                         {
-                            for (int ii = 0; ii < foregroundTiles[i].Length; ii++)
+                            for (int ii = 0; ii < WorldHeight; ii++)
                             {
                                 if (i == 0 || ii == 0 || i == WorldWidth - 1 || ii == WorldHeight - 1)
                                 {
-                                    foregroundTiles[i][ii] = border;
+                                    blocks[0][i][ii] = border;
                                 }
                                 else
                                 {
-                                    foregroundTiles[i][ii] = fill;
+                                    blocks[0][i][ii] = fill;
                                 }
+                                blocks[1][i][ii] = 0;
                             }
                         }
                         foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
@@ -287,7 +286,7 @@ namespace EEPhysics
                 case "lb":
                 case "wp":
                     {
-                        foregroundTiles[m.GetInt(0)][m.GetInt(1)] = m.GetInt(2);
+                        blocks[0][m.GetInt(0)][m.GetInt(1)] = m.GetInt(2);
                     }
                     break;
                 case "init":
@@ -295,13 +294,17 @@ namespace EEPhysics
                         WorldWidth = m.GetInt(12);
                         WorldHeight = m.GetInt(13);
 
-                        foregroundTiles = new int[WorldWidth][];
-                        for (int i = 0; i < foregroundTiles.Length; i++)
-                            foregroundTiles[i] = new int[WorldHeight];
+                        blocks = new int[2][][];
+                        for (int i = 0; i < blocks.Length; i++)
+                        {
+                            blocks[i] = new int[WorldWidth][];
+                            for (int ii = 0; ii < WorldWidth; ii++)
+                                blocks[i][ii] = new int[WorldHeight];
+                        }
 
-                        tileData = new int[WorldWidth][][];
-                        for (int i = 0; i < foregroundTiles.Length; i++)
-                            tileData[i] = new int[WorldHeight][];
+                        blockData = new int[WorldWidth][][];
+                        for (int i = 0; i < blocks.Length; i++)
+                            blockData[i] = new int[WorldHeight][];
 
                         WorldKey = Derot(m.GetString(5));
                         WorldGravity = m.GetDouble(15);
@@ -339,30 +342,40 @@ namespace EEPhysics
         /// <returns>Foreground block ID</returns>
         public int GetBlock(int xx, int yy)
         {
-            if (xx < 0 || xx >= foregroundTiles.Length || yy < 0 || yy >= foregroundTiles[0].Length)
-            {
-                return 0;
-            }
-            return foregroundTiles[xx][yy];
+            return GetBlock(0, xx, yy);
         }
-        /// <returns>Extra block data, eg. rotation, id and target id from portals.</returns>
+        /// <param name="zz">Block layer: 0 = foreground, 1 = background</param>
+        /// <returns>Block ID</returns>
+        public int GetBlock(int zz, int xx, int yy)
+        {
+            if (zz < 0 || zz > 1)
+            {
+                throw new ArgumentOutOfRangeException("zz", "Layer must be 0 (foreground) or 1 (background).");
+            }
+            if (xx < 0 || xx >= WorldWidth || yy < 0 || yy >= WorldHeight)
+            {
+                return -1;
+            }
+            return blocks[zz][xx][yy];
+        }
+        /// <returns>Extra block data, eg. rotation, id and target id from portals. Doesn't support signs.</returns>
         public int[] GetBlockData(int xx, int yy)
         {
-            if (xx < 0 || xx >= foregroundTiles.Length || yy < 0 || yy >= foregroundTiles[0].Length)
+            if (xx < 0 || xx >= blocks.Length || yy < 0 || yy >= blocks[0].Length)
             {
                 return null;
             }
-            return tileData[xx][yy];
+            return blockData[xx][yy];
         }
         internal Point GetPortalById(int id)
         {
-            for (int i = 0; i < foregroundTiles.Length; i++)
+            for (int i = 0; i < WorldWidth; i++)
             {
-                for (int ii = 0; ii < foregroundTiles[i].Length; ii++)
+                for (int ii = 0; ii < WorldHeight; ii++)
                 {
-                    if (foregroundTiles[i][ii] == 242 || foregroundTiles[i][ii] == 381)
+                    if (blocks[0][i][ii] == 242 || blocks[0][i][ii] == 381)
                     {
-                        if (tileData[i][ii][1] == id)
+                        if (blockData[i][ii][1] == id)
                         {
                             return new Point(i, ii);
                         }
@@ -434,7 +447,7 @@ namespace EEPhysics
                 x = firstX;
                 for (; x < lastX; x++)
                 {
-                    tileId = foregroundTiles[x][y];
+                    tileId = blocks[0][x][y];
                     if (ItemId.isSolid(tileId))
                     {
                         switch (tileId)
@@ -512,13 +525,13 @@ namespace EEPhysics
                                 }
                                 break;
                             case ItemId.Coindoor:
-                                if (tileData[x][y][0] <= p.Coins)
+                                if (blockData[x][y][0] <= p.Coins)
                                 {
                                     continue;
                                 }
                                 break;
                             case ItemId.Coingate:
-                                if (tileData[x][y][0] > p.Coins)
+                                if (blockData[x][y][0] > p.Coins)
                                 {
                                     continue;
                                 }
@@ -658,13 +671,10 @@ namespace EEPhysics
                         x = (xa[pos] * 256) + xa[pos + 1];
                         y = (ya[pos] * 256) + ya[pos + 1];
 
-                        if (blockId < 500)
+                        blocks[z][x][y] = blockId;
+                        if (data.Count > 0)
                         {
-                            foregroundTiles[x][y] = blockId;
-                            if (data.Count > 0)
-                            {
-                                tileData[x][y] = data.ToArray();
-                            }
+                            blockData[x][y] = data.ToArray();
                         }
                     }
                 }
