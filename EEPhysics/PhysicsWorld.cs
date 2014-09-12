@@ -117,22 +117,25 @@ namespace EEPhysics
                         int xx = m.GetInt(1);
                         int yy = m.GetInt(2);
                         int blockId = m.GetInt(3);
-                        blocks[zz][xx][yy] = blockId;
-                        switch (blockId)
+                        if (zz == 0)
                         {
-                            case 100:
-                                foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                                {
-                                    pair.Value.RemoveCoin(xx, yy);
-                                }
-                                break;
-                            case 101:
-                                foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                                {
-                                    pair.Value.RemoveBlueCoin(xx, yy);
-                                }
-                                break;
+                            switch (blocks[zz][xx][yy])
+                            {
+                                case 100:
+                                    foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
+                                    {
+                                        pair.Value.RemoveCoin(xx, yy);
+                                    }
+                                    break;
+                                case 101:
+                                    foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
+                                    {
+                                        pair.Value.RemoveBlueCoin(xx, yy);
+                                    }
+                                    break;
+                            }
                         }
+                        blocks[zz][xx][yy] = blockId;
                     }
                     break;
                 case "add":
