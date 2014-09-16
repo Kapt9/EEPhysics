@@ -72,6 +72,7 @@ namespace EEPhysics
         public delegate void PlayerEvent(PlayerEventArgs e);
 
         private Dictionary<int, PlayerEvent> blockIdEvents = new Dictionary<int, PlayerEvent>();
+        private Dictionary<int, PlayerEvent> bgblockIdEvents = new Dictionary<int, PlayerEvent>();
 
         public event PlayerEvent OnHitCrown = delegate { };
 
@@ -566,6 +567,9 @@ namespace EEPhysics
                     {
                         e(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                     }
+                    if (bgblockIdEvents.Count != 0 && bgblockIdEvents.TryGetValue(HostWorld.GetBlock(1, cx, cy), out e)) {
+                        e(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                    }
 
                     // Might remove specific events soon, because you can make them now with void AddBlockEvent. (except OnGetCoin and OnGetBlueCoin)
                     switch (current)
@@ -733,19 +737,28 @@ namespace EEPhysics
         /// <param name="e">Method which is run when event occurs.</param>
         public void AddBlockEvent(int blockId, PlayerEvent e)
         {
-            blockIdEvents[blockId] = e;
+            if (blockId < 500)
+                blockIdEvents[blockId] = e;
+            else
+                bgblockIdEvents[blockId] = e;
         }
         /// <returns>Whether there's block event with specified blockId.</returns>
         public bool HasBlockEvent(int blockId)
         {
-            return blockIdEvents.ContainsKey(blockId);
+            if (blockId < 500)
+                return blockIdEvents.ContainsKey(blockId);
+            else
+                return bgblockIdEvents.ContainsKey(blockId);
         }
         /// <summary>
         /// Removes block event added with AddBlockEvent with specified blockId.
         /// </summary>
         public void RemoveBlockEvent(int blockId)
         {
-            blockIdEvents.Remove(blockId);
+            if (blockId < 500)
+                blockIdEvents.Remove(blockId);
+            else
+                bgblockIdEvents.Remove(blockId);
         }
 
         /// <returns>True if player overlaps block at x,y.</returns>
