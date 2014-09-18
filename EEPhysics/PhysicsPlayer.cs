@@ -65,6 +65,7 @@ namespace EEPhysics
         public int ID { get; private set; }
         public string Name { get; protected set; }
         public int Coins { get; set; }
+        /// <summary>This is inaccurate if players have touched blue coins before bot joins the world.</summary>
         public int BlueCoins { get { return gotBlueCoins.Count; } }
         public bool IsClubMember { get; set; }
 

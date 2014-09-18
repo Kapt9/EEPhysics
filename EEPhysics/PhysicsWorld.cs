@@ -85,10 +85,56 @@ namespace EEPhysics
 
         public void HandleMessage(Message m)
         {
-            if (!inited && m.Type != "init")
+            if (!inited)
             {
-                earlyMessages.Add(m);
-                return;
+                if (m.Type == "init")
+                {
+                    WorldWidth = m.GetInt(12);
+                    WorldHeight = m.GetInt(13);
+
+                    blocks = new int[2][][];
+                    for (int i = 0; i < blocks.Length; i++)
+                    {
+                        blocks[i] = new int[WorldWidth][];
+                        for (int ii = 0; ii < WorldWidth; ii++)
+                            blocks[i][ii] = new int[WorldHeight];
+                    }
+
+                    blockData = new int[WorldWidth][][];
+                    for (int i = 0; i < WorldWidth; i++)
+                        blockData[i] = new int[WorldHeight][];
+
+                    WorldKey = Derot(m.GetString(5));
+                    WorldGravity = m.GetDouble(15);
+
+                    if (AddBotPlayer)
+                    {
+                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(9))
+                        {
+                            X = m.GetInt(7),
+                            Y = m.GetInt(8),
+                            HostWorld = this
+                        };
+                        Players.TryAdd(p.ID, p);
+                    }
+
+                    DeserializeBlocks(m, 18);
+                    inited = true;
+
+                    foreach (Message m2 in earlyMessages)
+                    {
+                        HandleMessage(m2);
+                    }
+                    earlyMessages.Clear();
+                    earlyMessages = null;
+
+                    if (AutoStart && (physicsThread == null || !physicsThread.IsAlive))
+                    {
+                        StartSimulation();
+                    }
+                }
+                if (m.Type != "add" && m.Type != "left")
+                    return;
             }
             switch (m.Type)
             {
@@ -290,53 +336,6 @@ namespace EEPhysics
                 case "wp":
                     {
                         blocks[0][m.GetInt(0)][m.GetInt(1)] = m.GetInt(2);
-                    }
-                    break;
-                case "init":
-                    {
-                        WorldWidth = m.GetInt(12);
-                        WorldHeight = m.GetInt(13);
-
-                        blocks = new int[2][][];
-                        for (int i = 0; i < blocks.Length; i++)
-                        {
-                            blocks[i] = new int[WorldWidth][];
-                            for (int ii = 0; ii < WorldWidth; ii++)
-                                blocks[i][ii] = new int[WorldHeight];
-                        }
-
-                        blockData = new int[WorldWidth][][];
-                        for (int i = 0; i < WorldWidth; i++)
-                            blockData[i] = new int[WorldHeight][];
-
-                        WorldKey = Derot(m.GetString(5));
-                        WorldGravity = m.GetDouble(15);
-
-                        if (AddBotPlayer)
-                        {
-                            PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(9))
-                                {
-                                    X = m.GetInt(7),
-                                    Y = m.GetInt(8),
-                                    HostWorld = this
-                                };
-                            Players.TryAdd(p.ID, p);
-                        }
-
-                        DeserializeBlocks(m, 18);
-                        inited = true;
-
-                        foreach (Message m2 in earlyMessages)
-                        {
-                            HandleMessage(m2);
-                        }
-                        earlyMessages.Clear();
-                        earlyMessages = null;
-
-                        if (AutoStart && (physicsThread == null || !physicsThread.IsAlive))
-                        {
-                            StartSimulation();
-                        }
                     }
                     break;
             }
