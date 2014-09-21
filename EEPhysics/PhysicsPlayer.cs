@@ -411,8 +411,13 @@ namespace EEPhysics
                 {
                     if (lastPortal == null)
                     {
+                        OnHitPortal(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                         lastPortal = new Point(cx, cy);
                         int[] data = HostWorld.GetBlockData(cx, cy);
+                        if (data != null)
+                            Console.WriteLine(" EEPhysics Debug: " + data.Length);
+                        else
+                            Console.WriteLine(" EEPhysics Debug: NULL");
                         if (data != null && data.Length == 3)
                         {
                             Point portalPoint = HostWorld.GetPortalById(data[2]);
@@ -455,7 +460,6 @@ namespace EEPhysics
                                 }
                                 X = portalPoint.x * 16;
                                 Y = portalPoint.y * 16;
-                                OnHitPortal(new PlayerEventArgs() { Player = this, BlockX = lastPortal.x, BlockY = lastPortal.y });
                                 lastPortal = portalPoint;
                             }
                         }

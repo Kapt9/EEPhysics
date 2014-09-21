@@ -133,8 +133,11 @@ namespace EEPhysics
                         StartSimulation();
                     }
                 }
-                if (m.Type != "add" && m.Type != "left")
+                else if (m.Type != "add" && m.Type != "left")
+                {
+                    earlyMessages.Add(m);
                     return;
+                }
             }
             switch (m.Type)
             {
@@ -683,7 +686,7 @@ namespace EEPhysics
             }
             catch (Exception e)
             {
-                Console.WriteLine(" EEPhysics: Error loading existing blocks:\n" + e);
+                Debug.WriteLine(" EEPhysics: Error loading existing blocks:\n" + e);
             }
         }
     }
