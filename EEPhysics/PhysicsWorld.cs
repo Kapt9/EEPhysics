@@ -366,7 +366,7 @@ namespace EEPhysics
         /// <returns>Extra block data, eg. rotation, id and target id from portals. Doesn't support signs.</returns>
         public int[] GetBlockData(int xx, int yy)
         {
-            if (xx < 0 || xx >= blocks.Length || yy < 0 || yy >= blocks[0].Length)
+            if (xx < 0 || xx >= WorldWidth || yy < 0 || yy >= WorldHeight)
             {
                 return null;
             }

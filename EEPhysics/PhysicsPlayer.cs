@@ -414,10 +414,6 @@ namespace EEPhysics
                         OnHitPortal(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                         lastPortal = new Point(cx, cy);
                         int[] data = HostWorld.GetBlockData(cx, cy);
-                        if (data != null)
-                            Console.WriteLine(" EEPhysics Debug: " + data.Length);
-                        else
-                            Console.WriteLine(" EEPhysics Debug: NULL");
                         if (data != null && data.Length == 3)
                         {
                             Point portalPoint = HostWorld.GetPortalById(data[2]);
