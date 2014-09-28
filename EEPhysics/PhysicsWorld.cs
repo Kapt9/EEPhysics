@@ -9,7 +9,6 @@ using PlayerIOClient;
 
 namespace EEPhysics
 {
-
     public class PhysicsWorld
     {
         internal const int Size = 16;
@@ -58,7 +57,7 @@ namespace EEPhysics
         }
 
         /// <summary>
-        /// Will run the physics simulation. Needs to be called only once.
+        /// Will run the physics simulation. Needs to be called only once. If you have AutoStart set to true, don't call this!
         /// </summary>
         public void Run()
         {
@@ -83,6 +82,9 @@ namespace EEPhysics
             PhysicsRunning = false;
         }
 
+        /// <summary>
+        /// Call this for very PlayerIO Message you receive.
+        /// </summary>
         public void HandleMessage(Message m)
         {
             if (!inited)
@@ -345,32 +347,34 @@ namespace EEPhysics
         }
 
         /// <returns>Foreground block ID</returns>
-        public int GetBlock(int xx, int yy)
+        public int GetBlock(int x, int y)
         {
-            return GetBlock(0, xx, yy);
+            return GetBlock(0, x, y);
         }
-        /// <param name="zz">Block layer: 0 = foreground, 1 = background</param>
+        /// <param name="z">Block layer: 0 = foreground, 1 = background</param>
+        /// <param name="x">Block X</param>
+        /// <param name="z">Block Y</param>
         /// <returns>Block ID</returns>
-        public int GetBlock(int zz, int xx, int yy)
+        public int GetBlock(int z, int x, int y)
         {
-            if (zz < 0 || zz > 1)
+            if (z < 0 || z > 1)
             {
                 throw new ArgumentOutOfRangeException("zz", "Layer must be 0 (foreground) or 1 (background).");
             }
-            if (xx < 0 || xx >= WorldWidth || yy < 0 || yy >= WorldHeight)
+            if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight)
             {
                 return -1;
             }
-            return blocks[zz][xx][yy];
+            return blocks[z][x][y];
         }
         /// <returns>Extra block data, eg. rotation, id and target id from portals. Doesn't support signs.</returns>
-        public int[] GetBlockData(int xx, int yy)
+        public int[] GetBlockData(int x, int y)
         {
-            if (xx < 0 || xx >= WorldWidth || yy < 0 || yy >= WorldHeight)
+            if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight)
             {
                 return null;
             }
-            return blockData[xx][yy];
+            return blockData[x][y];
         }
         internal Point GetPortalById(int id)
         {
@@ -391,7 +395,7 @@ namespace EEPhysics
         }
 
         /// <summary>
-        /// Starts the physics simulation thread.
+        /// Starts the physics simulation in another thread.
         /// </summary>
         public void StartSimulation()
         {
@@ -404,7 +408,7 @@ namespace EEPhysics
                 }
                 else
                 {
-                    throw new Exception("Cannot start before bot has received init message. ");
+                    throw new Exception("Cannot start before bot has received init message.");
                 }
             }
             else
@@ -414,7 +418,7 @@ namespace EEPhysics
         }
 
         /// <summary>
-        /// Stops physics simulation thread.
+        /// Stops the physics simulation thread.
         /// </summary>
         public void StopSimulation()
         {

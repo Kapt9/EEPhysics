@@ -11,7 +11,13 @@ namespace EEPhysics
         internal PhysicsWorld HostWorld { get; set; }
         internal const int Width = 16;
         internal const int Height = 16;
+        /// <summary>
+        /// The precise player X position.
+        /// </summary>
         public double X { get; internal set; }
+        /// <summary>
+        /// The precise player Y position.
+        /// </summary>
         public double Y { get; internal set; }
         public int Horizontal { get; internal set; }
         public int Vertical { get; internal set; }
@@ -62,10 +68,18 @@ namespace EEPhysics
         public int LastCheckpointX { get; private set; }
         public int LastCheckpointY { get; private set; }
 
+        /// <summary>
+        /// The player ID in PlayerIO Messages
+        /// </summary>
         public int ID { get; private set; }
+        /// <summary>
+        /// Player name in the world.
+        /// </summary>
         public string Name { get; protected set; }
         public int Coins { get; set; }
-        /// <summary>This is inaccurate if players have touched blue coins before bot joins the world.</summary>
+        /// <summary>
+        /// This is inaccurate if players have touched blue coins before bot joins the world.
+        /// </summary>
         public int BlueCoins { get { return gotBlueCoins.Count; } }
         public bool IsClubMember { get; set; }
 
