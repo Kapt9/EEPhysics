@@ -43,7 +43,7 @@ namespace EEPhysics
 
         /// <summary>Purple switch state.</summary>
         public bool Purple { get; internal set; }
-        /// <summary>Also includes moderatormode.</summary>
+        /// <summary>Also includes moderator and guardian mode.</summary>
         public bool InGodMode { get; internal set; }
         public bool IsDead { get; internal set; }
         //public bool Zombie { get; internal set; }

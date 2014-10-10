@@ -57,7 +57,7 @@ namespace EEPhysics
         }
 
         /// <summary>
-        /// Will run the physics simulation. Needs to be called only once. If you have AutoStart set to true, don't call this!
+        /// Will run the physics simulation. Needs to be called only once. If you have AutoStart set to true or you started physics with StartSimulation, don't call this!
         /// </summary>
         public void Run()
         {
