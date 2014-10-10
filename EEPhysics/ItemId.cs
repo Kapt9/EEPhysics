@@ -7,6 +7,8 @@ namespace EEPhysics
 {
     internal static class ItemId
     {
+        public const int Piano = 77;
+        public const int Drum = 83;
         public const int SwitchPurple = 113;
         public const int DoorPurple = 184;
         public const int GatePurple = 185;
@@ -24,6 +26,8 @@ namespace EEPhysics
         public const int Timegate = 157;
         public const int Coindoor = 43;
         public const int Coingate = 165;
+        public const int BlueCoindoor = 213;
+        public const int BlueCoingate = 214;
         public const int WineV = 98;
         public const int WineH = 99;
         public const int Diamond = 241;

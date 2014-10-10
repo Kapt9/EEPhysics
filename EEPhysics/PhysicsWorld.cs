@@ -83,7 +83,7 @@ namespace EEPhysics
         }
 
         /// <summary>
-        /// Call this for very PlayerIO Message you receive.
+        /// Call this for every PlayerIO Message you receive.
         /// </summary>
         public void HandleMessage(Message m)
         {
@@ -195,9 +195,11 @@ namespace EEPhysics
                         p.HostWorld = this;
                         p.X = m.GetDouble(3);
                         p.Y = m.GetDouble(4);
-                        p.Coins = m.GetInt(8);
-                        p.Purple = m.GetBoolean(9);
                         p.InGodMode = m.GetBoolean(5);
+                        p.HasChat = m.GetBoolean(7);
+                        p.Coins = m.GetInt(8);
+                        p.BlueCoins = m.GetInt(9);
+                        p.Purple = m.GetBoolean(10);
                         p.IsClubMember = m.GetBoolean(12);
 
                         Players.TryAdd(p.ID, p);
@@ -230,6 +232,16 @@ namespace EEPhysics
                         }
                     }
                     break;
+                case "c":
+                    {
+                        PhysicsPlayer p;
+                        if (Players.TryGetValue(m.GetInt(0), out p))
+                        {
+                            p.Coins = m.GetInt(1);
+                            p.BlueCoins = m.GetInt(2);
+                        }
+                    }
+                    break;
                 case "bc":
                 case "br":
                 case "bs":
@@ -257,6 +269,7 @@ namespace EEPhysics
                     }
                     break;
                 case "god":
+                case "guardian":
                 case "mod":
                     {
                         PhysicsPlayer p;
@@ -534,12 +547,14 @@ namespace EEPhysics
                                 }
                                 break;
                             case ItemId.Coindoor:
+                            case ItemId.BlueCoindoor:
                                 if (blockData[x][y][0] <= p.Coins)
                                 {
                                     continue;
                                 }
                                 break;
                             case ItemId.Coingate:
+                            case ItemId.BlueCoingate:
                                 if (blockData[x][y][0] > p.Coins)
                                 {
                                     continue;
@@ -653,25 +668,36 @@ namespace EEPhysics
                     messageIndex++;
 
                     List<int> data = new List<int>();
-                    if (blockId == 242 || blockId == 381)
-                    {
-                        for (int i = 0; i < 3; i++)
-                        {
+                    switch (blockId) {
+                        case ItemId.WorldPortal:
+                        case ItemId.TextSign:
+                            messageIndex++;
+                            break;
+                        case ItemId.Coindoor:
+                        case ItemId.Coingate:
+                        case ItemId.BlueCoindoor:
+                        case ItemId.BlueCoingate:
+                        case ItemId.Spike:
+                        case ItemId.Piano:
+                        case ItemId.Drum:
+                        case ItemId.GlowylineBlueSlope:
+                        case ItemId.GlowyLineBlueStraight:
+                        case ItemId.GlowyLineYellowSlope:
+                        case ItemId.GlowyLineYellowStraight:
+                        case ItemId.GlowyLineGreenSlope:
+                        case ItemId.GlowyLineGreenStraight:
                             data.Add(m.GetInteger(messageIndex));
                             messageIndex++;
-                        }
-                    }
-                    else if (blockId == 374 || blockId == 43 ||
-                             blockId == 165 || blockId == 83 ||
-                             blockId == 77 || blockId == 361 ||
-                             (blockId > 374 && blockId < 381) ||
-                             blockId == 1000 || blockId == 385)
-                    {
-                        if (blockId != 1000 && blockId != 385)
-                        {
-                            data.Add(m.GetInteger(messageIndex));
-                        }
-                        messageIndex++;
+                            break;
+                        case ItemId.Portal:
+                        case ItemId.PortalInvisible:
+                            for (int i = 0; i < 3; i++) {
+                                data.Add(m.GetInteger(messageIndex));
+                                messageIndex++;
+                            }
+                            break;
+                        default:
+                            break;
                     }
                     int x = 0, y = 0;
 

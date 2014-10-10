@@ -36,6 +36,7 @@ namespace EEPhysics
         private bool donex, doney;
         private int[] queue = new int[PhysicsConfig.QueueLength];
         private int delayed;
+        private const double portalMultiplier = 1.42;
         private Point lastPortal;
         private List<Point> gotCoins = new List<Point>();
         private List<Point> gotBlueCoins = new List<Point>();
@@ -46,6 +47,7 @@ namespace EEPhysics
         public bool InGodMode { get; internal set; }
         public bool IsDead { get; internal set; }
         //public bool Zombie { get; internal set; }
+        public bool HasChat { get; internal set; }
 
         internal double GravityMultiplier { get { return HostWorld.WorldGravity; } }
         internal double SpeedMultiplier
@@ -77,10 +79,7 @@ namespace EEPhysics
         /// </summary>
         public string Name { get; protected set; }
         public int Coins { get; set; }
-        /// <summary>
-        /// This is inaccurate if players have touched blue coins before bot joins the world.
-        /// </summary>
-        public int BlueCoins { get { return gotBlueCoins.Count; } }
+        public int BlueCoins { get; set; }
         public bool IsClubMember { get; set; }
 
 
@@ -419,7 +418,6 @@ namespace EEPhysics
             while ((currentSX != 0 && !donex) || (currentSY != 0 && !doney))
             {
                 #region processPortals()
-                const double multiplier = 1.42;
                 current = HostWorld.GetBlock(cx, cy);
                 if (!isGodMode && (current == ItemId.Portal || current == ItemId.PortalInvisible))
                 {
@@ -442,28 +440,28 @@ namespace EEPhysics
                                 switch (rot1 - rot2)
                                 {
                                     case 1:
-                                        SpeedX = SpeedY * multiplier;
-                                        SpeedY = -SpeedX * multiplier;
-                                        ModifierX = ModifierY * multiplier;
-                                        ModifierY = -ModifierX * multiplier;
+                                        SpeedX = SpeedY * portalMultiplier;
+                                        SpeedY = -SpeedX * portalMultiplier;
+                                        ModifierX = ModifierY * portalMultiplier;
+                                        ModifierY = -ModifierX * portalMultiplier;
                                         reminderY = -reminderY;
                                         currentSY = -currentSY;
                                         break;
                                     case 2:
-                                        SpeedX = -SpeedX * multiplier;
-                                        SpeedY = -SpeedY * multiplier;
-                                        ModifierX = -ModifierX * multiplier;
-                                        ModifierY = -ModifierY * multiplier;
+                                        SpeedX = -SpeedX * portalMultiplier;
+                                        SpeedY = -SpeedY * portalMultiplier;
+                                        ModifierX = -ModifierX * portalMultiplier;
+                                        ModifierY = -ModifierY * portalMultiplier;
                                         reminderY = -reminderY;
                                         currentSY = -currentSY;
                                         reminderX = -reminderX;
                                         currentSX = -currentSX;
                                         break;
                                     case 3:
-                                        SpeedX = -SpeedY * multiplier;
-                                        SpeedY = SpeedX * multiplier;
-                                        ModifierX = -ModifierY * multiplier;
-                                        ModifierY = ModifierX * multiplier;
+                                        SpeedX = -SpeedY * portalMultiplier;
+                                        SpeedY = SpeedX * portalMultiplier;
+                                        ModifierX = -ModifierY * portalMultiplier;
+                                        ModifierY = ModifierX * portalMultiplier;
                                         reminderX = -reminderX;
                                         currentSX = -currentSX;
                                         break;
@@ -624,36 +622,30 @@ namespace EEPhysics
                             OnHitRedKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case 7:
-                            // green
+                            // green key
                             OnHitGreenKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case 8:
-                            // blue
+                            // blue key
                             OnHitBlueKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case ItemId.SwitchPurple:
-                            // purple (switch)
                             Purple = !Purple;
                             OnHitSwitch(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case 77:
-                            // piano
+                        case ItemId.Piano:
                             OnHitPiano(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
-                        case 83:
-                            // drum
+                        case ItemId.Drum:
                             OnHitDrum(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case ItemId.Diamond:
-                            // diamond
                             OnHitDiamond(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case ItemId.Cake:
-                            // cake
                             OnHitCake(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case ItemId.Checkpoint:
-                            // checkpoint
                             if (!isGodMode)
                             {
                                 LastCheckpointX = cx;
@@ -662,7 +654,6 @@ namespace EEPhysics
                             }
                             break;
                         case ItemId.BrickComplete:
-                            // level completed
                             OnHitCompleteLevelBrick(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
                     }
