@@ -120,7 +120,7 @@ namespace EEPhysics
                         Players.TryAdd(p.ID, p);
                     }
 
-                    DeserializeBlocks(m, 18);
+                    DeserializeBlocks(m, (m[18] is string) ? 19u : 18u);
                     inited = true;
 
                     foreach (Message m2 in earlyMessages)
@@ -199,8 +199,8 @@ namespace EEPhysics
                         p.HasChat = m.GetBoolean(7);
                         p.Coins = m.GetInt(8);
                         p.BlueCoins = m.GetInt(9);
-                        p.Purple = m.GetBoolean(10);
-                        p.IsClubMember = m.GetBoolean(12);
+                        p.Purple = m.GetBoolean(11);
+                        p.IsClubMember = m.GetBoolean(13);
 
                         Players.TryAdd(p.ID, p);
                     }
