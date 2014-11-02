@@ -120,7 +120,7 @@ namespace EEPhysics
                         Players.TryAdd(p.ID, p);
                     }
 
-                    DeserializeBlocks(m, (m[18] is string) ? 19u : 18u);
+                    DeserializeBlocks(m, (m[19] is string) ? 20u : 19u);
                     inited = true;
 
                     foreach (Message m2 in earlyMessages)
@@ -128,7 +128,6 @@ namespace EEPhysics
                         HandleMessage(m2);
                     }
                     earlyMessages.Clear();
-                    earlyMessages = null;
 
                     if (AutoStart && (physicsThread == null || !physicsThread.IsAlive))
                     {
