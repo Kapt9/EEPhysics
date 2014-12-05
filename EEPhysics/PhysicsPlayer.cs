@@ -777,12 +777,8 @@ namespace EEPhysics
 
         internal void Respawn()
         {
-            modifierX = 0;
-            modifierY = 0;
             ModifierX = 0;
             ModifierY = 0;
-            speedX = 0;
-            speedY = 0;
             SpeedX = 0;
             SpeedY = 0;
             IsDead = false;

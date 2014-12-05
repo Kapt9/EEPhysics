@@ -275,10 +275,7 @@ namespace EEPhysics
                         if (Players.TryGetValue(m.GetInt(0), out p))
                         {
                             p.InGodMode = m.GetBoolean(1);
-                            if (p.InGodMode)
-                            {
-                                p.Respawn();
-                            }
+                            p.Respawn();
                         }
                     }
                     break;
