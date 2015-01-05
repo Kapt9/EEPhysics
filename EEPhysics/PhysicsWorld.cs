@@ -361,13 +361,13 @@ namespace EEPhysics
         }
         /// <param name="z">Block layer: 0 = foreground, 1 = background</param>
         /// <param name="x">Block X</param>
-        /// <param name="z">Block Y</param>
+        /// <param name="y">Block Y</param>
         /// <returns>Block ID</returns>
         public int GetBlock(int z, int x, int y)
         {
             if (z < 0 || z > 1)
             {
-                throw new ArgumentOutOfRangeException("zz", "Layer must be 0 (foreground) or 1 (background).");
+                throw new ArgumentOutOfRangeException("z", "Layer must be 0 (foreground) or 1 (background).");
             }
             if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight)
             {
@@ -690,8 +690,6 @@ namespace EEPhysics
                                 data.Add(m.GetInteger(messageIndex));
                                 messageIndex++;
                             }
-                            break;
-                        default:
                             break;
                     }
                     int x = 0, y = 0;
