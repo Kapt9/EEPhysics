@@ -598,7 +598,7 @@ namespace EEPhysics
                             case 83:
                             case 77:
                                 continue;
-                        };
+                        }
                         return true;
                     }
                 }
@@ -615,7 +615,7 @@ namespace EEPhysics
         internal static string Derot(string arg1)
         {
             // by Capasha (http://pastebin.com/Pj6tvNNx)
-            int num = 0;
+            int num;
             string str = "";
             for (int i = 0; i < arg1.Length; i++)
             {
@@ -692,7 +692,7 @@ namespace EEPhysics
                             }
                             break;
                     }
-                    int x = 0, y = 0;
+                    int x, y;
 
                     for (int pos = 0; pos < ya.Length; pos += 2)
                     {
