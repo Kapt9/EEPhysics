@@ -411,7 +411,7 @@ namespace EEPhysics
             {
                 if (inited)
                 {
-                    physicsThread = new Thread(new ThreadStart(Run));
+                    physicsThread = new Thread(Run) {IsBackground = true};
                     physicsThread.Start();
                 }
                 else
