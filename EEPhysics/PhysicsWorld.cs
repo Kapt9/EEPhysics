@@ -248,7 +248,7 @@ namespace EEPhysics
                         int xx = m.GetInt(0);
                         int yy = m.GetInt(1);
                         blocks[0][xx][yy] = m.GetInt(2);
-                        blockData[xx][yy] = new int[m.Count - 4];
+                        blockData[xx][yy] = new int[1];
                         for (uint i = 3; i < 4; i++)
                         {
                             blockData[xx][yy][i - 3] = m.GetInt(i);
@@ -260,7 +260,7 @@ namespace EEPhysics
                         int xx = m.GetInt(0);
                         int yy = m.GetInt(1);
                         blocks[0][xx][yy] = m.GetInt(2);
-                        blockData[xx][yy] = new int[m.Count - 3];
+                        blockData[xx][yy] = new int[3];
                         for (uint i = 3; i < 6; i++)
                         {
                             blockData[xx][yy][i - 3] = m.GetInt(i);
