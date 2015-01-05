@@ -9,7 +9,7 @@ using PlayerIOClient;
 
 namespace EEPhysics
 {
-    public class PhysicsWorld
+    public class PhysicsWorld : IDisposable 
     {
         internal const int Size = 16;
         internal Stopwatch sw = new Stopwatch();
@@ -361,13 +361,13 @@ namespace EEPhysics
         }
         /// <param name="z">Block layer: 0 = foreground, 1 = background</param>
         /// <param name="x">Block X</param>
-        /// <param name="z">Block Y</param>
+        /// <param name="y">Block Y</param>
         /// <returns>Block ID</returns>
         public int GetBlock(int z, int x, int y)
         {
             if (z < 0 || z > 1)
             {
-                throw new ArgumentOutOfRangeException("zz", "Layer must be 0 (foreground) or 1 (background).");
+                throw new ArgumentOutOfRangeException("z", "Layer must be 0 (foreground) or 1 (background).");
             }
             if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight)
             {
@@ -598,7 +598,7 @@ namespace EEPhysics
                             case 83:
                             case 77:
                                 continue;
-                        };
+                        }
                         return true;
                     }
                 }
@@ -615,7 +615,7 @@ namespace EEPhysics
         internal static string Derot(string arg1)
         {
             // by Capasha (http://pastebin.com/Pj6tvNNx)
-            int num = 0;
+            int num;
             string str = "";
             for (int i = 0; i < arg1.Length; i++)
             {
@@ -691,10 +691,8 @@ namespace EEPhysics
                                 messageIndex++;
                             }
                             break;
-                        default:
-                            break;
                     }
-                    int x = 0, y = 0;
+                    int x, y;
 
                     for (int pos = 0; pos < ya.Length; pos += 2)
                     {
@@ -713,6 +711,11 @@ namespace EEPhysics
             {
                 Debug.WriteLine(" EEPhysics: Error loading existing blocks:\n" + e);
             }
+        }
+
+        void IDisposable.Dispose()
+        {
+            StopSimulation();
         }
     }
 }

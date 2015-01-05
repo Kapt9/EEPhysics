@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using PlayerIOClient;
 
 namespace EEPhysics
 {
@@ -228,7 +225,7 @@ namespace EEPhysics
                         break;
                     default:
                         morx = 0;
-                        mory = (int)gravity;
+                        mory = gravity;
                         break;
                 }
 
@@ -681,7 +678,7 @@ namespace EEPhysics
                             else
                             {
                                 X -= tx / 15;
-                            };
+                            }
                         }
                         else
                         {
