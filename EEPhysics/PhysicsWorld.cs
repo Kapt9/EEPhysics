@@ -9,7 +9,7 @@ using PlayerIOClient;
 
 namespace EEPhysics
 {
-    public class PhysicsWorld
+    public class PhysicsWorld : IDisposable 
     {
         internal const int Size = 16;
         internal Stopwatch sw = new Stopwatch();
@@ -711,6 +711,11 @@ namespace EEPhysics
             {
                 Debug.WriteLine(" EEPhysics: Error loading existing blocks:\n" + e);
             }
+        }
+
+        void IDisposable.Dispose()
+        {
+            StopSimulation();
         }
     }
 }
