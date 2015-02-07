@@ -496,7 +496,7 @@ namespace EEPhysics
                         if (ItemId.CanJumpThroughFromBelow(tileId))
                         {
                             int rot = blockData[b][a][0];
-                            if (tileId == ItemId.Oneway_Cyan || tileId == ItemId.Oneway_Pink || tileId == ItemId.Oneway_Red || tileId == ItemId.Oneway_Yellow)
+                            if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayRed || tileId == ItemId.OnewayYellow)
                             {
                                 if ((p.SpeedY < 0 || a <= p.overlapy) && rot == 1)
                                 {
@@ -660,13 +660,13 @@ namespace EEPhysics
                                     }
                                 }
                                 break;
-                            case ItemId.Death_Door:
+                            case ItemId.DeathDoor:
                                 if (p.deaths < blockData[x][y][0])
                                 {
                                     continue;
                                 }
                                 break;
-                            case ItemId.Death_Gate:
+                            case ItemId.DeathGate:
                                 if (p.deaths >= blockData[x][y][0])
                                 {
                                     continue;
@@ -812,8 +812,8 @@ namespace EEPhysics
                             break;
                         case ItemId.Coindoor:
                         case ItemId.Coingate:
-                        case ItemId.Death_Door:
-                        case ItemId.Death_Gate:
+                        case ItemId.DeathDoor:
+                        case ItemId.DeathGate:
                         case ItemId.BlueCoindoor:
                         case ItemId.BlueCoingate:
                         case ItemId.DoorPurple:
@@ -821,10 +821,10 @@ namespace EEPhysics
                         case ItemId.Spike:
                         case ItemId.Piano:
                         case ItemId.Drum:
-                        case ItemId.Oneway_Cyan:
-                        case ItemId.Oneway_Pink:
-                        case ItemId.Oneway_Red:
-                        case ItemId.Oneway_Yellow:
+                        case ItemId.OnewayCyan:
+                        case ItemId.OnewayPink:
+                        case ItemId.OnewayRed:
+                        case ItemId.OnewayYellow:
                         case ItemId.GlowylineBlueSlope:
                         case ItemId.GlowyLineBlueStraight:
                         case ItemId.GlowyLineYellowSlope:
