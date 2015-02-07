@@ -493,7 +493,7 @@ namespace EEPhysics
                     {
                         if (ItemId.CanJumpThroughFromBelow(tileId))
                         {
-                            int rot = blockData[b][a][0];
+                            int rot = blockData[x][y][0];
                             if (tileId == ItemId.Oneway_Cyan || tileId == ItemId.Oneway_Pink || tileId == ItemId.Oneway_Red || tileId == ItemId.Oneway_Yellow)
                             {
                                 if ((p.SpeedY < 0 || a <= p.overlapy) && rot == 1)
