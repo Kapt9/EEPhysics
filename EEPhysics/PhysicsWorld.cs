@@ -156,7 +156,6 @@ namespace EEPhysics
                             p.Horizontal = m.GetInt(7);
                             p.Vertical = m.GetInt(8);
                             p.Coins = m.GetInt(9);
-                            //p.Purple = m.GetBoolean(10);
                             p.IsDead = false;
                         }
                     }
@@ -198,7 +197,6 @@ namespace EEPhysics
                         p.HasChat = m.GetBoolean(7);
                         p.Coins = m.GetInt(8);
                         p.BlueCoins = m.GetInt(9);
-                        //p.Purple = m.GetBoolean(11);
                         p.IsClubMember = m.GetBoolean(13);
 
                         Players.TryAdd(p.ID, p);
@@ -820,6 +818,7 @@ namespace EEPhysics
                         case ItemId.BlueCoingate:
                         case ItemId.DoorPurple:
                         case ItemId.GatePurple:
+                        case ItemId.SwitchPurple:
                         case ItemId.Spike:
                         case ItemId.Piano:
                         case ItemId.Drum:
