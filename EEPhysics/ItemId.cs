@@ -75,6 +75,11 @@ namespace EEPhysics
             return (9 <= blockId && blockId <= 97) || (122 <= blockId && blockId <= 217) || (1001 <= blockId && blockId <= 1012);
         }
 
+        public static bool IsBackground(int blockId)
+        {
+            return blockId >= 500 && blockId <= 999;
+        }
+
         public static bool isClimbable(int id)
         {
             switch (id)

@@ -405,7 +405,7 @@ namespace EEPhysics
             }
             return blockData[x][y];
         }
-        internal Point GetPortalById(int id)
+        internal bool TryGetPortalById(int id, out Point p)
         {
             for (int i = 0; i < WorldWidth; i++)
             {
@@ -415,12 +415,14 @@ namespace EEPhysics
                     {
                         if (blockData[i][ii][1] == id)
                         {
-                            return new Point(i, ii);
+                            p = new Point(i, ii);
+                            return true;
                         }
                     }
                 }
             }
-            return null;
+            p = default(Point);
+            return false;
         }
 
         /// <summary>
