@@ -31,6 +31,8 @@ namespace EEPhysics
         private double mx, my;
         private bool isInvulnerable;
         private bool donex, doney;
+        internal bool[] switches = new bool[PhysicsConfig.MaxSwitchIDCount];
+        internal int deaths = 0;
         private int[] queue = new int[PhysicsConfig.QueueLength];
         private int delayed;
         private const double portalMultiplier = 1.42;
@@ -38,8 +40,6 @@ namespace EEPhysics
         private List<Point> gotCoins = new List<Point>();
         private List<Point> gotBlueCoins = new List<Point>();
 
-        /// <summary>Purple switch state.</summary>
-        public bool Purple { get; internal set; }
         /// <summary>Also includes moderator and guardian mode.</summary>
         public bool InGodMode { get; internal set; }
         public bool IsDead { get; internal set; }
@@ -113,6 +113,9 @@ namespace EEPhysics
         public event PlayerEvent OnHitRedKey = delegate { };
         public event PlayerEvent OnHitBlueKey = delegate { };
         public event PlayerEvent OnHitGreenKey = delegate { };
+        public event PlayerEvent OnHitCyanKey = delegate { };
+        public event PlayerEvent OnHitMagentaKey = delegate { };
+        public event PlayerEvent OnHitYellowKey = delegate { };
 
         public event PlayerEvent OnHitPiano = delegate { };
         public event PlayerEvent OnHitDrum = delegate { };
@@ -184,14 +187,17 @@ namespace EEPhysics
                 switch (current)
                 {
                     case 1:
+                    case ItemId.InvisibleLeftArrow:
                         morx = -((int)gravity);
                         mory = 0;
                         break;
                     case 2:
+                    case ItemId.InvisibleUpArrow:
                         morx = 0;
                         mory = -((int)gravity);
                         break;
                     case 3:
+                    case ItemId.InvisibleRightArrow:
                         morx = (int)gravity;
                         mory = 0;
                         break;
@@ -203,7 +209,8 @@ namespace EEPhysics
                     case ItemId.NinjaLadder:
                     case ItemId.WineH:
                     case ItemId.WineV:
-                    case 4:
+                    case ItemId.InvisibleDot:
+                    case 4:                 
                         morx = 0;
                         mory = 0;
                         break;
@@ -232,14 +239,17 @@ namespace EEPhysics
                 switch (delayed)
                 {
                     case 1:
+                    case ItemId.InvisibleLeftArrow:
                         mox = -gravity;
                         moy = 0;
                         break;
                     case 2:
+                    case ItemId.InvisibleUpArrow:
                         mox = 0;
                         moy = -gravity;
                         break;
                     case 3:
+                    case ItemId.InvisibleRightArrow:
                         mox = gravity;
                         moy = 0;
                         break;
@@ -251,6 +261,7 @@ namespace EEPhysics
                     case ItemId.NinjaLadder:
                     case ItemId.WineH:
                     case ItemId.WineV:
+                    case ItemId.InvisibleDot:
                     case 4:
                         mox = 0;
                         moy = 0;
@@ -538,7 +549,7 @@ namespace EEPhysics
                     {
                         Y += currentSY;
                         currentSY = 0;
-                    };
+                    }
                 }
                 else
                 {
@@ -626,8 +637,18 @@ namespace EEPhysics
                             // blue key
                             OnHitBlueKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
+                        case ItemId.CyanKey:
+                            OnHitCyanKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            break;
+                        case ItemId.MagentaKey:
+                            OnHitMagentaKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            break;
+                        case ItemId.YellowKey:
+                            OnHitYellowKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            break;
                         case ItemId.SwitchPurple:
-                            Purple = !Purple;
+                            int sid = HostWorld.GetBlockData(cx, cy)[0];
+                            switches[sid] = !switches[sid];
                             OnHitSwitch(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case ItemId.Piano:
@@ -782,12 +803,14 @@ namespace EEPhysics
         }
         internal void KillPlayer()
         {
+            deaths++;
             IsDead = true;
         }
-        internal void ResetCoins()
+        internal void Reset()
         {
             gotCoins.Clear();
             gotBlueCoins.Clear();
+            deaths = 0;
         }
         internal void RemoveCoin(int xx, int yy)
         {

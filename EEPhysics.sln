@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EEPhysics", "EEPhysics\EEPhysics.csproj", "{BF106FD2-1482-4D64-8DF8-3FD5A883FAB5}"
 EndProject
 Global
