@@ -20,7 +20,7 @@ namespace EEPhysics
 
         private int[][][] blocks;
         private int[][][] blockData;
-        private bool hideRed, hideBlue, hideGreen, hideTimedoor;
+        private bool hideRed, hideBlue, hideGreen, hideCyan, hideMagenta, hideYellow, hideTimedoor;
         internal double WorldGravity = 1;
 
         public int WorldWidth { get; private set; }
@@ -156,7 +156,7 @@ namespace EEPhysics
                             p.Horizontal = m.GetInt(7);
                             p.Vertical = m.GetInt(8);
                             p.Coins = m.GetInt(9);
-                            p.Purple = m.GetBoolean(10);
+                            //p.Purple = m.GetBoolean(10);
                             p.IsDead = false;
                         }
                     }
@@ -198,7 +198,7 @@ namespace EEPhysics
                         p.HasChat = m.GetBoolean(7);
                         p.Coins = m.GetInt(8);
                         p.BlueCoins = m.GetInt(9);
-                        p.Purple = m.GetBoolean(11);
+                        //p.Purple = m.GetBoolean(11);
                         p.IsClubMember = m.GetBoolean(13);
 
                         Players.TryAdd(p.ID, p);
@@ -227,6 +227,15 @@ namespace EEPhysics
                                 break;
                             case "green":
                                 hideGreen = b;
+                                break;
+                            case "cyan":
+                                hideCyan = b;
+                                break;
+                            case "magenta":
+                                hideMagenta = b;
+                                break;
+                            case "yellow":
+                                hideYellow = b;
                                 break;
                         }
                     }
@@ -313,8 +322,9 @@ namespace EEPhysics
                         DeserializeBlocks(m, 1);
                         foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
                         {
-                            pair.Value.ResetCoins();
+                            pair.Value.Reset();
                         }
+
                         /*for (int i = 0; i < players.Count; i++) {
                             players[i].Coins = 0;
                             players[i].respawn();
@@ -341,7 +351,7 @@ namespace EEPhysics
                             }
                         }
                         foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                            pair.Value.ResetCoins();
+                            pair.Value.Reset();
                     }
                     break;
                 case "ts":
@@ -349,6 +359,17 @@ namespace EEPhysics
                 case "wp":
                     {
                         blocks[0][m.GetInt(0)][m.GetInt(1)] = m.GetInt(2);
+                    }
+                    break;
+                case "kill":
+                    {
+                        int userId = m.GetInt(0u);
+
+                        PhysicsPlayer p;
+                        if (Players.TryGetValue(userId, out p))
+                        {
+                            p.deaths++;
+                        }
                     }
                     break;
             }
@@ -455,18 +476,86 @@ namespace EEPhysics
             var firstY = ((int)p.Y >> 4);
             double lastX = ((p.X + PhysicsPlayer.Height) / Size);
             double lastY = ((p.Y + PhysicsPlayer.Width) / Size);
-            bool _local7 = false;
+            bool skip = false;
 
             int x;
             int y = firstY;
+
+            int a = firstY;
+            int b;
             while (y < lastY)
             {
                 x = firstX;
+                b = firstX;
                 for (; x < lastX; x++)
                 {
                     tileId = blocks[0][x][y];
+
                     if (ItemId.isSolid(tileId))
                     {
+                        if (ItemId.CanJumpThroughFromBelow(tileId))
+                        {
+                            int rot = blockData[b][a][0];
+                            if (tileId == ItemId.Oneway_Cyan || tileId == ItemId.Oneway_Pink || tileId == ItemId.Oneway_Red || tileId == ItemId.Oneway_Yellow)
+                            {
+                                if ((p.SpeedY < 0 || a <= p.overlapy) && rot == 1)
+                                {
+                                    if (a != firstY || p.overlapy == -1)
+                                    {
+                                        p.overlapy = a;
+                                    }
+
+                                    skip = true;
+                                    continue;
+                                }
+
+                                if ((p.SpeedX > 0 || b <= p.overlapy) && rot == 2)
+                                {
+                                    if (b == firstX || p.overlapy == -1)
+                                    {
+                                        p.overlapy = b;
+                                    }
+
+                                    skip = true;
+                                    continue;
+                                }
+
+                                if ((p.SpeedY > 0 || a <= p.overlapy) && rot == 3)
+                                {
+                                    if (a == firstY || p.overlapy == -1)
+                                    {
+                                        p.overlapy = a;
+                                    }
+
+                                    skip = true;
+                                    continue;
+                                }
+                                if ((p.SpeedX < 0 || b <= p.overlapy) && rot == 0)
+                                {
+                                    if (b != firstX || p.overlapy == -1)
+                                    {
+                                        p.overlapy = b;
+                                    }
+
+                                    skip = true;
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                if (p.SpeedY < 0 || a <= p.overlapy)
+                                {
+                                    if (a != y || p.overlapy == -1)
+                                    {
+                                        p.overlapy = a;
+                                    }
+
+                                    skip = true;
+                                    continue;
+                                }
+                            }
+                        }
+
                         switch (tileId)
                         {
                             case 23:
@@ -517,14 +606,68 @@ namespace EEPhysics
                                     continue;
                                 }
                                 break;
-                            case ItemId.DoorPurple:
-                                if (p.Purple)
+                            case ItemId.CyanDoor:
+                                if (hideCyan)
                                 {
                                     continue;
                                 }
                                 break;
+                            case ItemId.MagentaDoor:
+                                if (hideMagenta)
+                                {
+                                    continue;
+                                }
+                                break;
+                            case ItemId.YellowDoor:
+                                if (hideYellow)
+                                {
+                                    continue;
+                                }
+                                break;
+                            case ItemId.CyanGate:
+                                if (!hideCyan)
+                                {
+                                    continue;
+                                }
+                                break;
+                            case ItemId.MagentaGate:
+                                if (!hideMagenta)
+                                {
+                                    continue;
+                                }
+                                break;
+                            case ItemId.YellowGate:
+                                if (!hideYellow)
+                                {
+                                    continue;
+                                }
+                                break;
+                            case ItemId.DoorPurple:
+                                {
+                                    int pid = blockData[x][y][0];
+                                    if (p.switches[pid])
+                                    {
+                                        continue;
+                                    }
+                                }
+                                break;
                             case ItemId.GatePurple:
-                                if (!p.Purple)
+                                {
+                                    int pid = blockData[x][y][0];
+                                    if (!p.switches[pid])
+                                    {
+                                        continue;
+                                    }
+                                }
+                                break;
+                            case ItemId.Death_Door:
+                                if (p.deaths < blockData[x][y][0])
+                                {
+                                    continue;
+                                }
+                                break;
+                            case ItemId.Death_Gate:
+                                if (p.deaths >= blockData[x][y][0])
                                 {
                                     continue;
                                 }
@@ -591,7 +734,7 @@ namespace EEPhysics
                                     {
                                         p.overlapy = y;
                                     }
-                                    _local7 = true;
+                                    skip = true;
                                     continue;
                                 }
                                 break;
@@ -604,13 +747,12 @@ namespace EEPhysics
                 }
                 y++;
             }
-            if (!_local7)
+            if (!skip)
             {
                 p.overlapy = -1;
             }
             return false;
         }
-
 
         internal static string Derot(string arg1)
         {
@@ -670,11 +812,19 @@ namespace EEPhysics
                             break;
                         case ItemId.Coindoor:
                         case ItemId.Coingate:
+                        case ItemId.Death_Door:
+                        case ItemId.Death_Gate:
                         case ItemId.BlueCoindoor:
                         case ItemId.BlueCoingate:
+                        case ItemId.DoorPurple:
+                        case ItemId.GatePurple:
                         case ItemId.Spike:
                         case ItemId.Piano:
                         case ItemId.Drum:
+                        case ItemId.Oneway_Cyan:
+                        case ItemId.Oneway_Pink:
+                        case ItemId.Oneway_Red:
+                        case ItemId.Oneway_Yellow:
                         case ItemId.GlowylineBlueSlope:
                         case ItemId.GlowyLineBlueStraight:
                         case ItemId.GlowyLineYellowSlope:
@@ -690,6 +840,9 @@ namespace EEPhysics
                                 data.Add(m.GetInteger(messageIndex));
                                 messageIndex++;
                             }
+                            break;
+                        case 1000:
+                            messageIndex += 2;
                             break;
                     }
                     int x, y;
@@ -709,7 +862,7 @@ namespace EEPhysics
             }
             catch (Exception e)
             {
-                Debug.WriteLine(" EEPhysics: Error loading existing blocks:\n" + e);
+                Debug.WriteLine("EEPhysics: Error loading existing blocks:\n" + e);
             }
         }
 
