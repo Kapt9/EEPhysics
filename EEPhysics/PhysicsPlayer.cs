@@ -436,6 +436,7 @@ namespace EEPhysics
                     {
                         OnHitPortal(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                         lastPortal = new Point(cx, cy);
+                        hasLastPortal = true;
                         int[] data = HostWorld.GetBlockData(cx, cy);
                         if (data != null && data.Length == 3)
                         {
