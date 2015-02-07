@@ -157,8 +157,6 @@ namespace EEPhysics
                             p.Vertical = m.GetInt(8);
                             p.Coins = m.GetInt(9);
                             p.IsDead = false;
-
-                            Console.WriteLine(m.GetBoolean(10));
                         }
                     }
                     break;
