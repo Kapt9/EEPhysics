@@ -197,7 +197,7 @@ namespace EEPhysics
                         p.HasChat = m.GetBoolean(7);
                         p.Coins = m.GetInt(8);
                         p.BlueCoins = m.GetInt(9);
-                        p.IsClubMember = m.GetBoolean(13);
+                        p.IsClubMember = m.GetBoolean(11);
 
                         Players.TryAdd(p.ID, p);
                     }
