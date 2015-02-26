@@ -193,7 +193,7 @@ namespace EEPhysics
                         p.HostWorld = this;
                         p.X = m.GetDouble(3);
                         p.Y = m.GetDouble(4);
-                        p.InGodMode = m.GetBoolean(5);
+                        p.InGodMode = m.GetBoolean(5) || m.GetBoolean(12);
                         p.HasChat = m.GetBoolean(7);
                         p.Coins = m.GetInt(8);
                         p.BlueCoins = m.GetInt(9);
