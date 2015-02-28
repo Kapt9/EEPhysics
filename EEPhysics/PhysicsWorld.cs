@@ -455,10 +455,6 @@ namespace EEPhysics
             {
                 running = false;
             }
-            else
-            {
-                throw new Exception("Simulation thread is not running.");
-            }
         }
 
         internal bool Overlaps(PhysicsPlayer p)
@@ -499,7 +495,7 @@ namespace EEPhysics
                             if (blockData[x][y] == null)
                                 rot = 1;
                             else
-                                rot = blockData[x][y][0]; ;
+                                rot = blockData[x][y][0];
                             if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayRed || tileId == ItemId.OnewayYellow)
                             {
                                 if ((p.SpeedY < 0 || a <= p.overlapy) && rot == 1)
@@ -873,7 +869,8 @@ namespace EEPhysics
 
         void IDisposable.Dispose()
         {
-            StopSimulation();
+            if (PhysicsRunning)
+                StopSimulation();
         }
     }
 }
