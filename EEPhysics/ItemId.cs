@@ -37,6 +37,7 @@ namespace EEPhysics
         public const int Spike = 361;
         public const int Fire = 368;
         public const int Mud = 369;
+        public const int Lava = 416;
         public const int MudBubble = 370;
         public const int Portal = 242;
         public const int WorldPortal = 374;
@@ -69,10 +70,19 @@ namespace EEPhysics
         public const int YellowGate = 1010;
         public const int DeathDoor = 1011;
         public const int DeathGate = 1012;
+        public const int EffectJump = 417;
+        public const int EffectFly = 418;
+        public const int EffectRun = 419;
+        public const int EffectProtection = 420;
+        public const int EffectCurse = 421;
+        public const int EffectZombie = 422;
+        public const int EffectTeam = 423;
+        public const int TeamDoor = 1027;
+        public const int TeamGate = 1028;
 
         public static bool isSolid(int blockId)
         {
-            return (9 <= blockId && blockId <= 97) || (122 <= blockId && blockId <= 217) || (1001 <= blockId && blockId <= 1012);
+            return (9 <= blockId && blockId <= 97) || (122 <= blockId && blockId <= 217) || (1001 <= blockId && blockId <= 2000);
         }
 
         public static bool IsBackground(int blockId)
@@ -125,7 +135,6 @@ namespace EEPhysics
                 case OnewayPink:
                     return true;
             }
-
             return false;
         }
     }

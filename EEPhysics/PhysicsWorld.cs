@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using PlayerIOClient;
+using System.Drawing;
 
 namespace EEPhysics
 {
@@ -91,8 +92,8 @@ namespace EEPhysics
             {
                 if (m.Type == "init")
                 {
-                    WorldWidth = m.GetInt(12);
-                    WorldHeight = m.GetInt(13);
+                    WorldWidth = m.GetInt(15);
+                    WorldHeight = m.GetInt(16);
 
                     blocks = new int[2][][];
                     for (int i = 0; i < blocks.Length; i++)
@@ -107,11 +108,11 @@ namespace EEPhysics
                         blockData[i] = new int[WorldHeight][];
 
                     WorldKey = Derot(m.GetString(5));
-                    WorldGravity = m.GetDouble(15);
+                    WorldGravity = m.GetDouble(18);
 
                     if (AddBotPlayer)
                     {
-                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(9))
+                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(12))
                         {
                             X = m.GetInt(7),
                             Y = m.GetInt(8),
@@ -120,7 +121,7 @@ namespace EEPhysics
                         Players.TryAdd(p.ID, p);
                     }
 
-                    DeserializeBlocks(m, (m[19] is string) ? 20u : 19u);
+                    DeserializeBlocks(m, 24);
                     inited = true;
 
                     foreach (Message m2 in earlyMessages)
@@ -193,11 +194,12 @@ namespace EEPhysics
                         p.HostWorld = this;
                         p.X = m.GetDouble(3);
                         p.Y = m.GetDouble(4);
-                        p.InGodMode = m.GetBoolean(5) || m.GetBoolean(12);
+                        p.InGodMode = m.GetBoolean(5) || m.GetBoolean(6) || m.GetBoolean(12);
                         p.HasChat = m.GetBoolean(7);
                         p.Coins = m.GetInt(8);
                         p.BlueCoins = m.GetInt(9);
                         p.IsClubMember = m.GetBoolean(11);
+                        p.Team = m.GetInt(13);
 
                         Players.TryAdd(p.ID, p);
                     }
@@ -282,6 +284,15 @@ namespace EEPhysics
                         if (Players.TryGetValue(m.GetInt(0), out p))
                         {
                             p.InGodMode = m.GetBoolean(1);
+                        }
+                    }
+                    break;
+                case "team":
+                    {
+                        PhysicsPlayer p;
+                        if (Players.TryGetValue(m.GetInt(0), out p))
+                        {
+                            p.Team = m.GetInt(1);
                         }
                     }
                     break;
@@ -473,6 +484,7 @@ namespace EEPhysics
             double lastX = ((p.X + PhysicsPlayer.Height) / Size);
             double lastY = ((p.Y + PhysicsPlayer.Width) / Size);
             bool skip = false;
+            Rectangle playerRectangle = new Rectangle((int)p.X, (int)p.Y, 16, 16);
 
             int x;
             int y = firstY;
@@ -489,260 +501,276 @@ namespace EEPhysics
 
                     if (ItemId.isSolid(tileId))
                     {
-                        if (ItemId.CanJumpThroughFromBelow(tileId))
+                        if (playerRectangle.IntersectsWith(new Rectangle(x * 16, y * 16, 16, 16)))
                         {
-                            int rot;
-                            if (blockData[x][y] == null)
-                                rot = 1;
-                            else
-                                rot = blockData[x][y][0];
-                            if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayRed || tileId == ItemId.OnewayYellow)
+                            if (ItemId.CanJumpThroughFromBelow(tileId))
                             {
-                                if ((p.SpeedY < 0 || a <= p.overlapy) && rot == 1)
+                                int rot;
+                                if (blockData[x][y] == null)
+                                    rot = 1;
+                                else
+                                    rot = blockData[x][y][0];
+                                if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayRed || tileId == ItemId.OnewayYellow)
                                 {
-                                    if (a != firstY || p.overlapy == -1)
+                                    if ((p.SpeedY < 0 || a <= p.overlapy) && rot == 1)
                                     {
-                                        p.overlapy = a;
+                                        if (a != firstY || p.overlapy == -1)
+                                        {
+                                            p.overlapy = a;
+                                        }
+
+                                        skip = true;
+                                        continue;
                                     }
 
-                                    skip = true;
-                                    continue;
-                                }
-
-                                if ((p.SpeedX > 0 || b <= p.overlapy) && rot == 2)
-                                {
-                                    if (b == firstX || p.overlapy == -1)
+                                    if ((p.SpeedX > 0 || b <= p.overlapy) && rot == 2)
                                     {
-                                        p.overlapy = b;
+                                        if (b == firstX || p.overlapy == -1)
+                                        {
+                                            p.overlapy = b;
+                                        }
+
+                                        skip = true;
+                                        continue;
                                     }
 
-                                    skip = true;
-                                    continue;
-                                }
-
-                                if ((p.SpeedY > 0 || a <= p.overlapy) && rot == 3)
-                                {
-                                    if (a == firstY || p.overlapy == -1)
+                                    if ((p.SpeedY > 0 || a <= p.overlapy) && rot == 3)
                                     {
-                                        p.overlapy = a;
+                                        if (a == firstY || p.overlapy == -1)
+                                        {
+                                            p.overlapy = a;
+                                        }
+
+                                        skip = true;
+                                        continue;
                                     }
-
-                                    skip = true;
-                                    continue;
-                                }
-                                if ((p.SpeedX < 0 || b <= p.overlapy) && rot == 0)
-                                {
-                                    if (b != firstX || p.overlapy == -1)
+                                    if ((p.SpeedX < 0 || b <= p.overlapy) && rot == 0)
                                     {
-                                        p.overlapy = b;
-                                    }
+                                        if (b != firstX || p.overlapy == -1)
+                                        {
+                                            p.overlapy = b;
+                                        }
 
-                                    skip = true;
-                                    continue;
-                                }
-                            }
-                            else
-                            {
-                                if (p.SpeedY < 0 || a <= p.overlapy)
-                                {
-                                    if (a != y || p.overlapy == -1)
-                                    {
-                                        p.overlapy = a;
-                                    }
-
-                                    skip = true;
-                                    continue;
-                                }
-                            }
-                        }
-
-                        switch (tileId)
-                        {
-                            case 23:
-                                if (hideRed)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case 24:
-                                if (hideGreen)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case 25:
-                                if (hideBlue)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case 26:
-                                if (!hideRed)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case 27:
-                                if (!hideGreen)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case 28:
-                                if (!hideBlue)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case 156:
-                                if (hideTimedoor)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case 157:
-                                if (!hideTimedoor)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.CyanDoor:
-                                if (hideCyan)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.MagentaDoor:
-                                if (hideMagenta)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.YellowDoor:
-                                if (hideYellow)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.CyanGate:
-                                if (!hideCyan)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.MagentaGate:
-                                if (!hideMagenta)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.YellowGate:
-                                if (!hideYellow)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.DoorPurple:
-                                {
-                                    int pid = blockData[x][y][0];
-                                    if (p.switches[pid])
-                                    {
+                                        skip = true;
                                         continue;
                                     }
                                 }
-                                break;
-                            case ItemId.GatePurple:
+                                else
                                 {
-                                    int pid = blockData[x][y][0];
-                                    if (!p.switches[pid])
+                                    if (p.SpeedY < 0 || a <= p.overlapy)
                                     {
+                                        if (a != y || p.overlapy == -1)
+                                        {
+                                            p.overlapy = a;
+                                        }
+
+                                        skip = true;
                                         continue;
                                     }
                                 }
-                                break;
-                            case ItemId.DeathDoor:
-                                if (p.deaths < blockData[x][y][0])
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.DeathGate:
-                                if (p.deaths >= blockData[x][y][0])
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.DoorClub:
-                                if (p.IsClubMember)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.GateClub:
-                                if (!p.IsClubMember)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.Coindoor:
-                            case ItemId.BlueCoindoor:
-                                if (blockData[x][y][0] <= p.Coins)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.Coingate:
-                            case ItemId.BlueCoingate:
-                                if (blockData[x][y][0] > p.Coins)
-                                {
-                                    continue;
-                                }
-                                break;
-                            case ItemId.ZombieGate:
-                                /*if (p.Zombie) {
-                                    continue;
-                                };*/
-                                break;
-                            case ItemId.ZombieDoor:
-                                /*if (!p.Zombie) {
-                                    continue;
-                                };*/
-                                continue;
-                            case 61:
-                            case 62:
-                            case 63:
-                            case 64:
-                            case 89:
-                            case 90:
-                            case 91:
-                            case 96:
-                            case 97:
-                            case 122:
-                            case 123:
-                            case 124:
-                            case 125:
-                            case 126:
-                            case 127:
-                            case 146:
-                            case 154:
-                            case 158:
-                            case 194:
-                            case 211:
-                                if (p.SpeedY < 0 || y <= p.overlapy)
-                                {
-                                    if (y != firstY || p.overlapy == -1)
+                            }
+
+                            switch (tileId)
+                            {
+                                case 23:
+                                    if (hideRed)
                                     {
-                                        p.overlapy = y;
+                                        continue;
                                     }
-                                    skip = true;
+                                    break;
+                                case 24:
+                                    if (hideGreen)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case 25:
+                                    if (hideBlue)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case 26:
+                                    if (!hideRed)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case 27:
+                                    if (!hideGreen)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case 28:
+                                    if (!hideBlue)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case 156:
+                                    if (hideTimedoor)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case 157:
+                                    if (!hideTimedoor)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.CyanDoor:
+                                    if (hideCyan)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.MagentaDoor:
+                                    if (hideMagenta)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.YellowDoor:
+                                    if (hideYellow)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.CyanGate:
+                                    if (!hideCyan)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.MagentaGate:
+                                    if (!hideMagenta)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.YellowGate:
+                                    if (!hideYellow)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.DoorPurple:
+                                    {
+                                        int pid = blockData[x][y][0];
+                                        if (p.switches[pid])
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                    break;
+                                case ItemId.GatePurple:
+                                    {
+                                        int pid = blockData[x][y][0];
+                                        if (!p.switches[pid])
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                    break;
+                                case ItemId.DeathDoor:
+                                    if (p.deaths < blockData[x][y][0])
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.DeathGate:
+                                    if (p.deaths >= blockData[x][y][0])
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.TeamDoor:
+                                    if (p.Team == GetBlockData(x, y)[0])
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.TeamGate:
+                                    if (p.Team != GetBlockData(x, y)[0])
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.DoorClub:
+                                    if (p.IsClubMember)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.GateClub:
+                                    if (!p.IsClubMember)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.Coindoor:
+                                case ItemId.BlueCoindoor:
+                                    if (blockData[x][y][0] <= p.Coins)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.Coingate:
+                                case ItemId.BlueCoingate:
+                                    if (blockData[x][y][0] > p.Coins)
+                                    {
+                                        continue;
+                                    }
+                                    break;
+                                case ItemId.ZombieGate:
+                                    /*if (p.Zombie) {
+                                        continue;
+                                    };*/
+                                    break;
+                                case ItemId.ZombieDoor:
+                                    /*if (!p.Zombie) {
+                                        continue;
+                                    };*/
                                     continue;
-                                }
-                                break;
-                            case 83:
-                            case 77:
-                                continue;
+                                case 61:
+                                case 62:
+                                case 63:
+                                case 64:
+                                case 89:
+                                case 90:
+                                case 91:
+                                case 96:
+                                case 97:
+                                case 122:
+                                case 123:
+                                case 124:
+                                case 125:
+                                case 126:
+                                case 127:
+                                case 146:
+                                case 154:
+                                case 158:
+                                case 194:
+                                case 211:
+                                    if (p.SpeedY < 0 || y <= p.overlapy)
+                                    {
+                                        if (y != firstY || p.overlapy == -1)
+                                        {
+                                            p.overlapy = y;
+                                        }
+                                        skip = true;
+                                        continue;
+                                    }
+                                    break;
+                                case 83:
+                                case 77:
+                                    continue;
+                            }
+
+                            return true;
                         }
-                        return true;
                     }
                 }
                 y++;
@@ -785,6 +813,10 @@ namespace EEPhysics
             try
             {
                 uint messageIndex = start;
+                if (m[messageIndex] is string && m.GetString(messageIndex) == "ws")
+                {
+                    messageIndex++;
+                }
                 while (messageIndex < m.Count)
                 {
                     if (m[messageIndex] is string)

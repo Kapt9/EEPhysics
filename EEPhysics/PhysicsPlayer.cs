@@ -18,7 +18,7 @@ namespace EEPhysics
         public double Y { get; internal set; }
         public int Horizontal { get; internal set; }
         public int Vertical { get; internal set; }
-        private int current;
+        private int current, currentBelow;
         private double oldX, oldY;
         private double speedX = 0;
         private double speedY = 0;
@@ -30,21 +30,27 @@ namespace EEPhysics
         private int pastx, pasty;
         internal int overlapy;
         private double mx, my;
+        private int tx, ty;
+        private Queue<int> queue = new Queue<int>();
         private bool isInvulnerable;
         private bool donex, doney;
         internal bool[] switches = new bool[PhysicsConfig.MaxSwitchIDCount];
         internal int deaths = 0;
-        private int[] queue = new int[PhysicsConfig.QueueLength];
-        private int delayed;
         private const double portalMultiplier = 1.42;
         private bool hasLastPortal = false;
         private Point lastPortal;
         private List<Point> gotCoins = new List<Point>();
         private List<Point> gotBlueCoins = new List<Point>();
+        private bool isOnFire;
+        private int fireDeath = 200;
+        private const double maxThrust = 0.2;
+        private bool hasLevitation, isThrusting;
+        private double currentThrust, thrustBurnOff;
 
         /// <summary>Also includes moderator and guardian mode.</summary>
         public bool InGodMode { get; internal set; }
         public bool IsDead { get; internal set; }
+        public int Team { get; internal set; }
         //public bool Zombie { get; internal set; }
         public bool HasChat { get; internal set; }
 
@@ -158,18 +164,61 @@ namespace EEPhysics
             int cx = ((int)(X + 8) >> 4);
             int cy = ((int)(Y + 8) >> 4);
 
+            int delayed;
+            if (queue.Count > 0)
+                delayed = queue.Dequeue();
+            else
+                delayed = 0;
             current = HostWorld.GetBlock(0, cx, cy);
-            if (current == 4 || ItemId.isClimbable(current))
+            if (this.tx != -1)
             {
-                delayed = queue[1];
-                queue[0] = current;
+                updateTeamDoors(this.tx, this.ty);
+            }
+            currentBelow = 0;
+            if (current == 1 || current == 411)
+            {
+                currentBelow = HostWorld.GetBlock(0, cx - 1, cy);
+            }
+            else if (current == 2 || current == 412)
+            {
+                currentBelow = HostWorld.GetBlock(0, cx, cy - 1);
+            }
+            else if (current == 3 || current == 413)
+            {
+                currentBelow = HostWorld.GetBlock(0, cx + 1, cy);
             }
             else
             {
-                delayed = queue[0];
-                queue[0] = queue[1];
+                currentBelow = HostWorld.GetBlock(0, cx, cy + 1);
             }
-            queue[1] = current;
+
+            queue.Enqueue(current);
+            if (current == 4 || current == 414 || ItemId.isClimbable(current))
+            {
+                delayed = queue.Dequeue();
+                queue.Enqueue(current);
+            }
+            /*var queue_length:int = this.tilequeue.length;
+         while(queue_length--)
+         {
+            this.UpdatePurpleSwitchs(this.tilequeue.shift());
+         }*/
+            if (isOnFire && !isInvulnerable)
+            {
+                if (fireDeath <= 0)
+                {
+                    fireDeath = 200;
+                    KillPlayer();
+                }
+                else
+                {
+                    fireDeath--;
+                }
+            }
+            else
+            {
+                fireDeath = 200;
+            }
 
             if (IsDead)
             {
@@ -230,8 +279,14 @@ namespace EEPhysics
                         if (!IsDead && !isInvulnerable)
                         {
                             KillPlayer();
-                            OnDie(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                         };
+                        break;
+                    case ItemId.EffectProtection:
+                        // TODO
+                        /*if (HostWorld.GetOnStatus(cx, cy) && isOnFire)
+                        {
+                            isOnFire = false;
+                        }*/
                         break;
                     default:
                         morx = 0;
@@ -277,6 +332,10 @@ namespace EEPhysics
                         mox = 0;
                         moy = PhysicsConfig.MudBuoyancy;
                         break;
+                    case ItemId.Lava:
+                        mox = 0;
+                        moy = PhysicsConfig.LavaBuoyancy;
+                        break;
                     default:
                         mox = 0;
                         moy = gravity;
@@ -284,122 +343,110 @@ namespace EEPhysics
                 }
             }
 
-            if (moy == PhysicsConfig.WaterBuoyancy || moy == PhysicsConfig.MudBuoyancy)
+            if (moy == PhysicsConfig.WaterBuoyancy || moy == PhysicsConfig.MudBuoyancy || moy == PhysicsConfig.LavaBuoyancy)
             {
                 mx = Horizontal;
                 my = Vertical;
             }
+            else if (moy != 0)
+            {
+                mx = Horizontal;
+                my = 0;
+            }
+            else if (mox != 0)
+            {
+                mx = 0;
+                my = Vertical;
+            }
             else
             {
-                if (moy != 0)
-                {
-                    mx = Horizontal;
-                    my = 0;
-                }
-                else
-                {
-                    if (mox != 0)
-                    {
-                        mx = 0;
-                        my = Vertical;
-                    }
-                    else
-                    {
-                        mx = Horizontal;
-                        my = Vertical;
-                    }
-                }
+                mx = Horizontal;
+                my = Vertical;
             }
+
             mx *= SpeedMultiplier;
             my *= SpeedMultiplier;
             mox *= GravityMultiplier;
             moy *= GravityMultiplier;
-
+            
             ModifierX = (mox + mx);
             ModifierY = (moy + my);
 
-            if (!DoubleIsEqual(speedX, 0) || modifierX != 0)
+            if (!DoubleIsEqual(speedX, 0) || !DoubleIsEqual(modifierX, 0))
             {
                 speedX = (speedX + modifierX);
                 speedX = (speedX * PhysicsConfig.BaseDrag);
-                if ((mx == 0 && moy != 0) || (speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || (ItemId.isClimbable(current) && !isGodMode))
+                if (currentBelow != 216 && !isGodMode)
                 {
-                    speedX = (speedX * PhysicsConfig.NoModifierDrag);
-                }
-                else
-                {
-                    if (current == ItemId.Water && !isGodMode)
+                    if ((mx == 0 && moy != 0) || (speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || ItemId.isClimbable(current))
+                    {
+                        speedX = (speedX * PhysicsConfig.NoModifierDrag);
+                    }
+                    else if (current == ItemId.Water)
                     {
                         speedX = (speedX * PhysicsConfig.WaterDrag);
                     }
-                    else
+                    else if (current == ItemId.Mud)
                     {
-                        if (current == ItemId.Mud && !isGodMode)
-                        {
-                            speedX = (speedX * PhysicsConfig.MudDrag);
-                        }
+                        speedX = (speedX * PhysicsConfig.MudDrag);
+                    }
+                    else if (current == ItemId.Lava)
+                    {
+                        speedX = (speedX * PhysicsConfig.LavaDrag);
                     }
                 }
+
                 if (speedX > 16)
                 {
                     speedX = 16;
                 }
-                else
+                else if (speedX < -16)
                 {
-                    if (speedX < -16)
-                    {
-                        speedX = -16;
-                    }
-                    else
-                    {
-                        if (speedX < 0.0001 && speedX > -0.0001)
-                        {
-                            speedX = 0;
-                        }
-                    }
+                    speedX = -16;
+                }
+                else if (speedX < 0.0001 && speedX > -0.0001)
+                {
+                    speedX = 0;
                 }
             }
-            if (!DoubleIsEqual(speedY, 0) || modifierY != 0)
+            if (!DoubleIsEqual(speedY, 0) || !DoubleIsEqual(modifierY, 0))
             {
                 speedY = (speedY + modifierY);
                 speedY = (speedY * PhysicsConfig.BaseDrag);
-                if ((my == 0 && mox != 0) || (speedY < 0 && my > 0) || (speedY > 0 && my < 0) || (ItemId.isClimbable(current) && !isGodMode))
+                if (currentBelow != 216 && !isGodMode)
                 {
-                    speedY = (speedY * PhysicsConfig.NoModifierDrag);
-                }
-                else
-                {
-                    if (current == ItemId.Water && !isGodMode)
+                    if ((my == 0 && moy != 0) || (speedY < 0 && my > 0) || (speedY > 0 && my < 0) || ItemId.isClimbable(current))
+                    {
+                        speedY = (speedY * PhysicsConfig.NoModifierDrag);
+                    }
+                    else if (current == ItemId.Water)
                     {
                         speedY = (speedY * PhysicsConfig.WaterDrag);
                     }
-                    else
+                    else if (current == ItemId.Mud)
                     {
-                        if (current == ItemId.Mud && !isGodMode)
-                        {
-                            speedY = (speedY * PhysicsConfig.MudDrag);
-                        }
+                        speedY = (speedY * PhysicsConfig.MudDrag);
+                    }
+                    else if (current == ItemId.Lava)
+                    {
+                        speedY = (speedY * PhysicsConfig.LavaDrag);
                     }
                 }
+
                 if (speedY > 16)
                 {
                     speedY = 16;
                 }
-                else
+                else if (speedY < -16)
                 {
-                    if (speedY < -16)
-                    {
-                        speedY = -16;
-                    }
-                    else
-                    {
-                        if (speedY < 0.0001 && speedY > -0.0001)
-                        {
-                            speedY = 0;
-                        }
-                    }
+                    speedY = -16;
+                }
+                else if (speedY < 0.0001 && speedY > -0.0001)
+                {
+                    speedY = 0;
                 }
             }
+
             if (!isGodMode)
             {
                 switch (this.current)
@@ -764,11 +811,14 @@ namespace EEPhysics
                 }
             }
 
-            var imx = ((int)speedX << 8);
-            var imy = ((int)speedY << 8);
-
-            if (current != ItemId.Water && current != ItemId.Mud)
+            if (hasLevitation)
             {
+                updateThrust();
+            }
+
+            if ((current != ItemId.Water && current != ItemId.Mud && current != ItemId.Lava) || InGodMode)
+            {
+                int imx = ((int)speedX << 8);
                 if (imx == 0)
                 {
                     if (modifierX < 0.1 && modifierX > -0.1)
@@ -802,6 +852,7 @@ namespace EEPhysics
                     }
                 }
 
+                int imy = ((int)speedY << 8);
                 if (imy == 0)
                 {
                     if ((modifierY < 0.1) && (modifierY > -0.1))
@@ -913,6 +964,7 @@ namespace EEPhysics
         {
             deaths++;
             IsDead = true;
+            OnDie(new PlayerEventArgs() { Player = this, BlockX = ((int)(X + 8) >> 4), BlockY = ((int)(Y + 8) >> 4) });
         }
         internal void Reset()
         {
@@ -941,6 +993,54 @@ namespace EEPhysics
                     break;
                 }
             }
+        }
+
+        internal void updateTeamDoors(int x, int y)
+        {
+            int _loc3_ = HostWorld.GetBlockData(x, y)[0];
+            int _loc4_ = Team;
+            if (Team != _loc3_)
+            {
+                Team = _loc3_;
+                if (!HostWorld.Overlaps(this))
+                {
+                    //this.connection.send("team",param1,param2,_loc3_);
+                    this.tx = -1;
+                    this.ty = -1;
+                }
+                else
+                {
+                    Team = _loc4_;
+                    this.tx = x;
+                    this.ty = y;
+                }
+            }
+        }
+        internal void updateThrust()
+        {
+            if (this.mory != 0)
+            {
+                this.speedY = this.speedY - currentThrust * PhysicsConfig.JumpHeight / 2 * this.mory * 0.5;
+            }
+            if (this.morx != 0)
+            {
+                this.speedX = this.speedX - currentThrust * PhysicsConfig.JumpHeight / 2 * this.morx * 0.5;
+            }
+            if (isThrusting)
+            {
+                if (currentThrust > 0)
+                {
+                    currentThrust = currentThrust - thrustBurnOff;
+                }
+                else
+                {
+                    currentThrust = 0;
+                }
+            }
+        }
+        public void ApplyThrust()
+        {
+            currentThrust = maxThrust;
         }
 
         // this is used because: http://stackoverflow.com/questions/3103782/rule-of-thumb-to-test-the-equality-of-two-doubles-in-c
