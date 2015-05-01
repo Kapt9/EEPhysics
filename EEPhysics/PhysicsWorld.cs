@@ -276,6 +276,23 @@ namespace EEPhysics
                         }
                     }
                     break;
+                case "fill":
+                    {
+                        int blockId = m.GetInt(0);
+                        int z = m.GetInt(1);
+                        int startX = m.GetInt(2);
+                        int startY = m.GetInt(3);
+                        int endX = startX + m.GetInt(4);
+                        int endY = startY + m.GetInt(5);
+                        for (int x = startX; x < endX; x++)
+                        {
+                            for (int y = startY; y < endY; y++)
+                            {
+                                blocks[z][x][y] = blockId;
+                            }
+                        }
+                    }
+                    break;
                 case "god":
                 case "guardian":
                 case "mod":
