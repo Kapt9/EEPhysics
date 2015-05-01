@@ -336,6 +336,15 @@ namespace EEPhysics
                         }
                     }
                     break;
+                case "effect":
+                    {
+                        PhysicsPlayer p;
+                        if (Players.TryGetValue(m.GetInt(0), out p))
+                        {
+                            p.SetEffect(m.GetInt(1), m.GetBoolean(2));
+                        }
+                    }
+                    break;
                 case "team":
                     {
                         PhysicsPlayer p;

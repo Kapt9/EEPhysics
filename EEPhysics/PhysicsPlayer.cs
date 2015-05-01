@@ -34,7 +34,7 @@ namespace EEPhysics
         private int tx = -1;
         private int ty = -1;
         private Queue<int> queue = new Queue<int>();
-        private bool isInvulnerable;
+        private bool IsInvulnerable;
         private bool donex, doney;
         internal BitArray Switches { get; set; }
         internal int deaths = 0;
@@ -46,15 +46,19 @@ namespace EEPhysics
         private bool isOnFire;
         private int fireDeath = 200;
         private const double maxThrust = 0.2;
+
         public bool HasLevitation { get; internal set; }
         public bool IsThrusting { get; internal set; }
         private double currentThrust, thrustBurnOff;
+        public bool JumpBoostEffect { get; internal set; }
+        public bool SpeedBoostEffect { get; internal set; }
+        public bool CursedEffect { get; internal set; }
+        public bool Zombie { get; internal set; }
 
         /// <summary>Also includes moderator and guardian mode.</summary>
         public bool InGodMode { get; internal set; }
         public bool IsDead { get; internal set; }
         public int Team { get; internal set; }
-        //public bool Zombie { get; internal set; }
         public bool HasChat { get; internal set; }
 
         internal double GravityMultiplier { get { return HostWorld.WorldGravity; } }
@@ -62,18 +66,38 @@ namespace EEPhysics
         {
             get
             {
-                /*double d = 1;
-                if (Zombie) {
+                double d = 1.0;
+                if (Zombie)
+                {
                     d *= 1.2;
                 }
-                return d;*/
-                return 1;
+                if (SpeedBoostEffect)
+                {
+                    d *= 1.5;
+                }
+                return d;
             }
         }
         public double SpeedX { get { return speedX * PhysicsConfig.VariableMultiplier; } internal set { speedX = value / PhysicsConfig.VariableMultiplier; } }
         public double SpeedY { get { return speedY * PhysicsConfig.VariableMultiplier; } internal set { speedY = value / PhysicsConfig.VariableMultiplier; } }
         public double ModifierX { get { return modifierX * PhysicsConfig.VariableMultiplier; } internal set { modifierX = value / PhysicsConfig.VariableMultiplier; } }
         public double ModifierY { get { return modifierY * PhysicsConfig.VariableMultiplier; } internal set { modifierY = value / PhysicsConfig.VariableMultiplier; } }
+        internal double JumpMultiplier
+        {
+            get
+            {
+                double d = 1.0;
+                if (JumpBoostEffect)
+                {
+                    d *= 1.3;
+                }
+                if (Zombie)
+                {
+                    d *= 0.75;
+                }
+                return d;
+            }
+        }
 
         public int LastCheckpointX { get; private set; }
         public int LastCheckpointY { get; private set; }
@@ -207,7 +231,7 @@ namespace EEPhysics
          {
             this.UpdatePurpleSwitchs(this.tilequeue.shift());
          }*/
-            if (isOnFire && !isInvulnerable)
+            if (isOnFire && !IsInvulnerable)
             {
                 if (fireDeath <= 0)
                 {
@@ -280,7 +304,7 @@ namespace EEPhysics
                         break;
                     case ItemId.Fire:
                     case ItemId.Spike:
-                        if (!IsDead && !isInvulnerable)
+                        if (!IsDead && !IsInvulnerable)
                         {
                             KillPlayer();
                         };
@@ -1001,6 +1025,30 @@ namespace EEPhysics
                     gotCoins.RemoveAt(i);
                     break;
                 }
+            }
+        }
+        internal void SetEffect(int effectId, bool active)
+        {
+            switch (effectId)
+            {
+                case PhysicsConfig.EffectJump:
+                    JumpBoostEffect = active;
+                    break;
+                case PhysicsConfig.EffectFly:
+                    HasLevitation = active;
+                    break;
+                case PhysicsConfig.EffectRun:
+                    SpeedBoostEffect = active;
+                    break;
+                case PhysicsConfig.EffectProtection:
+                    IsInvulnerable = active;
+                    break;
+                case PhysicsConfig.EffectCurse:
+                    CursedEffect = active;
+                    break;
+                case PhysicsConfig.EffectZombie:
+                    Zombie = active;
+                    break;
             }
         }
 
