@@ -22,11 +22,11 @@ namespace EEPhysics
         public const double LavaBuoyancy = 0.2;
         public const int QueueLength = 2;
 
-        public static const int EffectJump = 0;
-        public static const int EffectFly = 1;
-        public static const int EffectRun = 2;
-        public static const int EffectProtection = 3;
-        public static const int EffectCurse = 4;
-        public static const int EffectZombie = 5;
+        public const int EffectJump = 0;
+        public const int EffectFly = 1;
+        public const int EffectRun = 2;
+        public const int EffectProtection = 3;
+        public const int EffectCurse = 4;
+        public const int EffectZombie = 5;
     }
 }
