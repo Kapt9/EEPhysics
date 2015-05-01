@@ -159,6 +159,18 @@ namespace EEPhysics
                             p.Vertical = m.GetInt(8);
                             p.Coins = m.GetInt(9);
                             p.IsDead = false;
+                            if (p.HasLevitation)
+                            {
+                                if (m.GetBoolean(10))
+                                {
+                                    p.ApplyThrust();
+                                    p.IsThrusting = true;
+                                }
+                                else
+                                {
+                                    p.IsThrusting = false;
+                                }
+                            }
                         }
                     }
                     break;

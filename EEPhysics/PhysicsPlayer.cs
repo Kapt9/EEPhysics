@@ -46,7 +46,8 @@ namespace EEPhysics
         private bool isOnFire;
         private int fireDeath = 200;
         private const double maxThrust = 0.2;
-        private bool hasLevitation, isThrusting;
+        public bool HasLevitation { get; internal set; }
+        public bool IsThrusting { get; internal set; }
         private double currentThrust, thrustBurnOff;
 
         /// <summary>Also includes moderator and guardian mode.</summary>
@@ -175,7 +176,7 @@ namespace EEPhysics
             current = HostWorld.GetBlock(0, cx, cy);
             if (this.tx != -1)
             {
-                updateTeamDoors(this.tx, this.ty);
+                UpdateTeamDoors(this.tx, this.ty);
             }
             currentBelow = 0;
             if (current == 1 || current == 411)
@@ -814,9 +815,9 @@ namespace EEPhysics
                 }
             }
 
-            if (hasLevitation)
+            if (HasLevitation)
             {
-                updateThrust();
+                UpdateThrust();
             }
 
             if ((current != ItemId.Water && current != ItemId.Mud && current != ItemId.Lava) || InGodMode)
@@ -1003,7 +1004,7 @@ namespace EEPhysics
             }
         }
 
-        internal void updateTeamDoors(int x, int y)
+        internal void UpdateTeamDoors(int x, int y)
         {
             int _loc3_ = HostWorld.GetBlockData(x, y)[0];
             int _loc4_ = Team;
@@ -1012,7 +1013,6 @@ namespace EEPhysics
                 Team = _loc3_;
                 if (!HostWorld.Overlaps(this))
                 {
-                    //this.connection.send("team",param1,param2,_loc3_);
                     this.tx = -1;
                     this.ty = -1;
                 }
@@ -1024,7 +1024,7 @@ namespace EEPhysics
                 }
             }
         }
-        internal void updateThrust()
+        internal void UpdateThrust()
         {
             if (this.mory != 0)
             {
@@ -1034,7 +1034,7 @@ namespace EEPhysics
             {
                 this.speedX = this.speedX - currentThrust * PhysicsConfig.JumpHeight / 2 * this.morx * 0.5;
             }
-            if (isThrusting)
+            if (IsThrusting)
             {
                 if (currentThrust > 0)
                 {
