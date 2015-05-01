@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace EEPhysics
 {
@@ -35,7 +36,7 @@ namespace EEPhysics
         private Queue<int> queue = new Queue<int>();
         private bool isInvulnerable;
         private bool donex, doney;
-        internal bool[] switches = new bool[PhysicsConfig.MaxSwitchIDCount];
+        internal BitArray Switches { get; set; }
         internal int deaths = 0;
         private const double portalMultiplier = 1.42;
         private bool hasLastPortal = false;
@@ -147,6 +148,7 @@ namespace EEPhysics
             X = 16;
             Y = 16;
             gravity = (int)PhysicsConfig.Gravity;
+            Switches = new BitArray(100);
         }
 
         internal void Tick()
@@ -701,7 +703,7 @@ namespace EEPhysics
                             break;
                         case ItemId.SwitchPurple:
                             int sid = HostWorld.GetBlockData(cx, cy)[0];
-                            switches[sid] = !switches[sid];
+                            Switches[sid] = !Switches[sid];
                             OnHitSwitch(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case ItemId.Piano:
@@ -921,6 +923,11 @@ namespace EEPhysics
                 blockIdEvents.Remove(blockId);
             else
                 bgblockIdEvents.Remove(blockId);
+        }
+
+        public bool GetSwitchState(int switchId)
+        {
+            return Switches[switchId];
         }
 
         /// <summary>

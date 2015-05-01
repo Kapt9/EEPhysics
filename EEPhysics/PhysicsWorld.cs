@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using PlayerIOClient;
 using System.Drawing;
+using System.Collections;
 
 namespace EEPhysics
 {
@@ -237,6 +238,25 @@ namespace EEPhysics
                             case "yellow":
                                 hideYellow = b;
                                 break;
+                        }
+                    }
+                    break;
+                case "ps":
+                    {
+                        PhysicsPlayer p;
+                        if (Players.TryGetValue(m.GetInt(0), out p))
+                        {
+                            p.Switches[m.GetInt(1)] = m.GetBoolean(2);
+                        }
+                    }
+                    break;
+                case "psi":
+                    {
+                        PhysicsPlayer p;
+                        if (Players.TryGetValue(m.GetInt(0), out p))
+                        {
+                            p.Switches = new BitArray(m.GetByteArray(1));
+                            p.Switches.Length = 100;
                         }
                     }
                     break;
@@ -676,7 +696,7 @@ namespace EEPhysics
                                 case ItemId.DoorPurple:
                                     {
                                         int pid = blockData[x][y][0];
-                                        if (p.switches[pid])
+                                        if (p.Switches[pid])
                                         {
                                             continue;
                                         }
@@ -685,7 +705,7 @@ namespace EEPhysics
                                 case ItemId.GatePurple:
                                     {
                                         int pid = blockData[x][y][0];
-                                        if (!p.switches[pid])
+                                        if (!p.Switches[pid])
                                         {
                                             continue;
                                         }

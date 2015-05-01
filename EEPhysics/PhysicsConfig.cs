@@ -21,6 +21,5 @@ namespace EEPhysics
         public const double MudBuoyancy = 0.4;
         public const double LavaBuoyancy = 0.2;
         public const int QueueLength = 2;
-        public const int MaxSwitchIDCount = 10;
     }
 }
