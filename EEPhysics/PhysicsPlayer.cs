@@ -30,7 +30,8 @@ namespace EEPhysics
         private int pastx, pasty;
         internal int overlapy;
         private double mx, my;
-        private int tx, ty;
+        private int tx = -1;
+        private int ty = -1;
         private Queue<int> queue = new Queue<int>();
         private bool isInvulnerable;
         private bool donex, doney;
