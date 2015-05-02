@@ -267,8 +267,14 @@ namespace EEPhysics
                         PhysicsPlayer p;
                         if (Players.TryGetValue(m.GetInt(0), out p))
                         {
-                            p.Switches = new BitArray(m.GetByteArray(1));
-                            p.Switches.Length = 100;
+                            p.Switches = new BitArray(100);
+                            byte[] bytes = m.GetByteArray(1);
+                            if (bytes.Length > 100)
+                                p.Switches.Length = bytes.Length;
+                            for (int i = 0; i < bytes.Length; i++)
+                            {
+                                p.Switches[i] = (bytes[i] == 1);
+                            }
                         }
                     }
                     break;
