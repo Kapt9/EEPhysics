@@ -406,7 +406,7 @@ namespace EEPhysics
                 speedX = (speedX * PhysicsConfig.BaseDrag);
                 if (currentBelow != 216 && !isGodMode)
                 {
-                    if ((mx == 0 && moy != 0) || (speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || ItemId.isClimbable(current))
+                    if ((mx == 0 && mox != 0) || (speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || ItemId.isClimbable(current))
                     {
                         speedX = (speedX * PhysicsConfig.NoModifierDrag);
                     }
