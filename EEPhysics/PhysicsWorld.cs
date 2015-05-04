@@ -871,10 +871,25 @@ namespace EEPhysics
 
         internal void DeserializeBlocks(Message m, uint start)
         {
+            DataChunk[] data = InitParse.Parse(m);
+            foreach (var d in data)
+            {
+                foreach (var p in d.Locations)
+                {
+                    blocks[d.Layer][p.x][p.y] = (int)d.Type;
+                    List<int> bdata = new List<int>();
+                    foreach (var o in d.Args)
+                    {
+                        if (o is int)
+                            bdata.Add((int)o);
+                    }
+                    blockData[p.x][p.y] = bdata.ToArray();
+                }
+            }
             // Got and modified from Skylight by TakoMan02 (made originally in VB by Bass5098), credit to them
             // (http://seist.github.io/Skylight/)
             // > https://github.com/Seist/Skylight/blob/master/Skylight/Miscellaneous/Tools.cs, method ConvertMessageToBlockList
-            try
+            /*try
             {
                 uint messageIndex = start;
                 if (m[messageIndex] is string && m.GetString(messageIndex) == "ws")
@@ -960,7 +975,7 @@ namespace EEPhysics
             catch (Exception e)
             {
                 Debug.WriteLine("EEPhysics: Error loading existing blocks:\n" + e);
-            }
+            }*/
         }
 
         void IDisposable.Dispose()

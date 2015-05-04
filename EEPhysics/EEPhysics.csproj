@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InitParse.cs" />
     <Compile Include="ItemId.cs" />
     <Compile Include="PhysicsConfig.cs" />
     <Compile Include="PhysicsPlayer.cs" />
