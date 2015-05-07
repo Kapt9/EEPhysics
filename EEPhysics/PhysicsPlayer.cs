@@ -34,6 +34,7 @@ namespace EEPhysics
         private int tx = -1;
         private int ty = -1;
         private Queue<int> queue = new Queue<int>();
+        private Queue<int> tileQueue = new Queue<int>();
         private bool IsInvulnerable;
         private bool donex, doney;
         internal BitArray Switches { get; set; }
@@ -227,11 +228,12 @@ namespace EEPhysics
                 delayed = queue.Dequeue();
                 queue.Enqueue(current);
             }
-            /*var queue_length:int = this.tilequeue.length;
-         while(queue_length--)
-         {
-            this.UpdatePurpleSwitchs(this.tilequeue.shift());
-         }*/
+            // not needed, client side only
+            /*while (tileQueue.Count > 0)
+            {
+                UpdatePurpleSwitches(tileQueue.Dequeue());
+            }*/
+
             if (isOnFire && !IsInvulnerable)
             {
                 if (fireDeath <= 0)
@@ -1053,6 +1055,15 @@ namespace EEPhysics
             }
         }
 
+        internal void UpdatePurpleSwitches(int id)
+        {
+            Switches[id] = !Switches[id];
+            if (HostWorld.Overlaps(this))
+            {
+                Switches[id] = !Switches[id];
+                tileQueue.Enqueue(id);
+            }
+        }
         internal void UpdateTeamDoors(int x, int y)
         {
             int _loc3_ = HostWorld.GetBlockData(x, y)[0];
