@@ -49,7 +49,8 @@ namespace EEPhysics
 
         public bool HasLevitation { get; internal set; }
         public bool IsThrusting { get; internal set; }
-        private double currentThrust, thrustBurnOff;
+        private double currentThrust = maxThrust;
+        private double thrustBurnOff = 0.01;
         public bool JumpBoostEffect { get; internal set; }
         public bool SpeedBoostEffect { get; internal set; }
         public bool CursedEffect { get; internal set; }
@@ -1076,11 +1077,11 @@ namespace EEPhysics
         {
             if (this.mory != 0)
             {
-                this.speedY = this.speedY - currentThrust * PhysicsConfig.JumpHeight / 2 * this.mory * 0.5;
+                SpeedY = SpeedY - currentThrust * PhysicsConfig.JumpHeight / 2 * this.mory * 0.5;
             }
             if (this.morx != 0)
             {
-                this.speedX = this.speedX - currentThrust * PhysicsConfig.JumpHeight / 2 * this.morx * 0.5;
+                SpeedX = SpeedX - currentThrust * PhysicsConfig.JumpHeight / 2 * this.morx * 0.5;
             }
             if (IsThrusting)
             {

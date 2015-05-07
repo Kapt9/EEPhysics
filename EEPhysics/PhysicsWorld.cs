@@ -723,7 +723,7 @@ namespace EEPhysics
                                 case ItemId.DoorPurple:
                                     {
                                         int pid = blockData[x][y][0];
-                                        if (!p.Switches[pid])
+                                        if (p.Switches[pid])
                                         {
                                             continue;
                                         }
@@ -732,7 +732,7 @@ namespace EEPhysics
                                 case ItemId.GatePurple:
                                     {
                                         int pid = blockData[x][y][0];
-                                        if (p.Switches[pid])
+                                        if (!p.Switches[pid])
                                         {
                                             continue;
                                         }
