@@ -258,7 +258,7 @@ namespace EEPhysics
                         PhysicsPlayer p;
                         if (Players.TryGetValue(m.GetInt(0), out p))
                         {
-                            p.Switches[m.GetInt(1)] = m.GetBoolean(2);
+                            p.Switches[m.GetInt(1)] = m.GetInt(2) == 1;
                         }
                     }
                     break;
@@ -723,7 +723,7 @@ namespace EEPhysics
                                 case ItemId.DoorPurple:
                                     {
                                         int pid = blockData[x][y][0];
-                                        if (p.Switches[pid])
+                                        if (!p.Switches[pid])
                                         {
                                             continue;
                                         }
@@ -732,7 +732,7 @@ namespace EEPhysics
                                 case ItemId.GatePurple:
                                     {
                                         int pid = blockData[x][y][0];
-                                        if (!p.Switches[pid])
+                                        if (p.Switches[pid])
                                         {
                                             continue;
                                         }
