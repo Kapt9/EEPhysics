@@ -739,13 +739,13 @@ namespace EEPhysics
                                     }
                                     break;
                                 case ItemId.DeathDoor:
-                                    if (p.deaths < blockData[x][y][0])
+                                    if (p.deaths >= blockData[x][y][0])
                                     {
                                         continue;
                                     }
                                     break;
                                 case ItemId.DeathGate:
-                                    if (p.deaths >= blockData[x][y][0])
+                                    if (p.deaths < blockData[x][y][0])
                                     {
                                         continue;
                                     }
@@ -877,13 +877,18 @@ namespace EEPhysics
                 foreach (var p in d.Locations)
                 {
                     blocks[d.Layer][p.x][p.y] = (int)d.Type;
-                    List<int> bdata = new List<int>();
-                    foreach (var o in d.Args)
+                    if (d.Layer == 0 && d.Args.Length > 0)
                     {
-                        if (o is int)
-                            bdata.Add((int)o);
+                        List<int> bdata = new List<int>();
+                        foreach (var o in d.Args)
+                        {
+                            if (o is int)
+                                bdata.Add((int)o);
+                            else if (o is uint)
+                                bdata.Add((int)((uint)o));
+                        }
+                        blockData[p.x][p.y] = bdata.ToArray();
                     }
-                    blockData[p.x][p.y] = bdata.ToArray();
                 }
             }
             // Got and modified from Skylight by TakoMan02 (made originally in VB by Bass5098), credit to them
