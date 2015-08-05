@@ -267,110 +267,126 @@ namespace EEPhysics
             }
             else
             {
-                switch (current)
+                if (ItemId.isClimbable(this.current))
                 {
-                    case 1:
-                    case ItemId.InvisibleLeftArrow:
-                        morx = -((int)gravity);
-                        mory = 0;
-                        break;
-                    case 2:
-                    case ItemId.InvisibleUpArrow:
-                        morx = 0;
-                        mory = -((int)gravity);
-                        break;
-                    case 3:
-                    case ItemId.InvisibleRightArrow:
-                        morx = (int)gravity;
-                        mory = 0;
-                        break;
-                    case ItemId.SpeedLeft:
-                    case ItemId.SpeedRight:
-                    case ItemId.SpeedUp:
-                    case ItemId.SpeedDown:
-                    case ItemId.Chain:
-                    case ItemId.NinjaLadder:
-                    case ItemId.WineH:
-                    case ItemId.WineV:
-                    case ItemId.InvisibleDot:
-                    case 4:
-                        morx = 0;
-                        mory = 0;
-                        break;
-                    case ItemId.Water:
-                        morx = 0;
-                        mory = (int)PhysicsConfig.WaterBuoyancy;
-                        break;
-                    case ItemId.Mud:
-                        morx = 0;
-                        mory = (int)PhysicsConfig.MudBuoyancy;
-                        break;
-                    case ItemId.Fire:
-                    case ItemId.Spike:
-                        if (!IsDead && !IsInvulnerable)
-                        {
-                            KillPlayer();
-                        };
-                        break;
-                    case ItemId.EffectProtection:
-                        // TODO
-                        /*if (HostWorld.GetOnStatus(cx, cy) && isOnFire)
-                        {
-                            isOnFire = false;
-                        }*/
-                        break;
-                    default:
-                        morx = 0;
-                        mory = gravity;
-                        break;
+                    morx = 0;
+                    mory = 0;
+                }
+                else
+                {
+                    switch (current)
+                    {
+                        case 1:
+                        case ItemId.InvisibleLeftArrow:
+                            morx = -((int)gravity);
+                            mory = 0;
+                            break;
+                        case 2:
+                        case ItemId.InvisibleUpArrow:
+                            morx = 0;
+                            mory = -((int)gravity);
+                            break;
+                        case 3:
+                        case ItemId.InvisibleRightArrow:
+                            morx = (int)gravity;
+                            mory = 0;
+                            break;
+                        case ItemId.SpeedLeft:
+                        case ItemId.SpeedRight:
+                        case ItemId.SpeedUp:
+                        case ItemId.SpeedDown:
+                        case ItemId.Chain:
+                        case ItemId.NinjaLadder:
+                        case ItemId.WineH:
+                        case ItemId.WineV:
+                        case ItemId.InvisibleDot:
+                        case 4:
+                            morx = 0;
+                            mory = 0;
+                            break;
+                        case ItemId.Water:
+                            morx = 0;
+                            mory = (int)PhysicsConfig.WaterBuoyancy;
+                            break;
+                        case ItemId.Mud:
+                            morx = 0;
+                            mory = (int)PhysicsConfig.MudBuoyancy;
+                            break;
+                        case ItemId.Fire:
+                        case ItemId.Spike:
+                            if (!IsDead && !IsInvulnerable)
+                            {
+                                KillPlayer();
+                            };
+                            break;
+                        case ItemId.EffectProtection:
+                            // TODO
+                            /*if (HostWorld.GetOnStatus(cx, cy) && isOnFire)
+                            {
+                                isOnFire = false;
+                            }*/
+                            break;
+                        default:
+                            morx = 0;
+                            mory = gravity;
+                            break;
+                    }
                 }
 
-                switch (delayed)
+                if (ItemId.isClimbable(delayed))
                 {
-                    case 1:
-                    case ItemId.InvisibleLeftArrow:
-                        mox = -gravity;
-                        moy = 0;
-                        break;
-                    case 2:
-                    case ItemId.InvisibleUpArrow:
-                        mox = 0;
-                        moy = -gravity;
-                        break;
-                    case 3:
-                    case ItemId.InvisibleRightArrow:
-                        mox = gravity;
-                        moy = 0;
-                        break;
-                    case ItemId.SpeedLeft:
-                    case ItemId.SpeedRight:
-                    case ItemId.SpeedUp:
-                    case ItemId.SpeedDown:
-                    case ItemId.Chain:
-                    case ItemId.NinjaLadder:
-                    case ItemId.WineH:
-                    case ItemId.WineV:
-                    case ItemId.InvisibleDot:
-                    case 4:
-                        mox = 0;
-                        moy = 0;
-                        break;
-                    case ItemId.Water:
-                        mox = 0;
-                        moy = PhysicsConfig.WaterBuoyancy;
-                        break;
-                    case ItemId.Mud:
-                        mox = 0;
-                        moy = PhysicsConfig.MudBuoyancy;
-                        break;
-                    case ItemId.Lava:
-                        mox = 0;
-                        moy = PhysicsConfig.LavaBuoyancy;
-                        break;
-                    default:
-                        mox = 0;
-                        moy = gravity;
-                        break;
+                    mox = 0;
+                    moy = 0;
+                }
+                else
+                {
+                    switch (delayed)
+                    {
+                        case 1:
+                        case ItemId.InvisibleLeftArrow:
+                            mox = -gravity;
+                            moy = 0;
+                            break;
+                        case 2:
+                        case ItemId.InvisibleUpArrow:
+                            mox = 0;
+                            moy = -gravity;
+                            break;
+                        case 3:
+                        case ItemId.InvisibleRightArrow:
+                            mox = gravity;
+                            moy = 0;
+                            break;
+                        case ItemId.SpeedLeft:
+                        case ItemId.SpeedRight:
+                        case ItemId.SpeedUp:
+                        case ItemId.SpeedDown:
+                        case ItemId.Chain:
+                        case ItemId.NinjaLadder:
+                        case ItemId.WineH:
+                        case ItemId.WineV:
+                        case ItemId.InvisibleDot:
+                        case 4:
+                            mox = 0;
+                            moy = 0;
+                            break;
+                        case ItemId.Water:
+                            mox = 0;
+                            moy = PhysicsConfig.WaterBuoyancy;
+                            break;
+                        case ItemId.Mud:
+                            mox = 0;
+                            moy = PhysicsConfig.MudBuoyancy;
+                            break;
+                        case ItemId.Lava:
+                            mox = 0;
+                            moy = PhysicsConfig.LavaBuoyancy;
+                            break;
+                        default:
+                            mox = 0;
+                            moy = gravity;
+                            break;
+                    }
                 }
             }
 
@@ -407,7 +423,7 @@ namespace EEPhysics
             {
                 speedX = (speedX + modifierX);
                 speedX = (speedX * PhysicsConfig.BaseDrag);
-                if (currentBelow != 216 && !isGodMode)
+                if (!isGodMode)
                 {
                     if ((mx == 0 && moy != 0) || (speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || ItemId.isClimbable(current))
                     {
@@ -444,7 +460,7 @@ namespace EEPhysics
             {
                 speedY = (speedY + modifierY);
                 speedY = (speedY * PhysicsConfig.BaseDrag);
-                if (currentBelow != 216 && !isGodMode)
+                if (!isGodMode)
                 {
                     if ((my == 0 && mox != 0) || (speedY < 0 && my > 0) || (speedY > 0 && my < 0) || ItemId.isClimbable(current))
                     {
@@ -847,9 +863,10 @@ namespace EEPhysics
                 UpdateThrust();
             }
 
+            int imx = ((int)speedX << 8);
+            int imy = ((int)speedX << 8);
             if ((current != ItemId.Water && current != ItemId.Mud && current != ItemId.Lava) || InGodMode)
             {
-                int imx = ((int)speedX << 8);
                 if (imx == 0)
                 {
                     if (modifierX < 0.1 && modifierX > -0.1)
@@ -883,7 +900,6 @@ namespace EEPhysics
                     }
                 }
 
-                int imy = ((int)speedY << 8);
                 if (imy == 0)
                 {
                     if ((modifierY < 0.1) && (modifierY > -0.1))

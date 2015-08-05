@@ -49,6 +49,8 @@ namespace EEPhysics
         public const int GlowyLineYellowStraight = 378;
         public const int GlowyLineGreenSlope = 379;
         public const int GlowyLineGreenStraight = 380;
+        public const int GlowyLineRedSlope = 438;
+        public const int GlowyLineRedStraight = 439;
         public const int PortalInvisible = 381;
         public const int TextSign = 385;
         public const int CyanKey = 408;
@@ -79,6 +81,22 @@ namespace EEPhysics
         public const int EffectTeam = 423;
         public const int TeamDoor = 1027;
         public const int TeamGate = 1028;
+        public const int Rope = 424;
+        public const int MedievalShield = 273;
+        public const int MedievalAxe = 275;
+        public const int MedievalBbanner = 327;
+        public const int MedievalCcoatfarms = 328;
+        public const int MedievalSword = 329;
+        public const int MedievalTimber = 440;
+        public const int ToothBig = 338;
+        public const int ToothSmall = 339;
+        public const int ToothTriple = 340;
+        public const int DojoLightLeft = 276;
+        public const int DojoLightRight = 277;
+        public const int DojoDarkLeft = 279;
+        public const int DojoDarkRight = 280;
+        public const int MedievalBanner = 327;
+        public const int MedievalCoatofarms = 328;
 
         public static bool isSolid(int blockId)
         {
@@ -98,6 +116,7 @@ namespace EEPhysics
                 case ItemId.Chain:
                 case ItemId.WineV:
                 case ItemId.WineH:
+                case ItemId.Rope:
                     return true;
             }
 
@@ -108,31 +127,55 @@ namespace EEPhysics
         {
             switch (itemId)
             {
-                case 61:
-                case 62:
-                case 63:
-                case 64:
-                case 89:
-                case 90:
-                case 91:
-                case 96:
-                case 97:
-                case 122:
-                case 123:
-                case 124:
-                case 125:
-                case 126:
-                case 127:
-                case 146:
-                case 154:
-                case 158:
-                case 194:
-                case 211:
-                case 216:
+                case GlowyLineBlueStraight:
+
+                case GlowylineBlueSlope:
+
+                case GlowyLineGreenSlope:
+
+                case GlowyLineGreenStraight:
+
+                case GlowyLineYellowSlope:
+
+                case GlowyLineYellowStraight:
+
+                case GlowyLineRedSlope:
+
+                case GlowyLineRedStraight:
+
                 case OnewayCyan:
+
                 case OnewayRed:
+
                 case OnewayYellow:
+
                 case OnewayPink:
+
+                case MedievalAxe:
+
+                case MedievalBanner:
+
+                case MedievalCoatofarms:
+
+                case MedievalShield:
+
+                case MedievalSword:
+
+                case MedievalTimber:
+
+                case ToothBig:
+
+                case ToothSmall:
+
+                case ToothTriple:
+
+                case DojoLightLeft:
+
+                case DojoLightRight:
+
+                case DojoDarkLeft:
+
+                case DojoDarkRight:
                     return true;
             }
             return false;
