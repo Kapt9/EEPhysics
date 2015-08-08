@@ -1095,6 +1095,31 @@ namespace EEPhysics
         }
 
         /// <summary>
+        /// Set horizontal movement direction of the bot. Allowed only for the bot player. Allowed only for the bot player. Also you have to initialize PhysicsWorld with the PlayerIO Connection.
+        /// </summary>
+        /// <param name="horizontal">-1 = left, 1 = right</param>
+        public void SetHorizontal(int horizontal)
+        {
+            if (!IsMe)
+            {
+                throw new Exception("Allowed only for the bot player. Also make sure you initialized PhysicsWorld with PlayerIO Connection.");
+            }
+            Horizontal = horizontal;
+        }
+        /// <summary>
+        /// Set horizontal movement direction of the bot. Allowed only for the bot player. Also you have to initialize PhysicsWorld with the PlayerIO Connection.
+        /// </summary>
+        /// <param name="vertical">-1 = up, 1 = down</param>
+        public void SetVertical(int vertical)
+        {
+            if (!IsMe)
+            {
+                throw new Exception("Allowed only for the bot player. Also make sure you initialized PhysicsWorld with PlayerIO Connection.");
+            }
+            Vertical = vertical;
+        }
+
+        /// <summary>
         /// Makes PhysicsPlayer raise event when player moves inside blockId block. Event is not raised every tick, but only at when player first touches the block.
         /// (Touching doesn't count! Only the block that is at center of player is checked, no multiple blocks at same time.)
         /// </summary>
