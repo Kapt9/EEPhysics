@@ -19,6 +19,7 @@ namespace EEPhysics
         private bool inited;
         private bool running;
         private Thread physicsThread;
+        internal Connection Connection { get; private set; }
 
         private int[][][] blocks;
         private int[][][] blockData;
@@ -56,6 +57,13 @@ namespace EEPhysics
             AutoStart = true;
             AddBotPlayer = true;
             Players = new ConcurrentDictionary<int, PhysicsPlayer>();
+        }
+        public PhysicsWorld(Connection conn)
+        {
+            AutoStart = true;
+            AddBotPlayer = true;
+            Players = new ConcurrentDictionary<int, PhysicsPlayer>();
+            Connection = conn;
         }
 
         /// <summary>
@@ -115,10 +123,14 @@ namespace EEPhysics
                     {
                         PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(12))
                         {
-                            X = m.GetInt(7),
-                            Y = m.GetInt(8),
+                            X = m.GetInt(9),
+                            Y = m.GetInt(10),
                             HostWorld = this
                         };
+                        if (Connection != null)
+                        {
+                            p.IsMe = true;
+                        }
                         Players.TryAdd(p.ID, p);
                     }
 
@@ -496,6 +508,12 @@ namespace EEPhysics
             }
             p = default(Point);
             return false;
+        }
+
+        internal bool GetOnStatus(int x, int y)
+        {
+            // TODO! Is effect at x,y allowed in world?
+            return true;
         }
 
         /// <summary>
