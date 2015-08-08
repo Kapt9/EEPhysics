@@ -97,6 +97,7 @@ namespace EEPhysics
         public const int DojoDarkRight = 280;
         public const int MedievalBanner = 327;
         public const int MedievalCoatofarms = 328;
+        public const int Hologram = 397;
 
         public static bool isSolid(int blockId)
         {

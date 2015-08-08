@@ -512,7 +512,7 @@ namespace EEPhysics
 
         internal bool GetOnStatus(int x, int y)
         {
-            // TODO! Is effect at x,y allowed in world?
+            // TODO: Does effect disable or enable?
             return true;
         }
 

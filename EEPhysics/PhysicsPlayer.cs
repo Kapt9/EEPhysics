@@ -907,6 +907,7 @@ namespace EEPhysics
                             {
                                 HostWorld.Connection.Send("hologramtouch", cx, cy);
                             }
+                            break;
                         case ItemId.Checkpoint:
                             if (!isGodMode)
                             {
