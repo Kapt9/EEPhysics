@@ -383,10 +383,7 @@ namespace EEPhysics
                             {
                                 p.X = m.GetInt(i + 1);
                                 p.Y = m.GetInt(i + 2);
-                                if (b)
-                                {
-                                    p.Respawn();
-                                }
+                                p.Respawn();
                             }
                             i += 3;
                         }
