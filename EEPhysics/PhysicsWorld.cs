@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using PlayerIOClient;
-using System.Drawing;
 using System.Collections;
 
 namespace EEPhysics
@@ -20,6 +19,7 @@ namespace EEPhysics
         private bool running;
         private Thread physicsThread;
         internal Connection Connection { get; private set; }
+        internal bool Connected { get { return Connection != null && Connection.Connected; } }
 
         private int[][][] blocks;
         private int[][][] blockData;
@@ -47,6 +47,7 @@ namespace EEPhysics
         /// </summary>
         public ConcurrentDictionary<int, PhysicsPlayer> Players { get; private set; }
         public string WorldKey { get; private set; }
+        public int BotID { get; private set; }
         /// <summary>
         /// Called upon every physics simulation tick. (every 10ms)
         /// </summary>
@@ -127,10 +128,8 @@ namespace EEPhysics
                             Y = m.GetInt(10),
                             HostWorld = this
                         };
-                        if (Connection != null)
-                        {
-                            p.IsMe = true;
-                        }
+                        BotID = p.ID;
+                        p.IsMe = true;
                         Players.TryAdd(p.ID, p);
                     }
 
@@ -158,8 +157,9 @@ namespace EEPhysics
             {
                 case "m":
                     {
+                        int id = m.GetInt(0);
                         PhysicsPlayer p;
-                        if (Players.TryGetValue(m.GetInt(0), out p))
+                        if (id != BotID && Players.TryGetValue(id, out p))
                         {
                             p.X = m.GetDouble(1);
                             p.Y = m.GetDouble(2);
@@ -1005,6 +1005,27 @@ namespace EEPhysics
         {
             if (PhysicsRunning)
                 StopSimulation();
+        }
+    }
+
+    public class Rectangle
+    {
+        public double X { get; private set; }
+        public double Y { get; private set; }
+        public double Width { get; private set; }
+        public double Height { get; private set; }
+
+        public Rectangle(double x, double y, double w, double h)
+        {
+            X = x;
+            Y = y;
+            Width = w;
+            Height = h;
+        }
+
+        public bool IntersectsWith(Rectangle r)
+        {
+            return (X + Width >= r.X && X < r.X + r.Width) && (Y + Height >= r.Y && Y < r.Y + r.Height);
         }
     }
 }

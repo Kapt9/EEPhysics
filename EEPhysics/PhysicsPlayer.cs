@@ -47,6 +47,7 @@ namespace EEPhysics
         private List<Point> gotBlueCoins = new List<Point>();
         private bool isOnFire;
         private int onFireDeath = 200;
+        private float deathOffset = 0;
         private const double maxThrust = 0.2;
 
         public bool HasLevitation { get; internal set; }
@@ -197,11 +198,20 @@ namespace EEPhysics
             double osy;
             double oy;
             double ty;
-            int k = 0;
-            int l = 0;
-            int curseDuration = 0;
-            int zombieDuration = 0;
             bool spacedown = SpaceDown;
+
+            if (IsDead)
+            {
+                if (IsMe && HostWorld.Connected)
+                {
+                    deathOffset += 0.3f;
+                    if (deathOffset >= 16.0f)
+                    {
+                        HostWorld.Connection.Send("death");
+                        deathOffset = 0;
+                    }
+                }
+            }
 
             int cx = ((int)(X + 8) >> 4);
             int cy = ((int)(Y + 8) >> 4);
@@ -769,9 +779,11 @@ namespace EEPhysics
                             lastJump = HostWorld.sw.ElapsedMilliseconds * mod;
                         }
                     }
-                    if (changed || oh != Horizontal || overlapy != Vertical)
+                    if (changed || oh != Horizontal || ov != Vertical)
                     {
-                        HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, ModifierX, ModifierY,
+                        oh = Horizontal;
+                        ov = Vertical;
+                        HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, (int)ModifierX, (int)ModifierY,
                             Horizontal, Vertical, GravityMultiplier, spacedown);
                     }
                 }
@@ -801,7 +813,7 @@ namespace EEPhysics
                             }
                             OnGetCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             gotCoins.Add(new Point(cx, cy));
-                            if (IsMe)
+                            if (IsMe && HostWorld.Connected)
                             {
                                 HostWorld.Connection.Send("c", Coins, BlueCoins, cx, cy);
                             }
@@ -818,7 +830,7 @@ namespace EEPhysics
                             }
                             OnGetBlueCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
                             gotBlueCoins.Add(new Point(cx, cy));
-                            if (IsMe)
+                            if (IsMe && HostWorld.Connected)
                             {
                                 HostWorld.Connection.Send("c", Coins, BlueCoins, cx, cy);
                             }
@@ -827,7 +839,7 @@ namespace EEPhysics
                         case 5:
                             // crown
                             OnHitCrown(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode && !HasCrown)
+                            if (IsMe && HostWorld.Connected && !InGodMode && !HasCrown)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "k", cx, cy);
                             }
@@ -835,7 +847,7 @@ namespace EEPhysics
                         case 6:
                             // red key
                             OnHitRedKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "r", cx, cy);
                             }
@@ -843,7 +855,7 @@ namespace EEPhysics
                         case 7:
                             // green key
                             OnHitGreenKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "g", cx, cy);
                             }
@@ -851,28 +863,28 @@ namespace EEPhysics
                         case 8:
                             // blue key
                             OnHitBlueKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "b", cx, cy);
                             }
                             break;
                         case ItemId.CyanKey:
                             OnHitCyanKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "c", cx, cy);
                             }
                             break;
                         case ItemId.MagentaKey:
                             OnHitMagentaKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "m", cx, cy);
                             }
                             break;
                         case ItemId.YellowKey:
                             OnHitYellowKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "y", cx, cy);
                             }
@@ -890,20 +902,20 @@ namespace EEPhysics
                             break;
                         case ItemId.Diamond:
                             OnHitDiamond(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send("diamondtouch", cx, cy);
                             }
                             break;
                         case ItemId.Cake:
                             OnHitCake(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send("caketouch", cx, cy);
                             }
                             break;
                         case ItemId.Hologram:
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send("hologramtouch", cx, cy);
                             }
@@ -914,7 +926,7 @@ namespace EEPhysics
                                 LastCheckpointX = cx;
                                 LastCheckpointY = cy;
                                 OnHitCheckpoint(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                                if (IsMe)
+                                if (IsMe && HostWorld.Connected)
                                 {
                                     HostWorld.Connection.Send("checkpoint", cx, cy);
                                 }
@@ -922,7 +934,7 @@ namespace EEPhysics
                             break;
                         case ItemId.BrickComplete:
                             OnHitCompleteLevelBrick(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
-                            if (IsMe && !InGodMode)
+                            if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send("levelcomplete", cx, cy);
                             }
@@ -1103,7 +1115,11 @@ namespace EEPhysics
         {
             if (!IsMe)
             {
-                throw new Exception("Allowed only for the bot player. Also make sure you initialized PhysicsWorld with PlayerIO Connection.");
+                throw new Exception("Allowed only for the bot player.");
+            }
+            if (!HostWorld.Connected)
+            {
+                throw new Exception("EEPhysics needs connection to move the bot. Make sure you initialized PhysicsWorld with PlayerIO Connection.");
             }
             Horizontal = horizontal;
         }
@@ -1115,7 +1131,11 @@ namespace EEPhysics
         {
             if (!IsMe)
             {
-                throw new Exception("Allowed only for the bot player. Also make sure you initialized PhysicsWorld with PlayerIO Connection.");
+                throw new Exception("Allowed only for the bot player.");
+            }
+            if (!HostWorld.Connected)
+            {
+                throw new Exception("EEPhysics needs connection to move the bot. Make sure you initialized PhysicsWorld with PlayerIO Connection.");
             }
             Vertical = vertical;
         }
@@ -1197,6 +1217,7 @@ namespace EEPhysics
         }
         internal void KillPlayer()
         {
+            deathOffset = 0;
             deaths++;
             IsDead = true;
             OnDie(new PlayerEventArgs() { Player = this, BlockX = ((int)(X + 8) >> 4), BlockY = ((int)(Y + 8) >> 4) });
