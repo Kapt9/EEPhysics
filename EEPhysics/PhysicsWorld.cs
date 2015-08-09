@@ -344,8 +344,8 @@ namespace EEPhysics
                     }
                     break;
                 case "god":
-                case "guardian":
                 case "mod":
+                case "admin":
                     {
                         PhysicsPlayer p;
                         if (Players.TryGetValue(m.GetInt(0), out p))
@@ -446,6 +446,11 @@ namespace EEPhysics
                 case "kill":
                     {
                         int userId = m.GetInt(0u);
+
+                        if (userId == BotID && Connected)
+                        {
+                            Players[BotID].KillPlayer();
+                        }
 
                         PhysicsPlayer p;
                         if (Players.TryGetValue(userId, out p))
