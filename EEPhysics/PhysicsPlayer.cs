@@ -48,6 +48,7 @@ namespace EEPhysics
         private bool isOnFire;
         private int onFireDeath = 200;
         private float deathOffset = 0;
+
         private const double maxThrust = 0.2;
 
         public bool HasLevitation { get; internal set; }
@@ -1220,6 +1221,8 @@ namespace EEPhysics
             deathOffset = 0;
             deaths++;
             IsDead = true;
+            isOnFire = false;
+            onFireDeath = 200;
             OnDie(new PlayerEventArgs() { Player = this, BlockX = ((int)(X + 8) >> 4), BlockY = ((int)(Y + 8) >> 4) });
         }
         internal void Reset()
