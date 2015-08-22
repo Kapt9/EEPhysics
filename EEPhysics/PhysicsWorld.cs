@@ -102,8 +102,8 @@ namespace EEPhysics
             {
                 if (m.Type == "init")
                 {
-                    WorldWidth = m.GetInt(15);
-                    WorldHeight = m.GetInt(16);
+                    WorldWidth = m.GetInt(17);
+                    WorldHeight = m.GetInt(18);
 
                     blocks = new int[2][][];
                     for (int i = 0; i < blocks.Length; i++)
@@ -118,7 +118,8 @@ namespace EEPhysics
                         blockData[i] = new int[WorldHeight][];
 
                     WorldKey = Derot(m.GetString(5));
-                    WorldGravity = m.GetDouble(18);
+                    //WorldGravity = m.GetDouble(18);
+                    WorldGravity = 1;
 
                     if (AddBotPlayer)
                     {
@@ -133,7 +134,7 @@ namespace EEPhysics
                         Players.TryAdd(p.ID, p);
                     }
 
-                    DeserializeBlocks(m, 24);
+                    DeserializeBlocks(m);
                     inited = true;
 
                     foreach (Message m2 in earlyMessages)
@@ -219,12 +220,12 @@ namespace EEPhysics
                         p.HostWorld = this;
                         p.X = m.GetDouble(3);
                         p.Y = m.GetDouble(4);
-                        p.InGodMode = m.GetBoolean(5) || m.GetBoolean(6) || m.GetBoolean(12);
+                        p.InGodMode = m.GetBoolean(6) || m.GetBoolean(7);
                         p.HasChat = m.GetBoolean(7);
-                        p.Coins = m.GetInt(8);
-                        p.BlueCoins = m.GetInt(9);
-                        p.IsClubMember = m.GetBoolean(11);
-                        p.Team = m.GetInt(13);
+                        p.Coins = m.GetInt(9);
+                        p.BlueCoins = m.GetInt(10);
+                        p.IsClubMember = m.GetBoolean(12);
+                        p.Team = m.GetInt(14);
 
                         Players.TryAdd(p.ID, p);
                     }
@@ -401,7 +402,7 @@ namespace EEPhysics
                     break;
                 case "reset":
                     {
-                        DeserializeBlocks(m, 1);
+                        DeserializeBlocks(m);
                         foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
                         {
                             pair.Value.Reset();
@@ -889,7 +890,7 @@ namespace EEPhysics
             return str;
         }
 
-        internal void DeserializeBlocks(Message m, uint start)
+        internal void DeserializeBlocks(Message m)
         {
             DataChunk[] data = InitParse.Parse(m);
             foreach (var d in data)
@@ -911,96 +912,6 @@ namespace EEPhysics
                     }
                 }
             }
-            // Got and modified from Skylight by TakoMan02 (made originally in VB by Bass5098), credit to them
-            // (http://seist.github.io/Skylight/)
-            // > https://github.com/Seist/Skylight/blob/master/Skylight/Miscellaneous/Tools.cs, method ConvertMessageToBlockList
-            /*try
-            {
-                uint messageIndex = start;
-                if (m[messageIndex] is string && m.GetString(messageIndex) == "ws")
-                {
-                    messageIndex++;
-                }
-                while (messageIndex < m.Count)
-                {
-                    if (m[messageIndex] is string)
-                    {
-                        break;
-                    }
-
-                    int blockId = m.GetInteger(messageIndex);
-                    messageIndex++;
-
-                    int z = m.GetInteger(messageIndex);
-                    messageIndex++;
-
-                    byte[] xa = m.GetByteArray(messageIndex);
-                    messageIndex++;
-
-                    byte[] ya = m.GetByteArray(messageIndex);
-                    messageIndex++;
-
-                    List<int> data = new List<int>();
-                    switch (blockId) {
-                        case ItemId.WorldPortal:
-                        case ItemId.TextSign:
-                            messageIndex++;
-                            break;
-                        case ItemId.Coindoor:
-                        case ItemId.Coingate:
-                        case ItemId.DeathDoor:
-                        case ItemId.DeathGate:
-                        case ItemId.BlueCoindoor:
-                        case ItemId.BlueCoingate:
-                        case ItemId.DoorPurple:
-                        case ItemId.GatePurple:
-                        case ItemId.SwitchPurple:
-                        case ItemId.Spike:
-                        case ItemId.Piano:
-                        case ItemId.Drum:
-                        case ItemId.OnewayCyan:
-                        case ItemId.OnewayPink:
-                        case ItemId.OnewayRed:
-                        case ItemId.OnewayYellow:
-                        case ItemId.GlowylineBlueSlope:
-                        case ItemId.GlowyLineBlueStraight:
-                        case ItemId.GlowyLineYellowSlope:
-                        case ItemId.GlowyLineYellowStraight:
-                        case ItemId.GlowyLineGreenSlope:
-                        case ItemId.GlowyLineGreenStraight:
-                            data.Add(m.GetInteger(messageIndex));
-                            messageIndex++;
-                            break;
-                        case ItemId.Portal:
-                        case ItemId.PortalInvisible:
-                            for (int i = 0; i < 3; i++) {
-                                data.Add(m.GetInteger(messageIndex));
-                                messageIndex++;
-                            }
-                            break;
-                        case 1000:
-                            messageIndex += 2;
-                            break;
-                    }
-                    int x, y;
-
-                    for (int pos = 0; pos < ya.Length; pos += 2)
-                    {
-                        x = (xa[pos] * 256) + xa[pos + 1];
-                        y = (ya[pos] * 256) + ya[pos + 1];
-
-                        blocks[z][x][y] = blockId;
-                        if (data.Count > 0)
-                        {
-                            blockData[x][y] = data.ToArray();
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("EEPhysics: Error loading existing blocks:\n" + e);
-            }*/
         }
 
         void IDisposable.Dispose()
