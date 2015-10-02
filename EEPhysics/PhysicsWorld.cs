@@ -118,8 +118,7 @@ namespace EEPhysics
                         blockData[i] = new int[WorldHeight][];
 
                     WorldKey = Derot(m.GetString(5));
-                    //WorldGravity = m.GetDouble(18);
-                    WorldGravity = 1;
+                    WorldGravity = m.GetDouble(19);
 
                     if (AddBotPlayer)
                     {
@@ -170,11 +169,10 @@ namespace EEPhysics
                             p.ModifierY = m.GetDouble(6);
                             p.Horizontal = m.GetInt(7);
                             p.Vertical = m.GetInt(8);
-                            p.Coins = m.GetInt(9);
                             p.IsDead = false;
                             if (p.HasLevitation)
                             {
-                                if (m.GetBoolean(10))
+                                if (m.GetBoolean(9))
                                 {
                                     p.ApplyThrust();
                                     p.IsThrusting = true;
