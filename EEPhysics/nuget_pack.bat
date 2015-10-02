@@ -1,1 +1,0 @@
-nuget pack -sym EEPhysics.csproj -Prop Configuration=Release
