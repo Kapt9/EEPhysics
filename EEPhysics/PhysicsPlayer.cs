@@ -1003,7 +1003,7 @@ namespace EEPhysics
                                 }
                             }
                         }
-                        if (Y % 16 == 0)
+                        if (DoubleIsEqual(Y % 16, 0))
                         {
                             p = new Point(cx, cy - 1);
                             if (ItemId.isSolid(HostWorld.GetBlock(0, p.x, p.y)) && touchBlockEvents.TryGetValue(HostWorld.GetBlock(0, p.x, p.y), out e))
@@ -1366,9 +1366,21 @@ namespace EEPhysics
             y = yy;
         }
 
-        public bool Equals(Point p)
+        public override bool Equals(object o)
         {
-            return (x == p.x && y == p.y);
+            if (o is Point)
+            {
+                Point p = (Point)o;
+                return (x == p.x && y == p.y);
+            }
+            else
+            {
+                return base.Equals(o);
+            }
+        }
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() ^ y.GetHashCode();
         }
 
         public static bool operator ==(Point p, Point p2)

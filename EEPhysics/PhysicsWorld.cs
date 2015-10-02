@@ -216,14 +216,14 @@ namespace EEPhysics
                     {
                         PhysicsPlayer p = new PhysicsPlayer(m.GetInt(0), m.GetString(1));
                         p.HostWorld = this;
-                        p.X = m.GetDouble(3);
-                        p.Y = m.GetDouble(4);
+                        p.X = m.GetDouble(4);
+                        p.Y = m.GetDouble(5);
                         p.InGodMode = m.GetBoolean(6) || m.GetBoolean(7);
                         p.HasChat = m.GetBoolean(7);
                         p.Coins = m.GetInt(9);
                         p.BlueCoins = m.GetInt(10);
                         p.IsClubMember = m.GetBoolean(12);
-                        p.Team = m.GetInt(14);
+                        p.Team = m.GetInt(15);
 
                         Players.TryAdd(p.ID, p);
                     }
