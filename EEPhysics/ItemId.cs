@@ -177,6 +177,8 @@ namespace EEPhysics
                 case DojoDarkLeft:
 
                 case DojoDarkRight:
+
+                case 1050:
                     return true;
             }
             return false;
