@@ -98,6 +98,8 @@ namespace EEPhysics
         public const int MedievalBanner = 327;
         public const int MedievalCoatofarms = 328;
         public const int Hologram = 397;
+        public const int SlowDot = 459;
+        public const int SlowDotInvisible = 460;
 
         public static bool isSolid(int blockId)
         {
@@ -118,6 +120,8 @@ namespace EEPhysics
                 case ItemId.WineV:
                 case ItemId.WineH:
                 case ItemId.Rope:
+                case ItemId.SlowDot:
+                case ItemId.SlowDotInvisible:
                     return true;
             }
 
