@@ -100,6 +100,9 @@ namespace EEPhysics
         public const int Hologram = 397;
         public const int SlowDot = 459;
         public const int SlowDotInvisible = 460;
+        public const int HalfBlockDomesticYellow = 1041;
+        public const int HalfBlockDomesticBrown = 1042;
+        public const int HalfBlockDomesticWhite = 1043;
 
         public static bool isSolid(int blockId)
         {
@@ -126,6 +129,20 @@ namespace EEPhysics
             }
 
             return false;
+        }
+
+        public static bool IsHalfBlock(int id)
+        {
+            switch (id)
+            {
+                case HalfBlockDomesticBrown:
+                case HalfBlockDomesticWhite:
+                case HalfBlockDomesticYellow:
+                    return true;
+
+                default:
+                    return false;
+            }
         }
 
         public static bool CanJumpThroughFromBelow(int itemId)
