@@ -639,28 +639,28 @@ namespace EEPhysics
                                         continue;
                                     }
                                 }
-                                else if (ItemId.IsHalfBlock(tileId))
+                            }
+                            else if (ItemId.IsHalfBlock(tileId))
+                            {
+                                if (rot == 1)
                                 {
-                                    if (rot == 1)
-                                    {
-                                        if (!playerRectangle.IntersectsWith(new Rectangle(b*16, a*16+8, 16, 8)))
-                                            continue;
-                                    }
-                                    else if (rot == 2)
-                                    {
-                                        if (!playerRectangle.IntersectsWith(new Rectangle(b*16, a*16, 8, 16)))
-                                            continue;
-                                    }
-                                    else if (rot == 3)
-                                    {
-                                        if (!playerRectangle.IntersectsWith(new Rectangle(b*16, a*16, 16, 8)))
-                                            continue;
-                                    }
-                                    else if (rot == 0)
-                                    {
-                                        if (!playerRectangle.IntersectsWith(new Rectangle(b*16+8, a*16, 8, 16)))
-                                            continue;
-                                    }
+                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16 + 8, 16, 8)))
+                                        continue;
+                                }
+                                else if (rot == 2)
+                                {
+                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16, 8, 16)))
+                                        continue;
+                                }
+                                else if (rot == 3)
+                                {
+                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16, 16, 8)))
+                                        continue;
+                                }
+                                else if (rot == 0)
+                                {
+                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16 + 8, a * 16, 8, 16)))
+                                        continue;
                                 }
                             }
                             else if (ItemId.CanJumpThroughFromBelow(tileId))
