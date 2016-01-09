@@ -591,7 +591,8 @@ namespace EEPhysics
                                 rot = 1;
                             else
                                 rot = blockData[x][y][0];
-                            if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayRed || tileId == ItemId.OnewayYellow)
+                            if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayOrange || tileId == ItemId.OnewayYellow ||
+                                tileId == ItemId.OnewayGray || tileId == ItemId.OnewayBlue || tileId == ItemId.OnewayRed || tileId == ItemId.OnewayGreen || tileId == ItemId.OnewayBlack)
                             {
                                 if (ItemId.CanJumpThroughFromBelow(tileId))
                                 {
