@@ -169,10 +169,11 @@ namespace EEPhysics
                             p.ModifierY = m.GetDouble(6);
                             p.Horizontal = m.GetInt(7);
                             p.Vertical = m.GetInt(8);
+                            p.SpaceDown = m.GetBoolean(9);
                             p.IsDead = false;
                             if (p.HasLevitation)
                             {
-                                if (m.GetBoolean(9))
+                                if (p.SpaceDown)
                                 {
                                     p.ApplyThrust();
                                     p.IsThrusting = true;

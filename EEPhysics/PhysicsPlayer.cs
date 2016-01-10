@@ -1334,7 +1334,7 @@ namespace EEPhysics
             {
                 SpeedX = SpeedX - currentThrust * PhysicsConfig.JumpHeight / 2 * this.morx * 0.5;
             }
-            if (IsThrusting)
+            if (!IsThrusting)
             {
                 if (currentThrust > 0)
                 {
