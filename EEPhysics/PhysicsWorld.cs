@@ -586,14 +586,15 @@ namespace EEPhysics
                     {
                         if (playerRectangle.IntersectsWith(new Rectangle(x * 16, y * 16, 16, 16)))
                         {
-                            if (ItemId.CanJumpThroughFromBelow(tileId))
+                            int rot;
+                            if (blockData[x][y] == null)
+                                rot = 1;
+                            else
+                                rot = blockData[x][y][0];
+                            if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayOrange || tileId == ItemId.OnewayYellow ||
+                                tileId == ItemId.OnewayGray || tileId == ItemId.OnewayBlue || tileId == ItemId.OnewayRed || tileId == ItemId.OnewayGreen || tileId == ItemId.OnewayBlack)
                             {
-                                int rot;
-                                if (blockData[x][y] == null)
-                                    rot = 1;
-                                else
-                                    rot = blockData[x][y][0];
-                                if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayRed || tileId == ItemId.OnewayYellow)
+                                if (ItemId.CanJumpThroughFromBelow(tileId))
                                 {
                                     if ((p.SpeedY < 0 || a <= p.overlapy) && rot == 1)
                                     {
@@ -638,18 +639,41 @@ namespace EEPhysics
                                         continue;
                                     }
                                 }
-                                else
+                            }
+                            else if (ItemId.IsHalfBlock(tileId))
+                            {
+                                if (rot == 1)
                                 {
-                                    if (p.SpeedY < 0 || a <= p.overlapy)
-                                    {
-                                        if (a != y || p.overlapy == -1)
-                                        {
-                                            p.overlapy = a;
-                                        }
-
-                                        skip = true;
+                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16 + 8, 16, 8)))
                                         continue;
+                                }
+                                else if (rot == 2)
+                                {
+                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16, 8, 16)))
+                                        continue;
+                                }
+                                else if (rot == 3)
+                                {
+                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16, 16, 8)))
+                                        continue;
+                                }
+                                else if (rot == 0)
+                                {
+                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16 + 8, a * 16, 8, 16)))
+                                        continue;
+                                }
+                            }
+                            else if (ItemId.CanJumpThroughFromBelow(tileId))
+                            {
+                                if (p.SpeedY < 0 || a <= p.overlapy)
+                                {
+                                    if (a != y || p.overlapy == -1)
+                                    {
+                                        p.overlapy = a;
                                     }
+
+                                    skip = true;
+                                    continue;
                                 }
                             }
 

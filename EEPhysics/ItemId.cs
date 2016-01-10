@@ -61,9 +61,14 @@ namespace EEPhysics
         public const int InvisibleRightArrow = 413;
         public const int InvisibleDot = 414;
         public const int OnewayCyan = 1001; 
-        public const int OnewayRed = 1002; 
+        public const int OnewayOrange = 1002; 
         public const int OnewayYellow = 1003; 
         public const int OnewayPink = 1004;
+        public const int OnewayGray = 1052;
+        public const int OnewayBlue = 1053;
+        public const int OnewayRed = 1054;
+        public const int OnewayGreen = 1055;
+        public const int OnewayBlack = 1056;
         public const int CyanDoor = 1005;
         public const int MagentaDoor = 1006;
         public const int YellowDoor = 1007;
@@ -98,6 +103,11 @@ namespace EEPhysics
         public const int MedievalBanner = 327;
         public const int MedievalCoatofarms = 328;
         public const int Hologram = 397;
+        public const int SlowDot = 459;
+        public const int SlowDotInvisible = 460;
+        public const int HalfBlockDomesticYellow = 1041;
+        public const int HalfBlockDomesticBrown = 1042;
+        public const int HalfBlockDomesticWhite = 1043;
 
         public static bool isSolid(int blockId)
         {
@@ -118,67 +128,64 @@ namespace EEPhysics
                 case ItemId.WineV:
                 case ItemId.WineH:
                 case ItemId.Rope:
+                case ItemId.SlowDot:
+                case ItemId.SlowDotInvisible:
                     return true;
             }
 
             return false;
         }
 
+        public static bool IsHalfBlock(int id)
+        {
+            switch (id)
+            {
+                case HalfBlockDomesticBrown:
+                case HalfBlockDomesticWhite:
+                case HalfBlockDomesticYellow:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
         public static bool CanJumpThroughFromBelow(int itemId)
         {
             switch (itemId)
             {
-                case GlowyLineBlueStraight:
-
-                case GlowylineBlueSlope:
-
-                case GlowyLineGreenSlope:
-
-                case GlowyLineGreenStraight:
-
-                case GlowyLineYellowSlope:
-
-                case GlowyLineYellowStraight:
-
-                case GlowyLineRedSlope:
-
-                case GlowyLineRedStraight:
-
+                case 61:
+                case 62:
+                case 63:
+                case 64:
+                case 89:
+                case 90:
+                case 91:
+                case 96:
+                case 97:
+                case 122:
+                case 123:
+                case 124:
+                case 125:
+                case 126:
+                case 127:
+                case 146:
+                case 154:
+                case 158:
+                case 194:
+                case 211:
+                case 216:
                 case OnewayCyan:
-
-                case OnewayRed:
-
+                case OnewayOrange:
                 case OnewayYellow:
-
                 case OnewayPink:
-
-                case MedievalAxe:
-
-                case MedievalBanner:
-
-                case MedievalCoatofarms:
-
-                case MedievalShield:
-
-                case MedievalSword:
-
-                case MedievalTimber:
-
-                case ToothBig:
-
-                case ToothSmall:
-
-                case ToothTriple:
-
-                case DojoLightLeft:
-
-                case DojoLightRight:
-
-                case DojoDarkLeft:
-
-                case DojoDarkRight:
-
+                case OnewayGray:
+                case OnewayBlue:
+                case OnewayRed:
+                case OnewayGreen:
+                case OnewayBlack:
                 case 1050:
+                case 1051:
                     return true;
             }
             return false;

@@ -223,10 +223,26 @@ namespace EEPhysics
             else
                 delayed = 0;
             current = HostWorld.GetBlock(0, cx, cy);
+
+            if (ItemId.IsHalfBlock(current))
+            {
+                var rot = HostWorld.GetBlockData(cx, cy)[0];
+                if (rot == 1)
+                {
+                    cy -= 1;
+                }
+                if (rot == 0)
+                {
+                    cx -= 1;
+                }
+                current = HostWorld.GetBlock(0, cx, cy);
+            }
+
             if (this.tx != -1)
             {
                 UpdateTeamDoors(this.tx, this.ty);
             }
+
             currentBelow = 0;
             if (current == 1 || current == 411)
             {
@@ -257,6 +273,7 @@ namespace EEPhysics
                 UpdatePurpleSwitches(tileQueue.Dequeue());
             }*/
 
+            // TODO: Change fire to effect
             if (isOnFire && !IsInvulnerable)
             {
                 if (onFireDeath <= 0)
