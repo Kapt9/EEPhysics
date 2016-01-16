@@ -13,10 +13,10 @@ namespace EEPhysics
         private bool hideRed, hideBlue, hideGreen, hideCyan, hideMagenta, hideYellow, hideTimedoor;
         internal bool Connected { get { return Connection != null && Connection.Connected; } }
         private readonly List<Message> earlyMessages = new List<Message>();
-        internal Connection Connection { get; private set; }
         public int WorldHeight { get; private set; }
         public int WorldWidth { get; private set; }
         internal Stopwatch Sw = new Stopwatch();
+        internal Connection Connection { get; }
         internal double WorldGravity = 1;
         private Thread physicsThread;
         internal const int Size = 16;
@@ -313,7 +313,7 @@ namespace EEPhysics
                     break;
                 case "tele":
                     {
-                        bool b = m.GetBoolean(0);
+                        if (m.GetBoolean(0)) foreach (var pair in Players) pair.Value.Reset();
                         uint i = 1;
                         while (i + 2 < m.Count)
                         {

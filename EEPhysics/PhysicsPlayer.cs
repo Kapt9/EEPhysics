@@ -45,9 +45,17 @@ namespace EEPhysics
         internal int Deaths;
         private int oh, ov;
 
+        private double slippery = 0;
+        private int jumpCount = 0;
+        private int maxJumps = 1;
+
         public bool SpeedBoostEffect { get; internal set; }
         public bool JumpBoostEffect { get; internal set; }
         public bool HasLevitation { get; internal set; }
+
+        public bool DoubleJumpEffect { get; internal set; }
+        public bool GravityEffect { get; internal set; }
+
         public bool CursedEffect { get; internal set; }
         public bool IsThrusting { get; internal set; }
         public bool Zombie { get; internal set; }
@@ -65,16 +73,28 @@ namespace EEPhysics
         public int TickId { get; set; }
 
         private long lastJump;
-        private bool spacejustdown;
+        public bool JustSpaceDown { get; set; }
         public bool SpaceDown { get; set; }
 
+        internal double gravityMultiplier
+        {
+            get
+            {
+                double d = 1;
+
+                if (GravityEffect) d *= 0.15;
+                else d *= HostWorld.WorldGravity;
+
+                return d;
+            }
+        }
         internal double GravityMultiplier { get { return HostWorld.WorldGravity; } }
         internal double SpeedMultiplier
         {
             get
             {
                 double d = 1.0;
-                if (Zombie) d *= 1.2;
+                if (Zombie) d *= 0.6;
                 if (SpeedBoostEffect) d *= 1.5;
                 return d;
             }
@@ -88,7 +108,9 @@ namespace EEPhysics
             get
             {
                 double d = 1.0;
+
                 if (JumpBoostEffect) d *= 1.3;
+                if (slippery > 0) d *= 0.88;
                 if (Zombie) d *= 0.75;
 
                 return d;
@@ -195,10 +217,7 @@ namespace EEPhysics
             int cy = ((int)(Y + 8) >> 4);
 
             int delayed;
-            if (queue.Count > 0)
-                delayed = queue.Dequeue();
-            else
-                delayed = 0;
+            delayed = queue.Count > 0 ? queue.Dequeue() : 0;
             current = HostWorld.GetBlock(0, cx, cy);
 
             if (ItemId.IsHalfBlock(current))
@@ -273,7 +292,7 @@ namespace EEPhysics
                 Horizontal = 0;
                 Vertical = 0;
                 spacedown = false;
-                spacejustdown = false;
+                JustSpaceDown = false;
             }
 
             bool isGodMode = InGodMode;
@@ -722,7 +741,7 @@ namespace EEPhysics
                     int mod = 1;
                     bool injump = false;
                     bool changed = false;
-                    if (spacejustdown)
+                    if (JustSpaceDown)
                     {
                         lastJump = -HostWorld.Sw.ElapsedMilliseconds;
                         injump = true;
@@ -779,10 +798,10 @@ namespace EEPhysics
                         oh = Horizontal;
                         ov = Vertical;
                         HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, (int)ModifierX, (int)ModifierY,
-                            Horizontal, Vertical, GravityMultiplier, spacedown, spacejustdown, TickId);
+                            Horizontal, Vertical, GravityMultiplier, spacedown, JustSpaceDown, TickId);
                     }
                     TickId++;
-                    spacejustdown = false;
+                    JustSpaceDown = false;
                 }
                 if (pastx != cx || pasty != cy)
                 {
@@ -812,7 +831,7 @@ namespace EEPhysics
                             gotCoins.Add(new Point(cx, cy));
                             if (IsMe && HostWorld.Connected)
                             {
-                                HostWorld.Connection.Send("c", Coins, BlueCoins, cx, cy);
+                                HostWorld.Connection.Send("c", ++Coins, BlueCoins, cx, cy);
                             }
                             found:
                             break;
@@ -829,7 +848,7 @@ namespace EEPhysics
                             gotBlueCoins.Add(new Point(cx, cy));
                             if (IsMe && HostWorld.Connected)
                             {
-                                HostWorld.Connection.Send("c", Coins, BlueCoins, cx, cy);
+                                HostWorld.Connection.Send("c", Coins, ++BlueCoins, cx, cy);
                             }
                             found2:
                             break;
@@ -936,9 +955,26 @@ namespace EEPhysics
                                 HostWorld.Connection.Send("levelcomplete", cx, cy);
                             }
                             break;
-                        case ItemId.EffectProtection:
-                            // TODO
-                            break;
+
+                            /* case ItemId.EffectProtection:
+                                 if (!InGodMode)
+                                 {
+                                     //TODO: Fix this (code currently from EE Client)
+                                     newInv = world.lookup.getBoolean(cx, cy);
+                                     if (this.isInvulnerable != newInv)
+                                     {
+                                         this.isInvulnerable = newInv;
+                                         if (this.isInvulnerable)
+                                         {
+                                             this.Zombie = false;
+                                             this.isOnFire = false;
+                                             this.CursedEffect = false;
+                                         }
+                                         if (IsMe && HostWorld.Connected) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectProtection);
+                                     }
+                                 }
+                                 break;*/
+
                     }
                     pastx = cx;
                     pasty = cy;
@@ -1225,6 +1261,8 @@ namespace EEPhysics
         {
             gotCoins.Clear();
             gotBlueCoins.Clear();
+            BlueCoins = 0;
+            Coins = 0;
             Deaths = 0;
         }
         internal void RemoveCoin(int xx, int yy)
