@@ -1,33 +1,31 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
+using System.Collections;
 using System.Threading;
 using PlayerIOClient;
-using System.Collections;
+using System;
 
 namespace EEPhysics
 {
-    public class PhysicsWorld : IDisposable 
+    public class PhysicsWorld : IDisposable
     {
-        internal const int Size = 16;
-        internal Stopwatch sw = new Stopwatch();
-        private List<Message> earlyMessages = new List<Message>();
-        private bool inited;
-        private bool running;
-        private Thread physicsThread;
-        internal Connection Connection { get; private set; }
-        internal bool Connected { get { return Connection != null && Connection.Connected; } }
-
-        private int[][][] blocks;
-        private int[][][] blockData;
         private bool hideRed, hideBlue, hideGreen, hideCyan, hideMagenta, hideYellow, hideTimedoor;
-        internal double WorldGravity = 1;
-
-        public int WorldWidth { get; private set; }
+        internal bool Connected { get { return Connection != null && Connection.Connected; } }
+        private readonly List<Message> earlyMessages = new List<Message>();
+        internal Connection Connection { get; private set; }
         public int WorldHeight { get; private set; }
+        public int WorldWidth { get; private set; }
+        internal Stopwatch Sw = new Stopwatch();
+        internal double WorldGravity = 1;
+        private Thread physicsThread;
+        internal const int Size = 16;
+        private int[][][] blockData;
+        private int[][][] blocks;
+        private bool running;
+        private bool inited;
+
+
 
         /// <summary>
         /// Whether bot automatically starts the physics simulation when it gets init message. Defaults to true.
@@ -45,9 +43,10 @@ namespace EEPhysics
         /// <summary>
         /// You shouldn't add or remove any items from this dictionary outside EEPhysics.
         /// </summary>
-        public ConcurrentDictionary<int, PhysicsPlayer> Players { get; private set; }
+        public ConcurrentDictionary<int, PhysicsPlayer> Players { get; }
         public string WorldKey { get; private set; }
-        public int BotID { get; private set; }
+        public int BotId { get; private set; }
+
         /// <summary>
         /// Called upon every physics simulation tick. (every 10ms)
         /// </summary>
@@ -75,19 +74,19 @@ namespace EEPhysics
             running = true;
             PhysicsRunning = true;
 
-            sw.Start();
+            Sw.Start();
             while (running)
             {
-                long frameStartTime = sw.ElapsedMilliseconds;
-                foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                {
-                    pair.Value.Tick();
-                }
+                long frameStartTime = Sw.ElapsedMilliseconds;
+
+                foreach (var pair in Players) pair.Value.Tick();
+
                 OnTick(this, null);
-                long frameEndTime = sw.ElapsedMilliseconds;
+
+                long frameEndTime = Sw.ElapsedMilliseconds;
+
                 long waitTime = 10 - (frameEndTime - frameStartTime);
-                if (waitTime > 0)
-                    Thread.Sleep((int)waitTime);
+                if (waitTime > 0) Thread.Sleep((int)waitTime);
             }
 
             PhysicsRunning = false;
@@ -109,13 +108,11 @@ namespace EEPhysics
                     for (int i = 0; i < blocks.Length; i++)
                     {
                         blocks[i] = new int[WorldWidth][];
-                        for (int ii = 0; ii < WorldWidth; ii++)
-                            blocks[i][ii] = new int[WorldHeight];
+                        for (int ii = 0; ii < WorldWidth; ii++) blocks[i][ii] = new int[WorldHeight];
                     }
 
                     blockData = new int[WorldWidth][][];
-                    for (int i = 0; i < WorldWidth; i++)
-                        blockData[i] = new int[WorldHeight][];
+                    for (int i = 0; i < WorldWidth; i++) blockData[i] = new int[WorldHeight][];
 
                     WorldKey = Derot(m.GetString(5));
                     WorldGravity = m.GetDouble(19);
@@ -128,24 +125,19 @@ namespace EEPhysics
                             Y = m.GetInt(10),
                             HostWorld = this
                         };
-                        BotID = p.ID;
+                        BotId = p.Id;
                         p.IsMe = true;
-                        Players.TryAdd(p.ID, p);
+                        Players.TryAdd(p.Id, p);
                     }
 
                     DeserializeBlocks(m);
                     inited = true;
 
-                    foreach (Message m2 in earlyMessages)
-                    {
-                        HandleMessage(m2);
-                    }
+                    foreach (Message m2 in earlyMessages) HandleMessage(m2);
+
                     earlyMessages.Clear();
 
-                    if (AutoStart && (physicsThread == null || !physicsThread.IsAlive))
-                    {
-                        StartSimulation();
-                    }
+                    if (AutoStart && (physicsThread == null || !physicsThread.IsAlive)) StartSimulation();
                 }
                 else if (m.Type != "add" && m.Type != "left")
                 {
@@ -159,7 +151,7 @@ namespace EEPhysics
                     {
                         int id = m.GetInt(0);
                         PhysicsPlayer p;
-                        if (id != BotID && Players.TryGetValue(id, out p))
+                        if (id != BotId && Players.TryGetValue(id, out p))
                         {
                             p.X = m.GetDouble(1);
                             p.Y = m.GetDouble(2);
@@ -178,10 +170,7 @@ namespace EEPhysics
                                     p.ApplyThrust();
                                     p.IsThrusting = true;
                                 }
-                                else
-                                {
-                                    p.IsThrusting = false;
-                                }
+                                else p.IsThrusting = false;
                             }
                         }
                     }
@@ -196,18 +185,8 @@ namespace EEPhysics
                         {
                             switch (blocks[zz][xx][yy])
                             {
-                                case 100:
-                                    foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                                    {
-                                        pair.Value.RemoveCoin(xx, yy);
-                                    }
-                                    break;
-                                case 101:
-                                    foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                                    {
-                                        pair.Value.RemoveBlueCoin(xx, yy);
-                                    }
-                                    break;
+                                case 100: foreach (var pair in Players) pair.Value.RemoveCoin(xx, yy); break;
+                                case 101: foreach (var pair in Players) pair.Value.RemoveBlueCoin(xx, yy); break;
                             }
                         }
                         blocks[zz][xx][yy] = blockId;
@@ -226,7 +205,7 @@ namespace EEPhysics
                         p.IsClubMember = m.GetBoolean(12);
                         p.Team = m.GetInt(15);
 
-                        Players.TryAdd(p.ID, p);
+                        Players.TryAdd(p.Id, p);
                     }
                     break;
                 case "left":
@@ -241,37 +220,20 @@ namespace EEPhysics
                         bool b = (m.Type == "hide");
                         switch (m.GetString(0))
                         {
-                            case "timedoor":
-                                hideTimedoor = b;
-                                break;
-                            case "blue":
-                                hideBlue = b;
-                                break;
-                            case "red":
-                                hideRed = b;
-                                break;
-                            case "green":
-                                hideGreen = b;
-                                break;
-                            case "cyan":
-                                hideCyan = b;
-                                break;
-                            case "magenta":
-                                hideMagenta = b;
-                                break;
-                            case "yellow":
-                                hideYellow = b;
-                                break;
+                            case "timedoor": hideTimedoor = b; break;
+                            case "blue": hideBlue = b; break;
+                            case "red": hideRed = b; break;
+                            case "green": hideGreen = b; break;
+                            case "cyan": hideCyan = b; break;
+                            case "magenta": hideMagenta = b; break;
+                            case "yellow": hideYellow = b; break;
                         }
                     }
                     break;
                 case "ps":
                     {
                         PhysicsPlayer p;
-                        if (Players.TryGetValue(m.GetInt(0), out p))
-                        {
-                            p.Switches[m.GetInt(1)] = m.GetInt(2) == 1;
-                        }
+                        if (Players.TryGetValue(m.GetInt(0), out p)) p.Switches[m.GetInt(1)] = m.GetInt(2) == 1;
                     }
                     break;
                 case "psi":
@@ -281,12 +243,8 @@ namespace EEPhysics
                         {
                             p.Switches = new BitArray(100);
                             byte[] bytes = m.GetByteArray(1);
-                            if (bytes.Length > 100)
-                                p.Switches.Length = bytes.Length;
-                            for (int i = 0; i < bytes.Length; i++)
-                            {
-                                p.Switches[i] = (bytes[i] == 1);
-                            }
+                            if (bytes.Length > 100) p.Switches.Length = bytes.Length;
+                            for (int i = 0; i < bytes.Length; i++) p.Switches[i] = (bytes[i] == 1);
                         }
                     }
                     break;
@@ -308,10 +266,7 @@ namespace EEPhysics
                         int yy = m.GetInt(1);
                         blocks[0][xx][yy] = m.GetInt(2);
                         blockData[xx][yy] = new int[1];
-                        for (uint i = 3; i < 4; i++)
-                        {
-                            blockData[xx][yy][i - 3] = m.GetInt(i);
-                        }
+                        for (uint i = 3; i < 4; i++) blockData[xx][yy][i - 3] = m.GetInt(i);
                     }
                     break;
                 case "pt":
@@ -320,13 +275,10 @@ namespace EEPhysics
                         int yy = m.GetInt(1);
                         blocks[0][xx][yy] = m.GetInt(2);
                         blockData[xx][yy] = new int[3];
-                        for (uint i = 3; i < 6; i++)
-                        {
-                            blockData[xx][yy][i - 3] = m.GetInt(i);
-                        }
+                        for (uint i = 3; i < 6; i++) blockData[xx][yy][i - 3] = m.GetInt(i);
                     }
                     break;
-                case "fill":
+                /*case "fill":
                     {
                         int blockId = m.GetInt(0);
                         int z = m.GetInt(1);
@@ -335,41 +287,28 @@ namespace EEPhysics
                         int endX = startX + m.GetInt(4);
                         int endY = startY + m.GetInt(5);
                         for (int x = startX; x < endX; x++)
-                        {
                             for (int y = startY; y < endY; y++)
-                            {
                                 blocks[z][x][y] = blockId;
-                            }
-                        }
                     }
-                    break;
+                    break;*/  //Fill got removed a long long while ago..
                 case "god":
                 case "mod":
                 case "admin":
                     {
                         PhysicsPlayer p;
-                        if (Players.TryGetValue(m.GetInt(0), out p))
-                        {
-                            p.InGodMode = m.GetBoolean(1);
-                        }
+                        if (Players.TryGetValue(m.GetInt(0), out p)) p.InGodMode = m.GetBoolean(1);
                     }
                     break;
                 case "effect":
                     {
                         PhysicsPlayer p;
-                        if (Players.TryGetValue(m.GetInt(0), out p))
-                        {
-                            p.SetEffect(m.GetInt(1), m.GetBoolean(2));
-                        }
+                        if (Players.TryGetValue(m.GetInt(0), out p)) p.SetEffect(m.GetInt(1), m.GetBoolean(2));
                     }
                     break;
                 case "team":
                     {
                         PhysicsPlayer p;
-                        if (Players.TryGetValue(m.GetInt(0), out p))
-                        {
-                            p.Team = m.GetInt(1);
-                        }
+                        if (Players.TryGetValue(m.GetInt(0), out p)) p.Team = m.GetInt(1);
                     }
                     break;
                 case "tele":
@@ -402,15 +341,7 @@ namespace EEPhysics
                 case "reset":
                     {
                         DeserializeBlocks(m);
-                        foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                        {
-                            pair.Value.Reset();
-                        }
-
-                        /*for (int i = 0; i < players.Count; i++) {
-                            players[i].Coins = 0;
-                            players[i].respawn();
-                        }*/
+                        foreach (var pair in Players) pair.Value.Reset();
                     }
                     break;
                 case "clear":
@@ -421,19 +352,13 @@ namespace EEPhysics
                         {
                             for (int ii = 0; ii < WorldHeight; ii++)
                             {
-                                if (i == 0 || ii == 0 || i == WorldWidth - 1 || ii == WorldHeight - 1)
-                                {
-                                    blocks[0][i][ii] = border;
-                                }
-                                else
-                                {
-                                    blocks[0][i][ii] = fill;
-                                }
+                                if (i == 0 || ii == 0 || i == WorldWidth - 1 || ii == WorldHeight - 1) blocks[0][i][ii] = border;
+                                else blocks[0][i][ii] = fill;
+
                                 blocks[1][i][ii] = 0;
                             }
                         }
-                        foreach (KeyValuePair<int, PhysicsPlayer> pair in Players)
-                            pair.Value.Reset();
+                        foreach (var pair in Players) pair.Value.Reset();
                     }
                     break;
                 case "ts":
@@ -447,16 +372,10 @@ namespace EEPhysics
                     {
                         int userId = m.GetInt(0u);
 
-                        if (userId == BotID && Connected)
-                        {
-                            Players[BotID].KillPlayer();
-                        }
+                        if (userId == BotId && Connected) Players[BotId].KillPlayer();
 
                         PhysicsPlayer p;
-                        if (Players.TryGetValue(userId, out p))
-                        {
-                            p.deaths++;
-                        }
+                        if (Players.TryGetValue(userId, out p)) p.Deaths++;
                     }
                     break;
             }
@@ -467,45 +386,37 @@ namespace EEPhysics
         {
             return GetBlock(0, x, y);
         }
+
         /// <param name="z">Block layer: 0 = foreground, 1 = background</param>
         /// <param name="x">Block X</param>
         /// <param name="y">Block Y</param>
         /// <returns>Block ID</returns>
         public int GetBlock(int z, int x, int y)
         {
-            if (z < 0 || z > 1)
-            {
-                throw new ArgumentOutOfRangeException("z", "Layer must be 0 (foreground) or 1 (background).");
-            }
-            if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight)
-            {
-                return -1;
-            }
+            if (z < 0 || z > 1) throw new ArgumentOutOfRangeException("z", "Layer must be 0 (foreground) or 1 (background).");
+            if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight) return -1;
+
             return blocks[z][x][y];
         }
+
         /// <returns>Extra block data, eg. rotation, id and target id from portals. Doesn't support signs.</returns>
         public int[] GetBlockData(int x, int y)
         {
-            if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight)
-            {
-                return null;
-            }
+            if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight) return null;
             return blockData[x][y];
         }
+
         internal bool TryGetPortalById(int id, out Point p)
         {
             for (int i = 0; i < WorldWidth; i++)
             {
                 for (int ii = 0; ii < WorldHeight; ii++)
                 {
-                    if (blocks[0][i][ii] == 242 || blocks[0][i][ii] == 381)
-                    {
-                        if (blockData[i][ii][1] == id)
-                        {
-                            p = new Point(i, ii);
-                            return true;
-                        }
-                    }
+                    if (blocks[0][i][ii] != 242 && blocks[0][i][ii] != 381) continue;
+                    if (blockData[i][ii][1] != id) continue;
+
+                    p = new Point(i, ii);
+                    return true;
                 }
             }
             p = default(Point);
@@ -527,42 +438,25 @@ namespace EEPhysics
             {
                 if (inited)
                 {
-                    physicsThread = new Thread(Run) {IsBackground = true};
+                    physicsThread = new Thread(Run) { IsBackground = true };
                     physicsThread.Start();
                 }
-                else
-                {
-                    throw new Exception("Cannot start before bot has received init message.");
-                }
+                else throw new Exception("Cannot start before bot has received init message.");
             }
-            else
-            {
-                throw new Exception("Simulation thread has already been started.");
-            }
+            else throw new Exception("Simulation thread has already been started.");
+
         }
 
         /// <summary>
         /// Stops the physics simulation thread.
         /// </summary>
-        public void StopSimulation()
-        {
-            if (PhysicsRunning)
-            {
-                running = false;
-            }
-        }
+        public void StopSimulation() { if (PhysicsRunning) running = false; }
 
         internal bool Overlaps(PhysicsPlayer p)
         {
-            if ((p.X < 0 || p.Y < 0) || ((p.X > WorldWidth * 16 - 16) || (p.Y > WorldHeight * 16 - 16)))
-            {
-                return true;
-            }
-            if (p.InGodMode)
-            {
-                return false;
-            }
-            int tileId;
+            if ((p.X < 0 || p.Y < 0) || ((p.X > WorldWidth * 16 - 16) || (p.Y > WorldHeight * 16 - 16))) return true;
+            if (p.InGodMode) return false;
+
             var firstX = ((int)p.X >> 4);
             var firstY = ((int)p.Y >> 4);
             double lastX = ((p.X + PhysicsPlayer.Height) / Size);
@@ -570,322 +464,308 @@ namespace EEPhysics
             bool skip = false;
             Rectangle playerRectangle = new Rectangle((int)p.X, (int)p.Y, 16, 16);
 
-            int x;
             int y = firstY;
 
             int a = firstY;
-            int b;
             while (y < lastY)
             {
-                x = firstX;
-                b = firstX;
+                var x = firstX;
+                var b = firstX;
                 for (; x < lastX; x++)
                 {
-                    tileId = blocks[0][x][y];
+                    var tileId = blocks[0][x][y];
 
-                    if (ItemId.isSolid(tileId))
+                    if (!ItemId.IsSolid(tileId)) continue;
+                    if (!playerRectangle.IntersectsWith(new Rectangle(x * 16, y * 16, 16, 16))) continue;
+
+                    int rot = blockData[x][y] == null ? 1 : blockData[x][y][0];
+
+                    if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayOrange ||
+                        tileId == ItemId.OnewayYellow || tileId == ItemId.OnewayGray || tileId == ItemId.OnewayBlue ||
+                        tileId == ItemId.OnewayRed || tileId == ItemId.OnewayGreen || tileId == ItemId.OnewayBlack)
                     {
-                        if (playerRectangle.IntersectsWith(new Rectangle(x * 16, y * 16, 16, 16)))
+                        if (ItemId.CanJumpThroughFromBelow(tileId))
                         {
-                            int rot;
-                            if (blockData[x][y] == null)
-                                rot = 1;
-                            else
-                                rot = blockData[x][y][0];
-                            if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayOrange || tileId == ItemId.OnewayYellow ||
-                                tileId == ItemId.OnewayGray || tileId == ItemId.OnewayBlue || tileId == ItemId.OnewayRed || tileId == ItemId.OnewayGreen || tileId == ItemId.OnewayBlack)
+                            if ((p.SpeedY < 0 || a <= p.Overlapy) && rot == 1)
                             {
-                                if (ItemId.CanJumpThroughFromBelow(tileId))
+                                if (a != firstY || p.Overlapy == -1)
                                 {
-                                    if ((p.SpeedY < 0 || a <= p.overlapy) && rot == 1)
-                                    {
-                                        if (a != firstY || p.overlapy == -1)
-                                        {
-                                            p.overlapy = a;
-                                        }
-
-                                        skip = true;
-                                        continue;
-                                    }
-
-                                    if ((p.SpeedX > 0 || b <= p.overlapy) && rot == 2)
-                                    {
-                                        if (b == firstX || p.overlapy == -1)
-                                        {
-                                            p.overlapy = b;
-                                        }
-
-                                        skip = true;
-                                        continue;
-                                    }
-
-                                    if ((p.SpeedY > 0 || a <= p.overlapy) && rot == 3)
-                                    {
-                                        if (a == firstY || p.overlapy == -1)
-                                        {
-                                            p.overlapy = a;
-                                        }
-
-                                        skip = true;
-                                        continue;
-                                    }
-                                    if ((p.SpeedX < 0 || b <= p.overlapy) && rot == 0)
-                                    {
-                                        if (b != firstX || p.overlapy == -1)
-                                        {
-                                            p.overlapy = b;
-                                        }
-
-                                        skip = true;
-                                        continue;
-                                    }
+                                    p.Overlapy = a;
                                 }
-                            }
-                            else if (ItemId.IsHalfBlock(tileId))
-                            {
-                                if (rot == 1)
-                                {
-                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16 + 8, 16, 8)))
-                                        continue;
-                                }
-                                else if (rot == 2)
-                                {
-                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16, 8, 16)))
-                                        continue;
-                                }
-                                else if (rot == 3)
-                                {
-                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16, 16, 8)))
-                                        continue;
-                                }
-                                else if (rot == 0)
-                                {
-                                    if (!playerRectangle.IntersectsWith(new Rectangle(b * 16 + 8, a * 16, 8, 16)))
-                                        continue;
-                                }
-                            }
-                            else if (ItemId.CanJumpThroughFromBelow(tileId))
-                            {
-                                if (p.SpeedY < 0 || a <= p.overlapy)
-                                {
-                                    if (a != y || p.overlapy == -1)
-                                    {
-                                        p.overlapy = a;
-                                    }
 
-                                    skip = true;
-                                    continue;
-                                }
+                                skip = true;
+                                continue;
                             }
 
-                            switch (tileId)
+                            if ((p.SpeedX > 0 || b <= p.Overlapy) && rot == 2)
                             {
-                                case 23:
-                                    if (hideRed)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case 24:
-                                    if (hideGreen)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case 25:
-                                    if (hideBlue)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case 26:
-                                    if (!hideRed)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case 27:
-                                    if (!hideGreen)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case 28:
-                                    if (!hideBlue)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case 156:
-                                    if (hideTimedoor)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case 157:
-                                    if (!hideTimedoor)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.CyanDoor:
-                                    if (hideCyan)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.MagentaDoor:
-                                    if (hideMagenta)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.YellowDoor:
-                                    if (hideYellow)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.CyanGate:
-                                    if (!hideCyan)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.MagentaGate:
-                                    if (!hideMagenta)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.YellowGate:
-                                    if (!hideYellow)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.DoorPurple:
-                                    {
-                                        int pid = blockData[x][y][0];
-                                        if (p.Switches[pid])
-                                        {
-                                            continue;
-                                        }
-                                    }
-                                    break;
-                                case ItemId.GatePurple:
-                                    {
-                                        int pid = blockData[x][y][0];
-                                        if (!p.Switches[pid])
-                                        {
-                                            continue;
-                                        }
-                                    }
-                                    break;
-                                case ItemId.DeathDoor:
-                                    if (p.deaths >= blockData[x][y][0])
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.DeathGate:
-                                    if (p.deaths < blockData[x][y][0])
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.TeamDoor:
-                                    if (p.Team == GetBlockData(x, y)[0])
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.TeamGate:
-                                    if (p.Team != GetBlockData(x, y)[0])
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.DoorClub:
-                                    if (p.IsClubMember)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.GateClub:
-                                    if (!p.IsClubMember)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.Coindoor:
-                                case ItemId.BlueCoindoor:
-                                    if (blockData[x][y][0] <= p.Coins)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.Coingate:
-                                case ItemId.BlueCoingate:
-                                    if (blockData[x][y][0] > p.Coins)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-                                case ItemId.ZombieGate:
-                                    /*if (p.Zombie) {
-                                        continue;
-                                    };*/
-                                    break;
-                                case ItemId.ZombieDoor:
-                                    /*if (!p.Zombie) {
-                                        continue;
-                                    };*/
-                                    continue;
-                                case 61:
-                                case 62:
-                                case 63:
-                                case 64:
-                                case 89:
-                                case 90:
-                                case 91:
-                                case 96:
-                                case 97:
-                                case 122:
-                                case 123:
-                                case 124:
-                                case 125:
-                                case 126:
-                                case 127:
-                                case 146:
-                                case 154:
-                                case 158:
-                                case 194:
-                                case 211:
-                                    if (p.SpeedY < 0 || y <= p.overlapy)
-                                    {
-                                        if (y != firstY || p.overlapy == -1)
-                                        {
-                                            p.overlapy = y;
-                                        }
-                                        skip = true;
-                                        continue;
-                                    }
-                                    break;
-                                case 83:
-                                case 77:
-                                    continue;
+                                if (b == firstX || p.Overlapy == -1)
+                                {
+                                    p.Overlapy = b;
+                                }
+
+                                skip = true;
+                                continue;
                             }
 
-                            return true;
+                            if ((p.SpeedY > 0 || a <= p.Overlapy) && rot == 3)
+                            {
+                                if (a == firstY || p.Overlapy == -1)
+                                {
+                                    p.Overlapy = a;
+                                }
+
+                                skip = true;
+                                continue;
+                            }
+                            if ((p.SpeedX < 0 || b <= p.Overlapy) && rot == 0)
+                            {
+                                if (b != firstX || p.Overlapy == -1)
+                                {
+                                    p.Overlapy = b;
+                                }
+
+                                skip = true;
+                                continue;
+                            }
                         }
                     }
+                    else if (ItemId.IsHalfBlock(tileId))
+                    {
+                        if (rot == 1)
+                        {
+                            if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16 + 8, 16, 8))) continue;
+                        }
+                        else if (rot == 2)
+                        {
+                            if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16, 8, 16))) continue;
+                        }
+                        else if (rot == 3)
+                        {
+                            if (!playerRectangle.IntersectsWith(new Rectangle(b * 16, a * 16, 16, 8))) continue;
+                        }
+                        else if (rot == 0)
+                        {
+                            if (!playerRectangle.IntersectsWith(new Rectangle(b * 16 + 8, a * 16, 8, 16))) continue;
+                        }
+                    }
+                    else if (ItemId.CanJumpThroughFromBelow(tileId))
+                    {
+                        if (p.SpeedY < 0 || a <= p.Overlapy)
+                        {
+                            if (a != y || p.Overlapy == -1) p.Overlapy = a;
+
+                            skip = true;
+                            continue;
+                        }
+                    }
+
+                    switch (tileId)
+                    {
+                        case 23:
+                            if (hideRed)
+                            {
+                                continue;
+                            }
+                            break;
+                        case 24:
+                            if (hideGreen)
+                            {
+                                continue;
+                            }
+                            break;
+                        case 25:
+                            if (hideBlue)
+                            {
+                                continue;
+                            }
+                            break;
+                        case 26:
+                            if (!hideRed)
+                            {
+                                continue;
+                            }
+                            break;
+                        case 27:
+                            if (!hideGreen)
+                            {
+                                continue;
+                            }
+                            break;
+                        case 28:
+                            if (!hideBlue)
+                            {
+                                continue;
+                            }
+                            break;
+                        case 156:
+                            if (hideTimedoor)
+                            {
+                                continue;
+                            }
+                            break;
+                        case 157:
+                            if (!hideTimedoor)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.CyanDoor:
+                            if (hideCyan)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.MagentaDoor:
+                            if (hideMagenta)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.YellowDoor:
+                            if (hideYellow)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.CyanGate:
+                            if (!hideCyan)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.MagentaGate:
+                            if (!hideMagenta)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.YellowGate:
+                            if (!hideYellow)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.DoorPurple:
+                            {
+                                int pid = blockData[x][y][0];
+                                if (p.Switches[pid])
+                                {
+                                    continue;
+                                }
+                            }
+                            break;
+                        case ItemId.GatePurple:
+                            {
+                                int pid = blockData[x][y][0];
+                                if (!p.Switches[pid])
+                                {
+                                    continue;
+                                }
+                            }
+                            break;
+                        case ItemId.DeathDoor:
+                            if (p.Deaths >= blockData[x][y][0])
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.DeathGate:
+                            if (p.Deaths < blockData[x][y][0])
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.TeamDoor:
+                            if (p.Team == GetBlockData(x, y)[0])
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.TeamGate:
+                            if (p.Team != GetBlockData(x, y)[0])
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.DoorClub:
+                            if (p.IsClubMember)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.GateClub:
+                            if (!p.IsClubMember)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.Coindoor:
+                        case ItemId.BlueCoindoor:
+                            if (blockData[x][y][0] <= p.Coins)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.Coingate:
+                        case ItemId.BlueCoingate:
+                            if (blockData[x][y][0] > p.Coins)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ItemId.ZombieGate:
+                            /*if (p.Zombie) {
+                                        continue;
+                                    };*/
+                            break;
+                        case ItemId.ZombieDoor:
+                            /*if (!p.Zombie) {
+                                        continue;
+                                    };*/
+                            continue;
+                        case 61:
+                        case 62:
+                        case 63:
+                        case 64:
+                        case 89:
+                        case 90:
+                        case 91:
+                        case 96:
+                        case 97:
+                        case 122:
+                        case 123:
+                        case 124:
+                        case 125:
+                        case 126:
+                        case 127:
+                        case 146:
+                        case 154:
+                        case 158:
+                        case 194:
+                        case 211:
+                            if (p.SpeedY < 0 || y <= p.Overlapy)
+                            {
+                                if (y != firstY || p.Overlapy == -1)
+                                {
+                                    p.Overlapy = y;
+                                }
+                                skip = true;
+                                continue;
+                            }
+                            break;
+                        case 83:
+                        case 77:
+                            continue;
+                    }
+
+                    return true;
                 }
                 y++;
             }
             if (!skip)
             {
-                p.overlapy = -1;
+                p.Overlapy = -1;
             }
             return false;
         }

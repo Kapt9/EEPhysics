@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace EEPhysics
+﻿namespace EEPhysics
 {
     internal static class ItemId
     {
@@ -109,7 +104,7 @@ namespace EEPhysics
         public const int HalfBlockDomesticBrown = 1042;
         public const int HalfBlockDomesticWhite = 1043;
 
-        public static bool isSolid(int blockId)
+        public static bool IsSolid(int blockId)
         {
             return (9 <= blockId && blockId <= 97) || (122 <= blockId && blockId <= 217) || (1001 <= blockId && blockId <= 2000);
         }
@@ -119,21 +114,21 @@ namespace EEPhysics
             return blockId >= 500 && blockId <= 999;
         }
 
-        public static bool isClimbable(int id)
+        public static bool IsClimbable(int id)
         {
             switch (id)
             {
-                case ItemId.NinjaLadder:
-                case ItemId.Chain:
-                case ItemId.WineV:
-                case ItemId.WineH:
-                case ItemId.Rope:
-                case ItemId.SlowDot:
-                case ItemId.SlowDotInvisible:
+                case NinjaLadder:
+                case Chain:
+                case WineV:
+                case WineH:
+                case Rope:
+                case SlowDot:
+                case SlowDotInvisible:
                     return true;
-            }
 
-            return false;
+                default: return false;
+            }
         }
 
         public static bool IsHalfBlock(int id)
@@ -145,8 +140,7 @@ namespace EEPhysics
                 case HalfBlockDomesticYellow:
                     return true;
 
-                default:
-                    return false;
+                default: return false;
             }
         }
 
@@ -187,8 +181,9 @@ namespace EEPhysics
                 case 1050:
                 case 1051:
                     return true;
+
+                default: return false;
             }
-            return false;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace EEPhysics
 {
@@ -17,59 +17,55 @@ namespace EEPhysics
         /// The precise player Y position.
         /// </summary>
         public double Y { get; internal set; }
+
+        private double oldX, oldY, speedX, speedY, modifierX, modifierY;
+        private readonly List<Point> gotBlueCoins = new List<Point>();
+        private readonly List<Point> gotCoins = new List<Point>();
+        private readonly Queue<int> tileQueue = new Queue<int>();
+        private readonly Queue<int> queue = new Queue<int>();
+        private const double PortalMultiplier = 1.42;
         public int Horizontal { get; internal set; }
         public int Vertical { get; internal set; }
+        internal BitArray Switches { get; set; }
         private int current, currentBelow;
-        private double oldX, oldY;
-        private double speedX = 0;
-        private double speedY = 0;
-        private double modifierX = 0;
-        private double modifierY = 0;
-        private int gravity;
+        private int onFireDeath = 200;
+        private readonly int gravity;
+        private int tx = -1, ty = -1;
+        private bool isInvulnerable;
+        private bool hasLastPortal;
+        private float deathOffset;
+        private bool donex, doney;
+        private int pastx, pasty;
+        private Point lastPortal;
         private double mox, moy;
         private int morx, mory;
-        private int pastx, pasty;
-        internal int overlapy;
-        private double mx, my;
-        private int tx = -1;
-        private int ty = -1;
-        private Queue<int> queue = new Queue<int>();
-        private Queue<int> tileQueue = new Queue<int>();
-        private bool IsInvulnerable;
-        private bool donex, doney;
-        private int oh, ov;
-        internal BitArray Switches { get; set; }
-        internal int deaths = 0;
-        private const double portalMultiplier = 1.42;
-        private bool hasLastPortal = false;
-        private Point lastPortal;
-        private List<Point> gotCoins = new List<Point>();
-        private List<Point> gotBlueCoins = new List<Point>();
         private bool isOnFire;
-        private int onFireDeath = 200;
-        private float deathOffset = 0;
+        internal int Overlapy;
+        private double mx, my;
+        internal int Deaths;
+        private int oh, ov;
 
-        private const double maxThrust = 0.2;
-
-        public bool HasLevitation { get; internal set; }
-        public bool IsThrusting { get; internal set; }
-        private double currentThrust = maxThrust;
-        private double thrustBurnOff = 0.01;
-        public bool JumpBoostEffect { get; internal set; }
         public bool SpeedBoostEffect { get; internal set; }
+        public bool JumpBoostEffect { get; internal set; }
+        public bool HasLevitation { get; internal set; }
         public bool CursedEffect { get; internal set; }
+        public bool IsThrusting { get; internal set; }
         public bool Zombie { get; internal set; }
+        private double currentThrust = MaxThrust;
+        private const double MaxThrust = 0.2;
+        private readonly double thrustBurnOff = 0.01;
 
         /// <summary>Also includes moderator and guardian mode.</summary>
         public bool InGodMode { get; internal set; }
-        public bool IsDead { get; internal set; }
-        public int Team { get; internal set; }
-        public bool HasChat { get; internal set; }
         public bool HasCrown { get; internal set; }
+        public bool HasChat { get; internal set; }
+        public bool IsDead { get; internal set; }
         public bool IsMe { get; internal set; }
+        public int Team { get; internal set; }
+        public int TickId { get; set; }
 
         private long lastJump;
-        private bool spacejustdown = false;
+        private bool spacejustdown;
         public bool SpaceDown { get; set; }
 
         internal double GravityMultiplier { get { return HostWorld.WorldGravity; } }
@@ -78,14 +74,8 @@ namespace EEPhysics
             get
             {
                 double d = 1.0;
-                if (Zombie)
-                {
-                    d *= 1.2;
-                }
-                if (SpeedBoostEffect)
-                {
-                    d *= 1.5;
-                }
+                if (Zombie) d *= 1.2;
+                if (SpeedBoostEffect) d *= 1.5;
                 return d;
             }
         }
@@ -98,14 +88,9 @@ namespace EEPhysics
             get
             {
                 double d = 1.0;
-                if (JumpBoostEffect)
-                {
-                    d *= 1.3;
-                }
-                if (Zombie)
-                {
-                    d *= 0.75;
-                }
+                if (JumpBoostEffect) d *= 1.3;
+                if (Zombie) d *= 0.75;
+
                 return d;
             }
         }
@@ -116,22 +101,22 @@ namespace EEPhysics
         /// <summary>
         /// The player ID in PlayerIO Messages
         /// </summary>
-        public int ID { get; private set; }
+        public int Id { get; private set; }
         /// <summary>
         /// Player name in the world.
         /// </summary>
         public string Name { get; protected set; }
-        public int Coins { get; set; }
-        public int BlueCoins { get; set; }
         public bool IsClubMember { get; set; }
+        public int BlueCoins { get; set; }
+        public int Coins { get; set; }
 
 
         public delegate void PlayerEvent(PlayerEventArgs e);
 
-        private Dictionary<int, PlayerEvent> blockIdEvents = new Dictionary<int, PlayerEvent>();
-        private Dictionary<int, PlayerEvent> bgblockIdEvents = new Dictionary<int, PlayerEvent>();
-        private Dictionary<int, PlayerEvent> touchBlockEvents = new Dictionary<int, PlayerEvent>();
-        private List<Point> touchedPoints = new List<Point>();
+        private readonly Dictionary<int, PlayerEvent> blockIdEvents = new Dictionary<int, PlayerEvent>();
+        private readonly Dictionary<int, PlayerEvent> bgblockIdEvents = new Dictionary<int, PlayerEvent>();
+        private readonly Dictionary<int, PlayerEvent> touchBlockEvents = new Dictionary<int, PlayerEvent>();
+        private readonly List<Point> touchedPoints = new List<Point>();
 
         public event PlayerEvent OnHitCrown = delegate { };
 
@@ -179,7 +164,7 @@ namespace EEPhysics
 
         public PhysicsPlayer(int id, string name)
         {
-            ID = id;
+            Id = id;
             Name = name;
             X = 16;
             Y = 16;
@@ -189,15 +174,7 @@ namespace EEPhysics
 
         internal void Tick()
         {
-            double reminderX;
-            double currentSX;
-            double osx;
-            double ox;
             double tx;
-            double reminderY;
-            double currentSY;
-            double osy;
-            double oy;
             double ty;
             bool spacedown = SpaceDown;
 
@@ -262,7 +239,7 @@ namespace EEPhysics
             }
 
             queue.Enqueue(current);
-            if (current == 4 || current == 414 || ItemId.isClimbable(current))
+            if (current == 4 || current == 414 || ItemId.IsClimbable(current))
             {
                 delayed = queue.Dequeue();
                 queue.Enqueue(current);
@@ -274,7 +251,7 @@ namespace EEPhysics
             }*/
 
             // TODO: Change fire to effect
-            if (isOnFire && !IsInvulnerable)
+            if (isOnFire && !isInvulnerable)
             {
                 if (onFireDeath <= 0)
                 {
@@ -309,7 +286,7 @@ namespace EEPhysics
             }
             else
             {
-                if (ItemId.isClimbable(this.current))
+                if (ItemId.IsClimbable(current))
                 {
                     morx = 0;
                     mory = 0;
@@ -320,17 +297,17 @@ namespace EEPhysics
                     {
                         case 1:
                         case ItemId.InvisibleLeftArrow:
-                            morx = -((int)gravity);
+                            morx = -gravity;
                             mory = 0;
                             break;
                         case 2:
                         case ItemId.InvisibleUpArrow:
                             morx = 0;
-                            mory = -((int)gravity);
+                            mory = -gravity;
                             break;
                         case 3:
                         case ItemId.InvisibleRightArrow:
-                            morx = (int)gravity;
+                            morx = gravity;
                             mory = 0;
                             break;
                         case ItemId.SpeedLeft:
@@ -361,7 +338,7 @@ namespace EEPhysics
                         case ItemId.Lava:
                             morx = 0;
                             mory = (int)PhysicsConfig.LavaBuoyancy;
-                            if (!isOnFire && !IsInvulnerable)
+                            if (!isOnFire && !isInvulnerable)
                             {
                                 isOnFire = true;
                             }
@@ -370,7 +347,7 @@ namespace EEPhysics
                         case ItemId.Spike:
                             morx = 0;
                             mory = gravity;
-                            if (!IsDead && !IsInvulnerable)
+                            if (!IsDead && !isInvulnerable)
                             {
                                 KillPlayer();
                             }
@@ -390,7 +367,7 @@ namespace EEPhysics
                     }
                 }
 
-                if (ItemId.isClimbable(delayed))
+                if (ItemId.IsClimbable(delayed))
                 {
                     mox = 0;
                     moy = 0;
@@ -468,7 +445,7 @@ namespace EEPhysics
             my *= SpeedMultiplier;
             mox *= GravityMultiplier;
             moy *= GravityMultiplier;
-            
+
             ModifierX = (mox + mx);
             ModifierY = (moy + my);
 
@@ -478,7 +455,7 @@ namespace EEPhysics
                 speedX = (speedX * PhysicsConfig.BaseDrag);
                 if (!isGodMode)
                 {
-                    if ((mx == 0 && moy != 0) || (speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || ItemId.isClimbable(current))
+                    if ((mx == 0 && moy != 0) || (speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || ItemId.IsClimbable(current))
                     {
                         speedX = (speedX * PhysicsConfig.NoModifierDrag);
                     }
@@ -515,7 +492,7 @@ namespace EEPhysics
                 speedY = (speedY * PhysicsConfig.BaseDrag);
                 if (!isGodMode)
                 {
-                    if ((my == 0 && mox != 0) || (speedY < 0 && my > 0) || (speedY > 0 && my < 0) || ItemId.isClimbable(current))
+                    if ((my == 0 && mox != 0) || (speedY < 0 && my > 0) || (speedY > 0 && my < 0) || ItemId.IsClimbable(current))
                     {
                         speedY = (speedY * PhysicsConfig.NoModifierDrag);
                     }
@@ -549,7 +526,7 @@ namespace EEPhysics
 
             if (!isGodMode)
             {
-                switch (this.current)
+                switch (current)
                 {
                     case ItemId.SpeedLeft:
                         speedX = -PhysicsConfig.Boost;
@@ -566,14 +543,14 @@ namespace EEPhysics
                 }
             }
 
-            reminderX = X % 1;
-            currentSX = speedX;
-            reminderY = Y % 1;
-            currentSY = speedY;
+            var reminderX = X % 1;
+            var currentSx = speedX;
+            var reminderY = Y % 1;
+            var currentSy = speedY;
             donex = false;
             doney = false;
 
-            while ((currentSX != 0 && !donex) || (currentSY != 0 && !doney))
+            while ((currentSx != 0 && !donex) || (currentSy != 0 && !doney))
             {
                 #region processPortals()
                 current = HostWorld.GetBlock(cx, cy);
@@ -581,7 +558,7 @@ namespace EEPhysics
                 {
                     if (!hasLastPortal)
                     {
-                        OnHitPortal(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                        OnHitPortal(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                         lastPortal = new Point(cx, cy);
                         hasLastPortal = true;
                         int[] data = HostWorld.GetBlockData(cx, cy);
@@ -605,30 +582,30 @@ namespace EEPhysics
                                     switch (rot1 - rot2)
                                     {
                                         case 1:
-                                            SpeedX = SpeedY * portalMultiplier;
-                                            SpeedY = -SpeedX * portalMultiplier;
-                                            ModifierX = ModifierY * portalMultiplier;
-                                            ModifierY = -ModifierX * portalMultiplier;
+                                            SpeedX = SpeedY * PortalMultiplier;
+                                            SpeedY = -SpeedX * PortalMultiplier;
+                                            ModifierX = ModifierY * PortalMultiplier;
+                                            ModifierY = -ModifierX * PortalMultiplier;
                                             reminderY = -reminderY;
-                                            currentSY = -currentSY;
+                                            currentSy = -currentSy;
                                             break;
                                         case 2:
-                                            SpeedX = -SpeedX * portalMultiplier;
-                                            SpeedY = -SpeedY * portalMultiplier;
-                                            ModifierX = -ModifierX * portalMultiplier;
-                                            ModifierY = -ModifierY * portalMultiplier;
+                                            SpeedX = -SpeedX * PortalMultiplier;
+                                            SpeedY = -SpeedY * PortalMultiplier;
+                                            ModifierX = -ModifierX * PortalMultiplier;
+                                            ModifierY = -ModifierY * PortalMultiplier;
                                             reminderY = -reminderY;
-                                            currentSY = -currentSY;
+                                            currentSy = -currentSy;
                                             reminderX = -reminderX;
-                                            currentSX = -currentSX;
+                                            currentSx = -currentSx;
                                             break;
                                         case 3:
-                                            SpeedX = -SpeedY * portalMultiplier;
-                                            SpeedY = SpeedX * portalMultiplier;
-                                            ModifierX = -ModifierY * portalMultiplier;
-                                            ModifierY = ModifierX * portalMultiplier;
+                                            SpeedX = -SpeedY * PortalMultiplier;
+                                            SpeedY = SpeedX * PortalMultiplier;
+                                            ModifierX = -ModifierY * PortalMultiplier;
+                                            ModifierY = ModifierX * PortalMultiplier;
                                             reminderX = -reminderX;
-                                            currentSX = -currentSX;
+                                            currentSx = -currentSx;
                                             break;
                                     }
                                     X = portalPoint.x * 16;
@@ -645,42 +622,42 @@ namespace EEPhysics
                 }
                 #endregion
 
-                ox = X;
-                oy = Y;
-                osx = currentSX;
-                osy = currentSY;
+                var ox = X;
+                var oy = Y;
+                var osx = currentSx;
+                var osy = currentSy;
 
                 #region stepX()
-                if (currentSX > 0)
+                if (currentSx > 0)
                 {
-                    if ((currentSX + reminderX) >= 1)
+                    if ((currentSx + reminderX) >= 1)
                     {
                         X += 1 - reminderX;
                         X = Math.Floor(X);
-                        currentSX -= 1 - reminderX;
+                        currentSx -= 1 - reminderX;
                         reminderX = 0;
                     }
                     else
                     {
-                        X += currentSX;
-                        currentSX = 0;
+                        X += currentSx;
+                        currentSx = 0;
                     }
                 }
                 else
                 {
-                    if (currentSX < 0)
+                    if (currentSx < 0)
                     {
-                        if (!DoubleIsEqual(reminderX, 0) && (reminderX + currentSX) < 0)
+                        if (!DoubleIsEqual(reminderX, 0) && (reminderX + currentSx) < 0)
                         {
-                            currentSX += reminderX;
+                            currentSx += reminderX;
                             X -= reminderX;
                             X = Math.Floor(X);
                             reminderX = 1;
                         }
                         else
                         {
-                            X += currentSX;
-                            currentSX = 0;
+                            X += currentSx;
+                            currentSx = 0;
                         }
                     }
                 }
@@ -688,42 +665,42 @@ namespace EEPhysics
                 {
                     X = ox;
                     speedX = 0;
-                    currentSX = osx;
+                    currentSx = osx;
                     donex = true;
                 }
                 #endregion
 
                 #region stepY()
-                if (currentSY > 0)
+                if (currentSy > 0)
                 {
-                    if ((currentSY + reminderY) >= 1)
+                    if ((currentSy + reminderY) >= 1)
                     {
                         Y += 1 - reminderY;
                         Y = Math.Floor(Y);
-                        currentSY -= 1 - reminderY;
+                        currentSy -= 1 - reminderY;
                         reminderY = 0;
                     }
                     else
                     {
-                        Y += currentSY;
-                        currentSY = 0;
+                        Y += currentSy;
+                        currentSy = 0;
                     }
                 }
                 else
                 {
-                    if (currentSY < 0)
+                    if (currentSy < 0)
                     {
-                        if (!DoubleIsEqual(reminderY, 0) && (reminderY + currentSY) < 0)
+                        if (!DoubleIsEqual(reminderY, 0) && (reminderY + currentSy) < 0)
                         {
                             Y -= reminderY;
                             Y = Math.Floor(Y);
-                            currentSY += reminderY;
+                            currentSy += reminderY;
                             reminderY = 1;
                         }
                         else
                         {
-                            Y += currentSY;
-                            currentSY = 0;
+                            Y += currentSy;
+                            currentSy = 0;
                         }
                     }
                 }
@@ -731,13 +708,13 @@ namespace EEPhysics
                 {
                     Y = oy;
                     speedY = 0;
-                    currentSY = osy;
+                    currentSy = osy;
                     doney = true;
                 }
                 #endregion
             }
 
-            
+
             if (!IsDead)
             {
                 if (IsMe)
@@ -747,7 +724,7 @@ namespace EEPhysics
                     bool changed = false;
                     if (spacejustdown)
                     {
-                        lastJump = -HostWorld.sw.ElapsedMilliseconds;
+                        lastJump = -HostWorld.Sw.ElapsedMilliseconds;
                         injump = true;
                         mod = -1;
                     }
@@ -764,12 +741,12 @@ namespace EEPhysics
                         }
                         else if (lastJump < 0)
                         {
-                            if (HostWorld.sw.ElapsedMilliseconds + lastJump > 750)
+                            if (HostWorld.Sw.ElapsedMilliseconds + lastJump > 750)
                             {
                                 injump = true;
                             }
                         }
-                        else if (HostWorld.sw.ElapsedMilliseconds - lastJump > 150)
+                        else if (HostWorld.Sw.ElapsedMilliseconds - lastJump > 150)
                         {
                             injump = true;
                         }
@@ -788,13 +765,13 @@ namespace EEPhysics
                         {
                             SpeedX -= morx * PhysicsConfig.JumpHeight * JumpMultiplier;
                             changed = true;
-                            lastJump = HostWorld.sw.ElapsedMilliseconds * mod;
+                            lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
                         }
                         if (SpeedY == 0 && mory != 0 && moy != 0 && (Y % 16 == 0 || Y % 8 == 0))
                         {
                             SpeedY -= mory * PhysicsConfig.JumpHeight * JumpMultiplier;
                             changed = true;
-                            lastJump = HostWorld.sw.ElapsedMilliseconds * mod;
+                            lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
                         }
                     }
                     if (changed || oh != Horizontal || ov != Vertical)
@@ -802,26 +779,28 @@ namespace EEPhysics
                         oh = Horizontal;
                         ov = Vertical;
                         HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, (int)ModifierX, (int)ModifierY,
-                            Horizontal, Vertical, GravityMultiplier, spacedown);
+                            Horizontal, Vertical, GravityMultiplier, spacedown, spacejustdown, TickId);
                     }
+                    TickId++;
+                    spacejustdown = false;
                 }
                 if (pastx != cx || pasty != cy)
                 {
                     PlayerEvent e;
                     if (blockIdEvents.Count != 0 && blockIdEvents.TryGetValue(current, out e))
                     {
-                        e(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                        e(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                     }
                     if (bgblockIdEvents.Count != 0 && bgblockIdEvents.TryGetValue(HostWorld.GetBlock(1, cx, cy), out e))
                     {
-                        e(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                        e(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                     }
 
                     // Might remove specific events soon, because you can make them now with void AddBlockEvent. (except OnGetCoin and OnGetBlueCoin)
                     switch (current)
                     {
                         case 100:   //coin
-                            OnHitCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitCoin(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             for (int i = 0; i < gotCoins.Count; i++)
                             {
                                 if (gotCoins[i].x == cx && gotCoins[i].y == cy)
@@ -829,16 +808,16 @@ namespace EEPhysics
                                     goto found;
                                 }
                             }
-                            OnGetCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnGetCoin(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             gotCoins.Add(new Point(cx, cy));
                             if (IsMe && HostWorld.Connected)
                             {
                                 HostWorld.Connection.Send("c", Coins, BlueCoins, cx, cy);
                             }
-                        found:
+                            found:
                             break;
                         case 101:   // bluecoin
-                            OnHitBlueCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitBlueCoin(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             for (int i = 0; i < gotBlueCoins.Count; i++)
                             {
                                 if (gotBlueCoins[i].x == cx && gotBlueCoins[i].y == cy)
@@ -846,17 +825,17 @@ namespace EEPhysics
                                     goto found2;
                                 }
                             }
-                            OnGetBlueCoin(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnGetBlueCoin(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             gotBlueCoins.Add(new Point(cx, cy));
                             if (IsMe && HostWorld.Connected)
                             {
                                 HostWorld.Connection.Send("c", Coins, BlueCoins, cx, cy);
                             }
-                        found2:
+                            found2:
                             break;
                         case 5:
                             // crown
-                            OnHitCrown(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitCrown(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode && !HasCrown)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "k", cx, cy);
@@ -864,7 +843,7 @@ namespace EEPhysics
                             break;
                         case 6:
                             // red key
-                            OnHitRedKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitRedKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "r", cx, cy);
@@ -872,7 +851,7 @@ namespace EEPhysics
                             break;
                         case 7:
                             // green key
-                            OnHitGreenKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitGreenKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "g", cx, cy);
@@ -880,28 +859,28 @@ namespace EEPhysics
                             break;
                         case 8:
                             // blue key
-                            OnHitBlueKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitBlueKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "b", cx, cy);
                             }
                             break;
                         case ItemId.CyanKey:
-                            OnHitCyanKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitCyanKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "c", cx, cy);
                             }
                             break;
                         case ItemId.MagentaKey:
-                            OnHitMagentaKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitMagentaKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "m", cx, cy);
                             }
                             break;
                         case ItemId.YellowKey:
-                            OnHitYellowKey(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitYellowKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send(HostWorld.WorldKey + "y", cx, cy);
@@ -910,23 +889,23 @@ namespace EEPhysics
                         case ItemId.SwitchPurple:
                             int sid = HostWorld.GetBlockData(cx, cy)[0];
                             UpdatePurpleSwitches(sid);
-                            OnHitSwitch(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitSwitch(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case ItemId.Piano:
-                            OnHitPiano(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitPiano(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case ItemId.Drum:
-                            OnHitDrum(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitDrum(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
                         case ItemId.Diamond:
-                            OnHitDiamond(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitDiamond(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send("diamondtouch", cx, cy);
                             }
                             break;
                         case ItemId.Cake:
-                            OnHitCake(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitCake(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send("caketouch", cx, cy);
@@ -943,7 +922,7 @@ namespace EEPhysics
                             {
                                 LastCheckpointX = cx;
                                 LastCheckpointY = cy;
-                                OnHitCheckpoint(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                                OnHitCheckpoint(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                                 if (IsMe && HostWorld.Connected)
                                 {
                                     HostWorld.Connection.Send("checkpoint", cx, cy);
@@ -951,7 +930,7 @@ namespace EEPhysics
                             }
                             break;
                         case ItemId.BrickComplete:
-                            OnHitCompleteLevelBrick(new PlayerEventArgs() { Player = this, BlockX = cx, BlockY = cy });
+                            OnHitCompleteLevelBrick(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send("levelcomplete", cx, cy);
@@ -1002,42 +981,42 @@ namespace EEPhysics
                         if (X % 16 == 0)
                         {
                             p = new Point(cx - 1, cy);
-                            if (ItemId.isSolid(HostWorld.GetBlock(0, p.x, p.y)) && touchBlockEvents.TryGetValue(HostWorld.GetBlock(0, p.x, p.y), out e))
+                            if (ItemId.IsSolid(HostWorld.GetBlock(0, p.x, p.y)) && touchBlockEvents.TryGetValue(HostWorld.GetBlock(0, p.x, p.y), out e))
                             {
                                 if (!touchedPoints.Contains(p))
                                 {
                                     touchedPoints.Add(p);
-                                    e(new PlayerEventArgs() { Player = this, BlockX = p.x, BlockY = p.y });
+                                    e(new PlayerEventArgs { Player = this, BlockX = p.x, BlockY = p.y });
                                 }
                             }
                             p = new Point(cx + 1, cy);
-                            if (ItemId.isSolid(HostWorld.GetBlock(0, p.x, p.y)) && touchBlockEvents.TryGetValue(HostWorld.GetBlock(0, p.x, p.y), out e))
+                            if (ItemId.IsSolid(HostWorld.GetBlock(0, p.x, p.y)) && touchBlockEvents.TryGetValue(HostWorld.GetBlock(0, p.x, p.y), out e))
                             {
                                 if (!touchedPoints.Contains(p))
                                 {
                                     touchedPoints.Add(p);
-                                    e(new PlayerEventArgs() { Player = this, BlockX = p.x, BlockY = p.y });
+                                    e(new PlayerEventArgs { Player = this, BlockX = p.x, BlockY = p.y });
                                 }
                             }
                         }
                         if (DoubleIsEqual(Y % 16, 0))
                         {
                             p = new Point(cx, cy - 1);
-                            if (ItemId.isSolid(HostWorld.GetBlock(0, p.x, p.y)) && touchBlockEvents.TryGetValue(HostWorld.GetBlock(0, p.x, p.y), out e))
+                            if (ItemId.IsSolid(HostWorld.GetBlock(0, p.x, p.y)) && touchBlockEvents.TryGetValue(HostWorld.GetBlock(0, p.x, p.y), out e))
                             {
                                 if (!touchedPoints.Contains(p))
                                 {
                                     touchedPoints.Add(p);
-                                    e(new PlayerEventArgs() { Player = this, BlockX = p.x, BlockY = p.y });
+                                    e(new PlayerEventArgs { Player = this, BlockX = p.x, BlockY = p.y });
                                 }
                             }
                             p = new Point(cx, cy + 1);
-                            if (ItemId.isSolid(HostWorld.GetBlock(0, p.x, p.y)) && touchBlockEvents.TryGetValue(HostWorld.GetBlock(0, p.x, p.y), out e))
+                            if (ItemId.IsSolid(HostWorld.GetBlock(0, p.x, p.y)) && touchBlockEvents.TryGetValue(HostWorld.GetBlock(0, p.x, p.y), out e))
                             {
                                 if (!touchedPoints.Contains(p))
                                 {
                                     touchedPoints.Add(p);
-                                    e(new PlayerEventArgs() { Player = this, BlockX = p.x, BlockY = p.y });
+                                    e(new PlayerEventArgs { Player = this, BlockX = p.x, BlockY = p.y });
                                 }
                             }
                         }
@@ -1176,9 +1155,9 @@ namespace EEPhysics
         {
             if (!ItemId.IsBackground(blockId))
                 return blockIdEvents.ContainsKey(blockId);
-            else
-                return bgblockIdEvents.ContainsKey(blockId);
+            return bgblockIdEvents.ContainsKey(blockId);
         }
+
         /// <summary>
         /// Removes block event added with AddBlockEvent with specified blockId.
         /// </summary>
@@ -1236,17 +1215,17 @@ namespace EEPhysics
         internal void KillPlayer()
         {
             deathOffset = 0;
-            deaths++;
+            Deaths++;
             IsDead = true;
             isOnFire = false;
             onFireDeath = 200;
-            OnDie(new PlayerEventArgs() { Player = this, BlockX = ((int)(X + 8) >> 4), BlockY = ((int)(Y + 8) >> 4) });
+            OnDie(new PlayerEventArgs { Player = this, BlockX = ((int)(X + 8) >> 4), BlockY = ((int)(Y + 8) >> 4) });
         }
         internal void Reset()
         {
             gotCoins.Clear();
             gotBlueCoins.Clear();
-            deaths = 0;
+            Deaths = 0;
         }
         internal void RemoveCoin(int xx, int yy)
         {
@@ -1274,24 +1253,12 @@ namespace EEPhysics
         {
             switch (effectId)
             {
-                case PhysicsConfig.EffectJump:
-                    JumpBoostEffect = active;
-                    break;
-                case PhysicsConfig.EffectFly:
-                    HasLevitation = active;
-                    break;
-                case PhysicsConfig.EffectRun:
-                    SpeedBoostEffect = active;
-                    break;
-                case PhysicsConfig.EffectProtection:
-                    IsInvulnerable = active;
-                    break;
-                case PhysicsConfig.EffectCurse:
-                    CursedEffect = active;
-                    break;
-                case PhysicsConfig.EffectZombie:
-                    Zombie = active;
-                    break;
+                case PhysicsConfig.EffectJump: JumpBoostEffect = active; break;
+                case PhysicsConfig.EffectFly: HasLevitation = active; break;
+                case PhysicsConfig.EffectRun: SpeedBoostEffect = active; break;
+                case PhysicsConfig.EffectProtection: isInvulnerable = active; break;
+                case PhysicsConfig.EffectCurse: CursedEffect = active; break;
+                case PhysicsConfig.EffectZombie: Zombie = active; break;
             }
         }
 
@@ -1306,56 +1273,39 @@ namespace EEPhysics
         }
         internal void UpdateTeamDoors(int x, int y)
         {
-            int _loc3_ = HostWorld.GetBlockData(x, y)[0];
-            int _loc4_ = Team;
-            if (Team != _loc3_)
+            int data = HostWorld.GetBlockData(x, y)[0];
+            int team = Team;
+            if (Team != data)
             {
-                Team = _loc3_;
+                Team = data;
                 if (!HostWorld.Overlaps(this))
                 {
-                    this.tx = -1;
-                    this.ty = -1;
+                    tx = -1;
+                    ty = -1;
                 }
                 else
                 {
-                    Team = _loc4_;
-                    this.tx = x;
-                    this.ty = y;
+                    Team = team;
+                    tx = x;
+                    ty = y;
                 }
             }
         }
         internal void UpdateThrust()
         {
-            if (this.mory != 0)
-            {
-                SpeedY = SpeedY - currentThrust * PhysicsConfig.JumpHeight / 2 * this.mory * 0.5;
-            }
-            if (this.morx != 0)
-            {
-                SpeedX = SpeedX - currentThrust * PhysicsConfig.JumpHeight / 2 * this.morx * 0.5;
-            }
+            if (mory != 0) SpeedY = SpeedY - currentThrust * PhysicsConfig.JumpHeight / 2 * mory * 0.5;
+            if (morx != 0) SpeedX = SpeedX - currentThrust * PhysicsConfig.JumpHeight / 2 * morx * 0.5;
+
             if (!IsThrusting)
             {
-                if (currentThrust > 0)
-                {
-                    currentThrust = currentThrust - thrustBurnOff;
-                }
-                else
-                {
-                    currentThrust = 0;
-                }
+                if (currentThrust > 0) currentThrust = currentThrust - thrustBurnOff;
+                else currentThrust = 0;
             }
         }
-        public void ApplyThrust()
-        {
-            currentThrust = maxThrust;
-        }
+        public void ApplyThrust() { currentThrust = MaxThrust; }
 
         // this is used because: http://stackoverflow.com/questions/3103782/rule-of-thumb-to-test-the-equality-of-two-doubles-in-c
-        internal bool DoubleIsEqual(double d1, double d2)
-        {
-            return Math.Abs(d1 - d2) < 0.00000001;
-        }
+        internal bool DoubleIsEqual(double d1, double d2) { return Math.Abs(d1 - d2) < 0.00000001; }
     }
 
     public class PlayerEventArgs
@@ -1385,28 +1335,13 @@ namespace EEPhysics
 
         public override bool Equals(object o)
         {
-            if (o is Point)
-            {
-                Point p = (Point)o;
-                return (x == p.x && y == p.y);
-            }
-            else
-            {
-                return base.Equals(o);
-            }
-        }
-        public override int GetHashCode()
-        {
-            return x.GetHashCode() ^ y.GetHashCode();
+            if (o is Point) return (x == ((Point)o).x && y == ((Point)o).y);
+            return base.Equals(o);
         }
 
-        public static bool operator ==(Point p, Point p2)
-        {
-            return p.Equals(p2);
-        }
-        public static bool operator !=(Point p, Point p2)
-        {
-            return !p.Equals(p2);
-        }
+        public override int GetHashCode() { return x.GetHashCode() ^ y.GetHashCode(); }
+
+        public static bool operator ==(Point p, Point p2) { return p.Equals(p2); }
+        public static bool operator !=(Point p, Point p2) { return !p.Equals(p2); }
     }
 }

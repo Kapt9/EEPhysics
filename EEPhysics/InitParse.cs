@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using PlayerIOClient;
+using System;
 
 namespace EEPhysics
 {
     internal static class InitParse
     {
-        public static DataChunk[] Parse(PlayerIOClient.Message m)
+        public static DataChunk[] Parse(Message m)
         {
             if (m == null) throw new ArgumentNullException("m");
             if (m.Type != "init" && m.Type != "reset") throw new ArgumentException("Invalid message type.", "m");
@@ -47,10 +46,10 @@ namespace EEPhysics
 
         public DataChunk(int layer, uint type, byte[] xs, byte[] ys, object[] args)
         {
-            this.Layer = layer;
-            this.Type = type;
-            this.Args = args;
-            this.Locations = GetLocations(xs, ys);
+            Layer = layer;
+            Type = type;
+            Args = args;
+            Locations = GetLocations(xs, ys);
         }
 
         private static Point[] GetLocations(byte[] xs, byte[] ys)
