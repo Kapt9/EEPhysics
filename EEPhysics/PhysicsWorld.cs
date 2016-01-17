@@ -119,7 +119,7 @@ namespace EEPhysics
 
                     if (AddBotPlayer)
                     {
-                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(12))
+                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(13))
                         {
                             X = m.GetInt(9),
                             Y = m.GetInt(10),
