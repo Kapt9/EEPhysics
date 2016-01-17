@@ -101,8 +101,8 @@ namespace EEPhysics
             {
                 if (m.Type == "init")
                 {
-                    WorldWidth = m.GetInt(17);
-                    WorldHeight = m.GetInt(18);
+                    WorldWidth = m.GetInt(18);
+                    WorldHeight = m.GetInt(19);
 
                     blocks = new int[2][][];
                     for (int i = 0; i < blocks.Length; i++)
@@ -115,7 +115,7 @@ namespace EEPhysics
                     for (int i = 0; i < WorldWidth; i++) blockData[i] = new int[WorldHeight][];
 
                     WorldKey = Derot(m.GetString(5));
-                    WorldGravity = m.GetDouble(19);
+                    WorldGravity = m.GetDouble(20);
 
                     if (AddBotPlayer)
                     {
