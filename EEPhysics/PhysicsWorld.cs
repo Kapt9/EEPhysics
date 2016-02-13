@@ -101,8 +101,8 @@ namespace EEPhysics
             {
                 if (m.Type == "init")
                 {
-                    WorldWidth = m.GetInt(18);
-                    WorldHeight = m.GetInt(19);
+                    WorldWidth = m.GetInt(19);
+                    WorldHeight = m.GetInt(20);
 
                     blocks = new int[2][][];
                     for (int i = 0; i < blocks.Length; i++)
@@ -115,14 +115,14 @@ namespace EEPhysics
                     for (int i = 0; i < WorldWidth; i++) blockData[i] = new int[WorldHeight][];
 
                     WorldKey = Derot(m.GetString(5));
-                    WorldGravity = m.GetDouble(20);
+                    WorldGravity = m.GetDouble(21);
 
                     if (AddBotPlayer)
                     {
-                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(13))
+                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(14))
                         {
-                            X = m.GetInt(9),
-                            Y = m.GetInt(10),
+                            X = m.GetInt(11),
+                            Y = m.GetInt(12),
                             HostWorld = this
                         };
                         BotId = p.Id;
@@ -203,7 +203,7 @@ namespace EEPhysics
                         p.Coins = m.GetInt(9);
                         p.BlueCoins = m.GetInt(10);
                         p.IsClubMember = m.GetBoolean(12);
-                        p.Team = m.GetInt(15);
+                        p.Team = m.GetInt(16);
 
                         Players.TryAdd(p.Id, p);
                     }
@@ -477,8 +477,13 @@ namespace EEPhysics
 
                     if (!ItemId.IsSolid(tileId)) continue;
                     if (!playerRectangle.IntersectsWith(new Rectangle(x * 16, y * 16, 16, 16))) continue;
-
-                    int rot = blockData[x][y] == null ? 1 : blockData[x][y][0];
+                    var rot = 1;
+                    try
+                    {
+                        //TODO: Figure out this.
+                        rot = blockData[x][y] == null ? 1 : blockData[x][y][0];
+                    }
+                    catch { }
 
                     if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayOrange ||
                         tileId == ItemId.OnewayYellow || tileId == ItemId.OnewayGray || tileId == ItemId.OnewayBlue ||
