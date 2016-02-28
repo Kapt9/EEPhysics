@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using PlayerIOClient;
-using System;
 
 namespace EEPhysics
 {

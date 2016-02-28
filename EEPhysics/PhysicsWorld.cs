@@ -1,10 +1,10 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Collections;
 using System.Threading;
 using PlayerIOClient;
-using System;
 
 namespace EEPhysics
 {
@@ -25,8 +25,6 @@ namespace EEPhysics
         private bool running;
         private bool inited;
 
-
-
         /// <summary>
         /// Whether bot automatically starts the physics simulation when it gets init message. Defaults to true.
         /// </summary>
@@ -44,7 +42,6 @@ namespace EEPhysics
         /// You shouldn't add or remove any items from this dictionary outside EEPhysics.
         /// </summary>
         public ConcurrentDictionary<int, PhysicsPlayer> Players { get; }
-        public string WorldKey { get; private set; }
         public int BotId { get; private set; }
 
         /// <summary>
@@ -101,8 +98,8 @@ namespace EEPhysics
             {
                 if (m.Type == "init")
                 {
-                    WorldWidth = m.GetInt(19);
-                    WorldHeight = m.GetInt(20);
+                    WorldWidth = m.GetInt(18);
+                    WorldHeight = m.GetInt(19);
 
                     blocks = new int[2][][];
                     for (int i = 0; i < blocks.Length; i++)
@@ -113,16 +110,15 @@ namespace EEPhysics
 
                     blockData = new int[WorldWidth][][];
                     for (int i = 0; i < WorldWidth; i++) blockData[i] = new int[WorldHeight][];
-
-                    WorldKey = Derot(m.GetString(5));
-                    WorldGravity = m.GetDouble(21);
+                    
+                    WorldGravity = m.GetDouble(20);
 
                     if (AddBotPlayer)
                     {
-                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(6), m.GetString(14))
+                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(5), m.GetString(13))
                         {
-                            X = m.GetInt(11),
-                            Y = m.GetInt(12),
+                            X = m.GetInt(10),
+                            Y = m.GetInt(11),
                             HostWorld = this
                         };
                         BotId = p.Id;
@@ -133,7 +129,7 @@ namespace EEPhysics
                     DeserializeBlocks(m);
                     inited = true;
 
-                    foreach (Message m2 in earlyMessages) HandleMessage(m2);
+                    foreach (var m2 in earlyMessages) HandleMessage(m2);
 
                     earlyMessages.Clear();
 
@@ -194,16 +190,18 @@ namespace EEPhysics
                     break;
                 case "add":
                     {
-                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(0), m.GetString(1));
-                        p.HostWorld = this;
-                        p.X = m.GetDouble(4);
-                        p.Y = m.GetDouble(5);
-                        p.InGodMode = m.GetBoolean(6) || m.GetBoolean(7);
-                        p.HasChat = m.GetBoolean(7);
-                        p.Coins = m.GetInt(9);
-                        p.BlueCoins = m.GetInt(10);
-                        p.IsClubMember = m.GetBoolean(12);
-                        p.Team = m.GetInt(16);
+                        var p = new PhysicsPlayer(m.GetInt(0), m.GetString(1))
+                        {
+                            HostWorld = this,
+                            X = m.GetDouble(4),
+                            Y = m.GetDouble(5),
+                            InGodMode = m.GetBoolean(6) || m.GetBoolean(7),
+                            HasChat = m.GetBoolean(8),
+                            Coins = m.GetInt(9),
+                            BlueCoins = m.GetInt(10),
+                            IsClubMember = m.GetBoolean(12),
+                            Team = m.GetInt(16)
+                        };
 
                         Players.TryAdd(p.Id, p);
                     }

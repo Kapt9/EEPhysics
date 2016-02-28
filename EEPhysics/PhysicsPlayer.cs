@@ -216,46 +216,26 @@ namespace EEPhysics
             int cx = ((int)(X + 8) >> 4);
             int cy = ((int)(Y + 8) >> 4);
 
-            int delayed;
-            delayed = queue.Count > 0 ? queue.Dequeue() : 0;
+            var delayed = queue.Count > 0 ? queue.Dequeue() : 0;
             current = HostWorld.GetBlock(0, cx, cy);
 
             if (ItemId.IsHalfBlock(current))
             {
                 var rot = HostWorld.GetBlockData(cx, cy)[0];
-                if (rot == 1)
-                {
-                    cy -= 1;
-                }
-                if (rot == 0)
-                {
-                    cx -= 1;
-                }
+
+                if (rot == 1) cy -= 1;
+                if (rot == 0) cx -= 1;
+
                 current = HostWorld.GetBlock(0, cx, cy);
             }
 
-            if (this.tx != -1)
-            {
-                UpdateTeamDoors(this.tx, this.ty);
-            }
+            if (this.tx != -1) UpdateTeamDoors(this.tx, this.ty);
 
             currentBelow = 0;
-            if (current == 1 || current == 411)
-            {
-                currentBelow = HostWorld.GetBlock(0, cx - 1, cy);
-            }
-            else if (current == 2 || current == 412)
-            {
-                currentBelow = HostWorld.GetBlock(0, cx, cy - 1);
-            }
-            else if (current == 3 || current == 413)
-            {
-                currentBelow = HostWorld.GetBlock(0, cx + 1, cy);
-            }
-            else
-            {
-                currentBelow = HostWorld.GetBlock(0, cx, cy + 1);
-            }
+            if (current == 1 || current == 411) currentBelow = HostWorld.GetBlock(0, cx - 1, cy);
+            else if (current == 2 || current == 412) currentBelow = HostWorld.GetBlock(0, cx, cy - 1);
+            else if (current == 3 || current == 413) currentBelow = HostWorld.GetBlock(0, cx + 1, cy);
+            else currentBelow = HostWorld.GetBlock(0, cx, cy + 1);
 
             queue.Enqueue(current);
             if (current == 4 || current == 414 || ItemId.IsClimbable(current))
@@ -366,17 +346,16 @@ namespace EEPhysics
                         case ItemId.Spike:
                             morx = 0;
                             mory = gravity;
-                            if (!IsDead && !isInvulnerable)
-                            {
-                                KillPlayer();
-                            }
+                            if (!IsDead && !isInvulnerable) KillPlayer();
                             break;
                         case ItemId.EffectProtection:
                             morx = 0;
                             mory = gravity;
                             if (HostWorld.GetOnStatus(cx, cy) && isOnFire)
                             {
+                                Zombie = false;
                                 isOnFire = false;
+                                CursedEffect = false;
                             }
                             break;
                         default:
@@ -857,7 +836,7 @@ namespace EEPhysics
                             OnHitCrown(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode && !HasCrown)
                             {
-                                HostWorld.Connection.Send(HostWorld.WorldKey + "k", cx, cy);
+                                HostWorld.Connection.Send("crown", cx, cy);
                             }
                             break;
                         case 6:
@@ -865,7 +844,7 @@ namespace EEPhysics
                             OnHitRedKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
-                                HostWorld.Connection.Send(HostWorld.WorldKey + "r", cx, cy);
+                                HostWorld.Connection.Send("pressKey", cx, cy, "red");
                             }
                             break;
                         case 7:
@@ -873,7 +852,7 @@ namespace EEPhysics
                             OnHitGreenKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
-                                HostWorld.Connection.Send(HostWorld.WorldKey + "g", cx, cy);
+                                HostWorld.Connection.Send("pressKey", cx, cy, "green");
                             }
                             break;
                         case 8:
@@ -881,28 +860,28 @@ namespace EEPhysics
                             OnHitBlueKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
-                                HostWorld.Connection.Send(HostWorld.WorldKey + "b", cx, cy);
+                                HostWorld.Connection.Send("pressKey", cx, cy, "blue");
                             }
                             break;
                         case ItemId.CyanKey:
                             OnHitCyanKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
-                                HostWorld.Connection.Send(HostWorld.WorldKey + "c", cx, cy);
+                                HostWorld.Connection.Send("pressKey", cx, cy, "cyan");
                             }
                             break;
                         case ItemId.MagentaKey:
                             OnHitMagentaKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
-                                HostWorld.Connection.Send(HostWorld.WorldKey + "m", cx, cy);
+                                HostWorld.Connection.Send("pressKey", cx, cy, "magenta");
                             }
                             break;
                         case ItemId.YellowKey:
                             OnHitYellowKey(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
-                                HostWorld.Connection.Send(HostWorld.WorldKey + "y", cx, cy);
+                                HostWorld.Connection.Send("pressKey", cx, cy, "yellow");
                             }
                             break;
                         case ItemId.SwitchPurple:
@@ -956,24 +935,23 @@ namespace EEPhysics
                             }
                             break;
 
-                            /* case ItemId.EffectProtection:
-                                 if (!InGodMode)
-                                 {
-                                     //TODO: Fix this (code currently from EE Client)
-                                     newInv = world.lookup.getBoolean(cx, cy);
-                                     if (this.isInvulnerable != newInv)
-                                     {
-                                         this.isInvulnerable = newInv;
-                                         if (this.isInvulnerable)
-                                         {
-                                             this.Zombie = false;
-                                             this.isOnFire = false;
-                                             this.CursedEffect = false;
-                                         }
-                                         if (IsMe && HostWorld.Connected) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectProtection);
-                                     }
-                                 }
-                                 break;*/
+                        case ItemId.EffectProtection:
+                            if (!InGodMode)
+                            {
+                                var status = HostWorld.GetOnStatus(cx, cy);
+                                if (isInvulnerable != status)
+                                {
+                                    isInvulnerable = status;
+                                    if (isInvulnerable)
+                                    {
+                                        Zombie = false;
+                                        isOnFire = false;
+                                        CursedEffect = false;
+                                    }
+                                    if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectProtection);
+                                }
+                            }
+                            break;
 
                     }
                     pastx = cx;
