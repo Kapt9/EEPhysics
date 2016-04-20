@@ -88,7 +88,8 @@ namespace EEPhysics
                 return d;
             }
         }
-        internal double GravityMultiplier { get { return HostWorld.WorldGravity; } }
+        internal double GravityMultiplier => HostWorld.WorldGravity;
+
         internal double SpeedMultiplier
         {
             get
@@ -243,6 +244,7 @@ namespace EEPhysics
                 delayed = queue.Dequeue();
                 queue.Enqueue(current);
             }
+
             // not needed, client side only
             /*while (tileQueue.Count > 0)
             {
@@ -526,18 +528,10 @@ namespace EEPhysics
             {
                 switch (current)
                 {
-                    case ItemId.SpeedLeft:
-                        speedX = -PhysicsConfig.Boost;
-                        break;
-                    case ItemId.SpeedRight:
-                        speedX = PhysicsConfig.Boost;
-                        break;
-                    case ItemId.SpeedUp:
-                        speedY = -PhysicsConfig.Boost;
-                        break;
-                    case ItemId.SpeedDown:
-                        speedY = PhysicsConfig.Boost;
-                        break;
+                    case ItemId.SpeedLeft: speedX = -PhysicsConfig.Boost; break;
+                    case ItemId.SpeedRight: speedX = PhysicsConfig.Boost; break;
+                    case ItemId.SpeedUp: speedY = -PhysicsConfig.Boost; break;
+                    case ItemId.SpeedDown: speedY = PhysicsConfig.Boost; break;
                 }
             }
 
@@ -1124,14 +1118,9 @@ namespace EEPhysics
         /// <param name="horizontal">-1 = left, 1 = right</param>
         public void SetHorizontal(int horizontal)
         {
-            if (!IsMe)
-            {
-                throw new Exception("Allowed only for the bot player.");
-            }
-            if (!HostWorld.Connected)
-            {
-                throw new Exception("EEPhysics needs connection to move the bot. Make sure you initialized PhysicsWorld with PlayerIO Connection.");
-            }
+            if (!IsMe) throw new Exception("Allowed only for the bot player.");
+            if (!HostWorld.Connected) throw new Exception("EEPhysics needs connection to move the bot. Make sure you initialized PhysicsWorld with PlayerIO Connection.");
+
             Horizontal = horizontal;
         }
         /// <summary>
@@ -1140,14 +1129,9 @@ namespace EEPhysics
         /// <param name="vertical">-1 = up, 1 = down</param>
         public void SetVertical(int vertical)
         {
-            if (!IsMe)
-            {
-                throw new Exception("Allowed only for the bot player.");
-            }
-            if (!HostWorld.Connected)
-            {
-                throw new Exception("EEPhysics needs connection to move the bot. Make sure you initialized PhysicsWorld with PlayerIO Connection.");
-            }
+            if (!IsMe) throw new Exception("Allowed only for the bot player.");
+            if (!HostWorld.Connected) throw new Exception("EEPhysics needs connection to move the bot. Make sure you initialized PhysicsWorld with PlayerIO Connection.");
+
             Vertical = vertical;
         }
 
@@ -1159,16 +1143,13 @@ namespace EEPhysics
         /// <param name="e">Method which is run when event occurs.</param>
         public void AddBlockEvent(int blockId, PlayerEvent e)
         {
-            if (!ItemId.IsBackground(blockId))
-                blockIdEvents[blockId] = e;
-            else
-                bgblockIdEvents[blockId] = e;
+            if (!ItemId.IsBackground(blockId)) blockIdEvents[blockId] = e;
+            else bgblockIdEvents[blockId] = e;
         }
         /// <returns>Whether there's block event with specified blockId.</returns>
         public bool HasBlockEvent(int blockId)
         {
-            if (!ItemId.IsBackground(blockId))
-                return blockIdEvents.ContainsKey(blockId);
+            if (!ItemId.IsBackground(blockId)) return blockIdEvents.ContainsKey(blockId);
             return bgblockIdEvents.ContainsKey(blockId);
         }
 
@@ -1177,10 +1158,8 @@ namespace EEPhysics
         /// </summary>
         public void RemoveBlockEvent(int blockId)
         {
-            if (!ItemId.IsBackground(blockId))
-                blockIdEvents.Remove(blockId);
-            else
-                bgblockIdEvents.Remove(blockId);
+            if (!ItemId.IsBackground(blockId)) blockIdEvents.Remove(blockId);
+            else bgblockIdEvents.Remove(blockId);
         }
 
         public bool GetSwitchState(int switchId)

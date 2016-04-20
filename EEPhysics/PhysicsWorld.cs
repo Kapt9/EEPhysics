@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using PlayerIOClient;
+using System;
 
 namespace EEPhysics
 {
     public class PhysicsWorld : IDisposable
     {
         private bool hideRed, hideBlue, hideGreen, hideCyan, hideMagenta, hideYellow, hideTimedoor;
-        internal bool Connected { get { return Connection != null && Connection.Connected; } }
+        internal bool Connected => Connection != null && Connection.Connected;
         private readonly List<Message> earlyMessages = new List<Message>();
         public int WorldHeight { get; private set; }
         public int WorldWidth { get; private set; }
@@ -110,7 +110,7 @@ namespace EEPhysics
 
                     blockData = new int[WorldWidth][][];
                     for (int i = 0; i < WorldWidth; i++) blockData[i] = new int[WorldHeight][];
-                    
+
                     WorldGravity = m.GetDouble(20);
 
                     if (AddBotPlayer)
@@ -288,7 +288,7 @@ namespace EEPhysics
                             for (int y = startY; y < endY; y++)
                                 blocks[z][x][y] = blockId;
                     }
-                    break;*/  //Fill got removed a long long while ago..
+                    break;*/  //Fill got removed a long long time ago..
                 case "god":
                 case "mod":
                 case "admin":
@@ -311,19 +311,37 @@ namespace EEPhysics
                     break;
                 case "tele":
                     {
-                        if (m.GetBoolean(0)) foreach (var pair in Players) pair.Value.Reset();
-                        uint i = 1;
-                        while (i + 2 < m.Count)
+                        try
                         {
-                            PhysicsPlayer p;
-                            if (Players.TryGetValue(m.GetInt(i), out p))
+                            var resetCoins = m.GetBoolean(0);
+                            for (uint a = 2; a < m.Count; a++)
                             {
-                                p.X = m.GetInt(i + 1);
-                                p.Y = m.GetInt(i + 2);
-                                p.Respawn();
+                                var id = m.GetInt(a);
+                                var nx = m.GetInt(a + 1);
+                                var ny = m.GetInt(a + 2);
+                                var deaths = m.GetInt(a + 3);
+
+                                var p = Players[id];
+                                if (p != null)
+                                {
+                                    p.X = nx;
+                                    p.Y = ny;
+                                    p.Respawn();
+                                    p.Deaths = deaths;
+                                    if (resetCoins) p.Reset();
+                                }
+                                if (id == BotId && Connected)
+                                {
+                                    var player = Players[BotId];
+                                    player.X = nx;
+                                    player.Y = ny;
+                                    player.Respawn();
+                                    if (resetCoins) player.Reset();
+                                }
+                                a = a + 3;
                             }
-                            i += 3;
                         }
+                        catch { }
                     }
                     break;
                 case "teleport":
@@ -347,7 +365,6 @@ namespace EEPhysics
                         int border = m.GetInt(2);
                         int fill = m.GetInt(3);
                         for (int i = 0; i < WorldWidth; i++)
-                        {
                             for (int ii = 0; ii < WorldHeight; ii++)
                             {
                                 if (i == 0 || ii == 0 || i == WorldWidth - 1 || ii == WorldHeight - 1) blocks[0][i][ii] = border;
@@ -355,7 +372,7 @@ namespace EEPhysics
 
                                 blocks[1][i][ii] = 0;
                             }
-                        }
+
                         foreach (var pair in Players) pair.Value.Reset();
                     }
                     break;
@@ -380,10 +397,7 @@ namespace EEPhysics
         }
 
         /// <returns>Foreground block ID</returns>
-        public int GetBlock(int x, int y)
-        {
-            return GetBlock(0, x, y);
-        }
+        public int GetBlock(int x, int y) { return GetBlock(0, x, y); }
 
         /// <param name="z">Block layer: 0 = foreground, 1 = background</param>
         /// <param name="x">Block X</param>
@@ -460,7 +474,7 @@ namespace EEPhysics
             double lastX = ((p.X + PhysicsPlayer.Height) / Size);
             double lastY = ((p.Y + PhysicsPlayer.Width) / Size);
             bool skip = false;
-            Rectangle playerRectangle = new Rectangle((int)p.X, (int)p.Y, 16, 16);
+            var playerRectangle = new Rectangle((int)p.X, (int)p.Y, 16, 16);
 
             int y = firstY;
 
@@ -773,32 +787,9 @@ namespace EEPhysics
             return false;
         }
 
-        internal static string Derot(string arg1)
-        {
-            // by Capasha (http://pastebin.com/Pj6tvNNx)
-            int num;
-            string str = "";
-            for (int i = 0; i < arg1.Length; i++)
-            {
-                num = arg1[i];
-                if ((num >= 0x61) && (num <= 0x7a))
-                {
-                    if (num > 0x6d) num -= 13;
-                    else num += 13;
-                }
-                else if ((num >= 0x41) && (num <= 90))
-                {
-                    if (num > 0x4d) num -= 13;
-                    else num += 13;
-                }
-                str = str + ((char)num);
-            }
-            return str;
-        }
-
         internal void DeserializeBlocks(Message m)
         {
-            DataChunk[] data = InitParse.Parse(m);
+            var data = InitParse.Parse(m);
             foreach (var d in data)
             {
                 foreach (var p in d.Locations)
@@ -809,10 +800,8 @@ namespace EEPhysics
                         List<int> bdata = new List<int>();
                         foreach (var o in d.Args)
                         {
-                            if (o is int)
-                                bdata.Add((int)o);
-                            else if (o is uint)
-                                bdata.Add((int)((uint)o));
+                            if (o is int) bdata.Add((int)o);
+                            else if (o is uint) bdata.Add((int)((uint)o));
                         }
                         blockData[p.x][p.y] = bdata.ToArray();
                     }
@@ -829,10 +818,10 @@ namespace EEPhysics
 
     public class Rectangle
     {
-        public double X { get; private set; }
-        public double Y { get; private set; }
-        public double Width { get; private set; }
-        public double Height { get; private set; }
+        public double X { get; }
+        public double Y { get; }
+        public double Width { get; }
+        public double Height { get; }
 
         public Rectangle(double x, double y, double w, double h)
         {
