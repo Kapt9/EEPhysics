@@ -1,6 +1,6 @@
 ﻿namespace EEPhysics
 {
-    internal static class ItemId
+    public static class ItemId
     {
         public const int Piano = 77;
         public const int Drum = 83;
