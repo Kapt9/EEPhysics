@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlockData.cs" />
     <Compile Include="InitParse.cs" />
     <Compile Include="ItemId.cs" />
     <Compile Include="PhysicsConfig.cs" />

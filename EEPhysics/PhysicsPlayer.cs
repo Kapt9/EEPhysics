@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace EEPhysics
 {
@@ -76,7 +77,7 @@ namespace EEPhysics
         public bool JustSpaceDown { get; set; }
         public bool SpaceDown { get; set; }
 
-        internal double gravityMultiplier
+        internal double GravityMultiplier
         {
             get
             {
@@ -88,7 +89,6 @@ namespace EEPhysics
                 return d;
             }
         }
-        internal double GravityMultiplier => HostWorld.WorldGravity;
 
         internal double SpeedMultiplier
         {
@@ -222,7 +222,7 @@ namespace EEPhysics
 
             if (ItemId.IsHalfBlock(current))
             {
-                var rot = HostWorld.GetBlockData(cx, cy)[0];
+                var rot = (int)HostWorld.GetBlockData(cx, cy)[0];
 
                 if (rot == 1) cy -= 1;
                 if (rot == 0) cx -= 1;
@@ -244,12 +244,6 @@ namespace EEPhysics
                 delayed = queue.Dequeue();
                 queue.Enqueue(current);
             }
-
-            // not needed, client side only
-            /*while (tileQueue.Count > 0)
-            {
-                UpdatePurpleSwitches(tileQueue.Dequeue());
-            }*/
 
             // TODO: Change fire to effect
             if (isOnFire && !isInvulnerable)
@@ -353,7 +347,7 @@ namespace EEPhysics
                         case ItemId.EffectProtection:
                             morx = 0;
                             mory = gravity;
-                            if (HostWorld.GetOnStatus(cx, cy) && isOnFire)
+                            if (HostWorld.GetOnStatus(cx, cy))
                             {
                                 Zombie = false;
                                 isOnFire = false;
@@ -448,6 +442,9 @@ namespace EEPhysics
 
             ModifierX = (mox + mx);
             ModifierY = (moy + my);
+            if (ItemId.IsSlippery(currentBelow) && !ItemId.IsClimbable(current) && current != 4 && current != 414) slippery = 2;
+            else if (ItemId.IsSolid(currentBelow)) slippery = 0;
+            else if (slippery > 0) slippery -= 0.2;
 
             if (!DoubleIsEqual(speedX, 0) || !DoubleIsEqual(modifierX, 0))
             {
@@ -455,7 +452,7 @@ namespace EEPhysics
                 speedX = (speedX * PhysicsConfig.BaseDrag);
                 if (!isGodMode)
                 {
-                    if ((mx == 0 && moy != 0) || (speedX < 0 && mx > 0) || (speedX > 0 && mx < 0) || ItemId.IsClimbable(current))
+                    if ((mx == 0 && moy != 0 || speedX < 0 && mx > 0 || speedX > 0 && mx < 0) && (slippery <= 0) || ItemId.IsClimbable(current))
                     {
                         speedX = (speedX * PhysicsConfig.NoModifierDrag);
                     }
@@ -470,6 +467,21 @@ namespace EEPhysics
                     else if (current == ItemId.Lava)
                     {
                         speedX = (speedX * PhysicsConfig.LavaDrag);
+                    }
+                    else if (slippery > 0)
+                    {
+                        if (mx != 0 && !(speedX < 0 && mx > 0 || speedX > 0 && mx < 0))
+                        {
+                            speedX = speedX * PhysicsConfig.BaseDrag;
+                        }
+                        else
+                        {
+                            speedX = speedX * PhysicsConfig.IceNoModDrag;
+                        }
+                        if (speedX < 0 && mx > 0 || speedX > 0 && mx < 0)
+                        {
+                            speedX = speedX * PhysicsConfig.IceDrag;
+                        }
                     }
                 }
 
@@ -492,7 +504,7 @@ namespace EEPhysics
                 speedY = (speedY * PhysicsConfig.BaseDrag);
                 if (!isGodMode)
                 {
-                    if ((my == 0 && mox != 0) || (speedY < 0 && my > 0) || (speedY > 0 && my < 0) || ItemId.IsClimbable(current))
+                    if ((my == 0 && mox != 0 || speedY < 0 && my > 0 || speedY > 0 && my < 0) && (slippery <= 0 || ItemId.IsClimbable(current)))
                     {
                         speedY = (speedY * PhysicsConfig.NoModifierDrag);
                     }
@@ -507,6 +519,21 @@ namespace EEPhysics
                     else if (current == ItemId.Lava)
                     {
                         speedY = (speedY * PhysicsConfig.LavaDrag);
+                    }
+                    else if (slippery > 0)
+                    {
+                        if (my != 0 && !(speedY < 0 && my > 0 || speedY > 0 && my < 0))
+                        {
+                            speedY = speedY * PhysicsConfig.BaseDrag;
+                        }
+                        else
+                        {
+                            speedY = speedY * PhysicsConfig.IceNoModDrag;
+                        }
+                        if (speedY < 0 && my > 0 || speedY > 0 && my < 0)
+                        {
+                            speedY = speedY * PhysicsConfig.IceDrag;
+                        }
                     }
                 }
 
@@ -533,6 +560,12 @@ namespace EEPhysics
                     case ItemId.SpeedUp: speedY = -PhysicsConfig.Boost; break;
                     case ItemId.SpeedDown: speedY = PhysicsConfig.Boost; break;
                 }
+
+                if (IsDead)
+                {
+                    speedX = 0;
+                    speedY = 0;
+                }
             }
 
             var reminderX = X % 1;
@@ -553,20 +586,20 @@ namespace EEPhysics
                         OnHitPortal(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                         lastPortal = new Point(cx, cy);
                         hasLastPortal = true;
-                        int[] data = HostWorld.GetBlockData(cx, cy);
+                        object[] data = HostWorld.GetBlockData(cx, cy);
                         if (data != null && data.Length == 3)
                         {
                             Point portalPoint;
                             if (data[2] != data[1] && // target != itself
-                                HostWorld.TryGetPortalById(data[2], out portalPoint))
+                                HostWorld.TryGetPortalById((int)data[2], out portalPoint))
                             {
-                                int[] data2 = HostWorld.GetBlockData(lastPortal.x, lastPortal.y);
-                                int[] data3 = HostWorld.GetBlockData(portalPoint.x, portalPoint.y);
+                                var data2 = HostWorld.GetBlockData(lastPortal.x, lastPortal.y);
+                                var data3 = HostWorld.GetBlockData(portalPoint.x, portalPoint.y);
                                 if (data2 != null && data2.Length == 3 &&
                                     data3 != null && data3.Length == 3)
                                 {
-                                    int rot1 = data2[0];
-                                    int rot2 = data3[0];
+                                    int rot1 = (int)data2[0];
+                                    int rot2 = (int)data3[0];
                                     if (rot1 < rot2)
                                     {
                                         rot1 += 4;
@@ -661,7 +694,6 @@ namespace EEPhysics
                     donex = true;
                 }
                 #endregion
-
                 #region stepY()
                 if (currentSy > 0)
                 {
@@ -720,7 +752,7 @@ namespace EEPhysics
                         injump = true;
                         mod = -1;
                     }
-                    if (SpaceDown)
+                    if (spacedown)
                     {
                         if (HasLevitation)
                         {
@@ -753,29 +785,66 @@ namespace EEPhysics
                     }
                     if (injump && !HasLevitation)
                     {
-                        if (SpeedX == 0 && morx != 0 && mox != 0 && (X % 16 == 0 || X % 8 == 0))
+                        if ((maxJumps > 0 || jumpCount < maxJumps))
                         {
-                            SpeedX -= morx * PhysicsConfig.JumpHeight * JumpMultiplier;
-                            changed = true;
-                            lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
-                        }
-                        if (SpeedY == 0 && mory != 0 && moy != 0 && (Y % 16 == 0 || Y % 8 == 0))
-                        {
-                            SpeedY -= mory * PhysicsConfig.JumpHeight * JumpMultiplier;
-                            changed = true;
-                            lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
+                            if (SpeedX == 0 && morx != 0 && mox != 0 && (X % 16 == 0 || X % 8 == 0))
+                            {
+                                var skipJumpX = false;
+                                if (jumpCount == 0 && speedX != 0 && ItemId.IsSolid(currentBelow))
+                                {
+                                    if (maxJumps == 1)
+                                    {
+                                        skipJumpX = true;
+                                    }
+                                    else jumpCount += 2;
+                                }
+                                else jumpCount++;
+
+                                if (!skipJumpX)
+                                {
+                                    SpeedX -= morx * PhysicsConfig.JumpHeight * JumpMultiplier;
+                                    changed = true;
+                                    lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
+                                }
+                            }
+                            if (SpeedY == 0 && mory != 0 && moy != 0 && (Y % 16 == 0 || Y % 8 == 0))
+                            {
+                                var skipJumpY = false;
+                                if (jumpCount == 0 && speedY != 0 && ItemId.IsSolid(currentBelow))
+                                {
+                                    if (maxJumps == 1)
+                                    {
+                                        skipJumpY = true;
+                                    }
+                                    else jumpCount += 2;
+                                }
+                                else jumpCount++;
+
+                                if (!skipJumpY)
+                                {
+                                    SpeedY -= mory * PhysicsConfig.JumpHeight * JumpMultiplier;
+                                    changed = true;
+                                    lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
+                                }
+                            }
                         }
                     }
+
+                    if ((speedX == 0 && !DoubleIsEqual(morx, 0) && !DoubleIsEqual(mox, 0) || speedY == 0 && !DoubleIsEqual(mory, 0) && !DoubleIsEqual(moy, 0)) && ItemId.IsSolid(currentBelow) || current == ItemId.EffectMultiJump)
+                    {
+                        jumpCount = 0;
+                    }
+
                     if (changed || oh != Horizontal || ov != Vertical)
                     {
                         oh = Horizontal;
                         ov = Vertical;
-                        HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, (int)ModifierX, (int)ModifierY,
-                            Horizontal, Vertical, GravityMultiplier, spacedown, JustSpaceDown, TickId);
+                        HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, (int)ModifierX, (int)ModifierY, Horizontal, Vertical, GravityMultiplier, spacedown, JustSpaceDown, TickId);
                     }
                     TickId++;
                     JustSpaceDown = false;
                 }
+
                 if (pastx != cx || pasty != cy)
                 {
                     PlayerEvent e;
@@ -879,7 +948,7 @@ namespace EEPhysics
                             }
                             break;
                         case ItemId.SwitchPurple:
-                            int sid = HostWorld.GetBlockData(cx, cy)[0];
+                            var sid = (int)HostWorld.GetBlockData(cx, cy)[0];
                             UpdatePurpleSwitches(sid);
                             OnHitSwitch(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
@@ -929,6 +998,67 @@ namespace EEPhysics
                             }
                             break;
 
+                        //Effects
+                        case ItemId.EffectJump:
+                            if (!isGodMode)
+                            {
+                                var status = HostWorld.GetOnStatus(cx, cy);
+                                if (JumpBoostEffect != status)
+                                {
+                                    JumpBoostEffect = status;
+
+                                    if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectJump);
+                                }
+                            }
+                            break;
+                        case ItemId.EffectMultiJump:
+                            if (!isGodMode)
+                            {
+                                var status = HostWorld.GetInt(cx, cy);
+                                if (status != maxJumps)
+                                {
+                                    maxJumps = status;
+
+                                    if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectMultiJump);
+                                }
+                            }
+                            break;
+                        case ItemId.EffectFly:
+                            if (!isGodMode)
+                            {
+                                var status = HostWorld.GetOnStatus(cx, cy);
+                                if (HasLevitation != status)
+                                {
+                                    HasLevitation = status;
+
+                                    if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectFly);
+                                }
+                            }
+                            break;
+                        case ItemId.EffectRun:
+                            if (!isGodMode)
+                            {
+                                var status = HostWorld.GetOnStatus(cx, cy);
+                                if (SpeedBoostEffect != status)
+                                {
+                                    SpeedBoostEffect = status;
+
+                                    if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectRun);
+                                }
+                            }
+                            break;
+                        case ItemId.EffectLowGravity:
+                            if (!isGodMode)
+                            {
+                                var status = HostWorld.GetOnStatus(cx, cy);
+                                if (GravityEffect != status)
+                                {
+                                    GravityEffect = status;
+
+                                    if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectLowGravity);
+                                }
+                            }
+                            break;
                         case ItemId.EffectProtection:
                             if (!InGodMode)
                             {
@@ -942,11 +1072,57 @@ namespace EEPhysics
                                         isOnFire = false;
                                         CursedEffect = false;
                                     }
+
                                     if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectProtection);
                                 }
                             }
                             break;
 
+                        case ItemId.EffectCurse:
+                            if (!isGodMode && !isInvulnerable)
+                            {
+                                var status = HostWorld.GetInt(cx, cy) > 0;
+                                if (CursedEffect != status)
+                                {
+                                    CursedEffect = status;
+
+                                    if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectCurse);
+                                }
+                            }
+                            break;
+
+                        case ItemId.EffectZombie:
+                            if (!isGodMode && !isInvulnerable)
+                            {
+                                var status = HostWorld.GetInt(cx, cy) > 0;
+                                if (Zombie != status)
+                                {
+                                    Zombie = status;
+
+                                    if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectZombie);
+                                }
+                            }
+                            break;
+
+                        case ItemId.Lava:
+                            if (!isGodMode && !isInvulnerable && !isOnFire)
+                            {
+                                isOnFire = true;
+                                if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectFire);
+                            }
+                            break;
+
+                        case ItemId.Water:
+                        case ItemId.Mud:
+                            if (!isGodMode && isOnFire)
+                            {
+                                isOnFire = false;
+                                if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectFire);
+                            }
+                            break;
+
+                            //TODO: Team Effect
+                            //TODO: SwitchOrange
                     }
                     pastx = cx;
                     pasty = cy;
@@ -961,22 +1137,14 @@ namespace EEPhysics
                         {
                             if (touchedPoints[i].y == cy)
                             {
-                                if (X % 16 == 0 && (touchedPoints[i].x == cx - 1 || touchedPoints[i].x == cx + 1) && touchedPoints[i].y == cy)
-                                {
-
-                                }
-                                else
+                                if (X % 16 != 0 || (touchedPoints[i].x != cx - 1 && touchedPoints[i].x != cx + 1) || touchedPoints[i].y != cy)
                                 {
                                     touchedPoints.RemoveAt(i--);
                                 }
                             }
                             else if (touchedPoints[i].x == cx)
                             {
-                                if (Y % 16 == 0 && (touchedPoints[i].y == cy - 1 || touchedPoints[i].y == cy + 1) && touchedPoints[i].x == cx)
-                                {
-
-                                }
-                                else
+                                if (Y % 16 != 0 || (touchedPoints[i].y != cy - 1 && touchedPoints[i].y != cy + 1) || touchedPoints[i].x != cx)
                                 {
                                     touchedPoints.RemoveAt(i--);
                                 }
@@ -1110,7 +1278,15 @@ namespace EEPhysics
 
             oldX = X;
             oldY = Y;
+
+            PlayerOverlaps = HostWorld.PlayerOverlaps(this);
         }
+        
+        /// <summary>
+        /// An array of players you overlap
+        /// (Players you move ontop of)
+        /// </summary>
+        public PhysicsPlayer[] PlayerOverlaps { get; set; }
 
         /// <summary>
         /// Set horizontal movement direction of the bot. Allowed only for the bot player. Allowed only for the bot player. Also you have to initialize PhysicsWorld with the PlayerIO Connection.
@@ -1268,7 +1444,7 @@ namespace EEPhysics
         }
         internal void UpdateTeamDoors(int x, int y)
         {
-            int data = HostWorld.GetBlockData(x, y)[0];
+            var data = (int)HostWorld.GetBlockData(x, y)[0];
             int team = Team;
             if (Team != data)
             {

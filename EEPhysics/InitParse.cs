@@ -14,8 +14,8 @@ namespace EEPhysics
             // Get world data
             var p = 0u;
             var data = new Stack<object>();
-            while (m[p] as string != "ws") { ++p; }
-            while (m[p] as string != "we") { data.Push(m[++p]); }
+            while (m[p++] as string != "ws") { }
+            while (m[p] as string != "we") { data.Push(m[p++]); }
 
             // Parse world data
             var chunks = new List<DataChunk>();
@@ -39,10 +39,10 @@ namespace EEPhysics
 
     internal class DataChunk
     {
-        public int Layer { get; set; }
-        public uint Type { get; set; }
         public Point[] Locations { get; set; }
         public object[] Args { get; set; }
+        public int Layer { get; set; }
+        public uint Type { get; set; }
 
         public DataChunk(int layer, uint type, byte[] xs, byte[] ys, object[] args)
         {

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Threading;
 using PlayerIOClient;
 using System;
+using System.Linq;
 
 namespace EEPhysics
 {
@@ -15,13 +16,12 @@ namespace EEPhysics
         private readonly List<Message> earlyMessages = new List<Message>();
         public int WorldHeight { get; private set; }
         public int WorldWidth { get; private set; }
+        public BlockData[,,] Blocks { get; set; }
         internal Stopwatch Sw = new Stopwatch();
         internal Connection Connection { get; }
         internal double WorldGravity = 1;
         private Thread physicsThread;
         internal const int Size = 16;
-        private int[][][] blockData;
-        private int[][][] blocks;
         private bool running;
         private bool inited;
 
@@ -101,21 +101,11 @@ namespace EEPhysics
                     WorldWidth = m.GetInt(18);
                     WorldHeight = m.GetInt(19);
 
-                    blocks = new int[2][][];
-                    for (int i = 0; i < blocks.Length; i++)
-                    {
-                        blocks[i] = new int[WorldWidth][];
-                        for (int ii = 0; ii < WorldWidth; ii++) blocks[i][ii] = new int[WorldHeight];
-                    }
-
-                    blockData = new int[WorldWidth][][];
-                    for (int i = 0; i < WorldWidth; i++) blockData[i] = new int[WorldHeight][];
-
                     WorldGravity = m.GetDouble(20);
 
                     if (AddBotPlayer)
                     {
-                        PhysicsPlayer p = new PhysicsPlayer(m.GetInt(5), m.GetString(13))
+                        var p = new PhysicsPlayer(m.GetInt(5), m.GetString(13))
                         {
                             X = m.GetInt(10),
                             Y = m.GetInt(11),
@@ -158,6 +148,7 @@ namespace EEPhysics
                             p.Horizontal = m.GetInt(7);
                             p.Vertical = m.GetInt(8);
                             p.SpaceDown = m.GetBoolean(9);
+                            p.JustSpaceDown = m.GetBoolean(10);
                             p.IsDead = false;
                             if (p.HasLevitation)
                             {
@@ -179,13 +170,13 @@ namespace EEPhysics
                         int blockId = m.GetInt(3);
                         if (zz == 0)
                         {
-                            switch (blocks[zz][xx][yy])
+                            switch (Blocks[xx, yy, zz].Id)
                             {
                                 case 100: foreach (var pair in Players) pair.Value.RemoveCoin(xx, yy); break;
                                 case 101: foreach (var pair in Players) pair.Value.RemoveBlueCoin(xx, yy); break;
                             }
                         }
-                        blocks[zz][xx][yy] = blockId;
+                        Blocks[xx, yy, zz].Id = blockId;
                     }
                     break;
                 case "add":
@@ -199,7 +190,7 @@ namespace EEPhysics
                             HasChat = m.GetBoolean(8),
                             Coins = m.GetInt(9),
                             BlueCoins = m.GetInt(10),
-                            IsClubMember = m.GetBoolean(12),
+                            IsClubMember = m.GetBoolean(13),
                             Team = m.GetInt(16)
                         };
 
@@ -260,20 +251,16 @@ namespace EEPhysics
                 case "br":
                 case "bs":
                     {
-                        int xx = m.GetInt(0);
-                        int yy = m.GetInt(1);
-                        blocks[0][xx][yy] = m.GetInt(2);
-                        blockData[xx][yy] = new int[1];
-                        for (uint i = 3; i < 4; i++) blockData[xx][yy][i - 3] = m.GetInt(i);
+                        var xx = m.GetInt(0);
+                        var yy = m.GetInt(1);
+                        Blocks[xx, yy, 0] = new BlockData(0, xx, yy, m.GetInt(2), m.GetInt(3));
                     }
                     break;
                 case "pt":
                     {
-                        int xx = m.GetInt(0);
-                        int yy = m.GetInt(1);
-                        blocks[0][xx][yy] = m.GetInt(2);
-                        blockData[xx][yy] = new int[3];
-                        for (uint i = 3; i < 6; i++) blockData[xx][yy][i - 3] = m.GetInt(i);
+                        var x = m.GetInt(0);
+                        var y = m.GetInt(1);
+                        Blocks[x, y, 0] = new BlockData(0, x, y, m.GetInt(2), m.GetInt(3), m.GetInt(4), m.GetInt(5));
                     }
                     break;
                 /*case "fill":
@@ -367,10 +354,10 @@ namespace EEPhysics
                         for (int i = 0; i < WorldWidth; i++)
                             for (int ii = 0; ii < WorldHeight; ii++)
                             {
-                                if (i == 0 || ii == 0 || i == WorldWidth - 1 || ii == WorldHeight - 1) blocks[0][i][ii] = border;
-                                else blocks[0][i][ii] = fill;
+                                if (i == 0 || ii == 0 || i == WorldWidth - 1 || ii == WorldHeight - 1) Blocks[i, ii, 0].Id = border;
+                                else Blocks[i, ii, 0].Id = fill;
 
-                                blocks[1][i][ii] = 0;
+                                Blocks[i, ii, 1].Id = 0;
                             }
 
                         foreach (var pair in Players) pair.Value.Reset();
@@ -380,7 +367,9 @@ namespace EEPhysics
                 case "lb":
                 case "wp":
                     {
-                        blocks[0][m.GetInt(0)][m.GetInt(1)] = m.GetInt(2);
+                        var x = m.GetInt(0);
+                        var y = m.GetInt(1);
+                        Blocks[x, y, 0] = new BlockData(0, x, y, m.GetInt(2), m.GetString(3));
                     }
                     break;
                 case "kill":
@@ -405,17 +394,18 @@ namespace EEPhysics
         /// <returns>Block ID</returns>
         public int GetBlock(int z, int x, int y)
         {
-            if (z < 0 || z > 1) throw new ArgumentOutOfRangeException("z", "Layer must be 0 (foreground) or 1 (background).");
+            if (z < 0 || z > 1) throw new ArgumentOutOfRangeException(nameof(z), "Layer must be 0 (foreground) or 1 (background).");
             if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight) return -1;
 
-            return blocks[z][x][y];
+            return Blocks[x, y, z].Id;
         }
 
-        /// <returns>Extra block data, eg. rotation, id and target id from portals. Doesn't support signs.</returns>
-        public int[] GetBlockData(int x, int y)
+        /// <returns>Extra block data, eg. rotation, id and target id from portals.</returns>
+        public object[] GetBlockData(int x, int y)
         {
             if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight) return null;
-            return blockData[x][y];
+            var data = Blocks[x, y, 0].Args;
+            return data.Length == 0 ? null : data;
         }
 
         internal bool TryGetPortalById(int id, out Point p)
@@ -424,8 +414,10 @@ namespace EEPhysics
             {
                 for (int ii = 0; ii < WorldHeight; ii++)
                 {
-                    if (blocks[0][i][ii] != 242 && blocks[0][i][ii] != 381) continue;
-                    if (blockData[i][ii][1] != id) continue;
+                    var block = Blocks[i, ii, 0];
+
+                    if (block.Id != 242 && block.Id != 381) continue;
+                    if ((int)block.Args[1] != id) continue;
 
                     p = new Point(i, ii);
                     return true;
@@ -433,12 +425,6 @@ namespace EEPhysics
             }
             p = default(Point);
             return false;
-        }
-
-        internal bool GetOnStatus(int x, int y)
-        {
-            // TODO: Does effect disable or enable?
-            return true;
         }
 
         /// <summary>
@@ -459,11 +445,36 @@ namespace EEPhysics
 
         }
 
+        public int GetInt(int x, int y)
+        {
+            var block = GetBlockData(x, y);
+            if (block == null) return 0;
+
+            if (block[0] is int) return (int)block[0];
+            if (block[0] is uint) return (int)(uint)block[0];
+            return Convert.ToInt32(block[0]);
+        }
+
+        public bool GetOnStatus(int x, int y)
+        {
+            var block = GetBlockData(x, y);
+            if (block == null) return false;
+
+            if (block[0] is int) return (int)block[0] == 1;
+            if (block[0] is uint) return (uint)block[0] == 1;
+            if (block[0] is bool) return (bool)block[0];
+            return false;
+        }
+
         /// <summary>
         /// Stops the physics simulation thread.
         /// </summary>
         public void StopSimulation() { if (PhysicsRunning) running = false; }
 
+        public PhysicsPlayer[] PlayerOverlaps(PhysicsPlayer p)
+        {
+            return (from physicsPlayer in Players where physicsPlayer.Value != p && Math.Abs(p.X - physicsPlayer.Value.X) < 8 && Math.Abs(p.Y - physicsPlayer.Value.Y) < 8 select physicsPlayer.Value).ToArray();
+        }
         internal bool Overlaps(PhysicsPlayer p)
         {
             if ((p.X < 0 || p.Y < 0) || ((p.X > WorldWidth * 16 - 16) || (p.Y > WorldHeight * 16 - 16))) return true;
@@ -485,15 +496,16 @@ namespace EEPhysics
                 var b = firstX;
                 for (; x < lastX; x++)
                 {
-                    var tileId = blocks[0][x][y];
+                    var tileId = Blocks[x, y, 0].Id;
 
                     if (!ItemId.IsSolid(tileId)) continue;
                     if (!playerRectangle.IntersectsWith(new Rectangle(x * 16, y * 16, 16, 16))) continue;
-                    var rot = 1;
+                    var rot = 0;
                     try
                     {
                         //TODO: Figure out this.
-                        rot = blockData[x][y] == null ? 1 : blockData[x][y][0];
+                        var data = GetBlockData(x, y);
+                        if (data != null) rot = (int)data[0];
                     }
                     catch { }
 
@@ -665,7 +677,7 @@ namespace EEPhysics
                             break;
                         case ItemId.DoorPurple:
                             {
-                                int pid = blockData[x][y][0];
+                                var pid = (int)GetBlockData(x, y)[0];
                                 if (p.Switches[pid])
                                 {
                                     continue;
@@ -674,7 +686,7 @@ namespace EEPhysics
                             break;
                         case ItemId.GatePurple:
                             {
-                                int pid = blockData[x][y][0];
+                                var pid = (int)GetBlockData(x, y)[0];
                                 if (!p.Switches[pid])
                                 {
                                     continue;
@@ -682,51 +694,51 @@ namespace EEPhysics
                             }
                             break;
                         case ItemId.DeathDoor:
-                            if (p.Deaths >= blockData[x][y][0])
+                            if (p.Deaths >= (int)GetBlockData(x, y)[0])
                             {
                                 continue;
                             }
                             break;
                         case ItemId.DeathGate:
-                            if (p.Deaths < blockData[x][y][0])
+                            if (p.Deaths < (int)GetBlockData(x, y)[0])
                             {
                                 continue;
                             }
                             break;
                         case ItemId.TeamDoor:
-                            if (p.Team == GetBlockData(x, y)[0])
+                            if (p.Team == (int)GetBlockData(x, y)[0])
                             {
                                 continue;
                             }
                             break;
                         case ItemId.TeamGate:
-                            if (p.Team != GetBlockData(x, y)[0])
+                            if (p.Team != (int)GetBlockData(x, y)[0])
                             {
                                 continue;
                             }
                             break;
-                        case ItemId.DoorClub:
+                        case ItemId.DoorGold:
                             if (p.IsClubMember)
                             {
                                 continue;
                             }
                             break;
-                        case ItemId.GateClub:
+                        case ItemId.GateGold:
                             if (!p.IsClubMember)
                             {
                                 continue;
                             }
                             break;
-                        case ItemId.Coindoor:
-                        case ItemId.BlueCoindoor:
-                            if (blockData[x][y][0] <= p.Coins)
+                        case ItemId.CoinDoor:
+                        case ItemId.BlueCoinDoor:
+                            if ((int)GetBlockData(x, y)[0] <= p.Coins)
                             {
                                 continue;
                             }
                             break;
-                        case ItemId.Coingate:
-                        case ItemId.BlueCoingate:
-                            if (blockData[x][y][0] > p.Coins)
+                        case ItemId.CoinGate:
+                        case ItemId.BlueCoinGate:
+                            if ((int)GetBlockData(x, y)[0] > p.Coins)
                             {
                                 continue;
                             }
@@ -789,22 +801,18 @@ namespace EEPhysics
 
         internal void DeserializeBlocks(Message m)
         {
+            Blocks = new BlockData[WorldWidth, WorldHeight, 2];
+            for (int i = 0; i < WorldWidth; i++)
+                for (int j = 0; j < WorldHeight; j++)
+                    for (int k = 0; k < 2; k++)
+                        Blocks[i, j, k] = new BlockData(k, i, j, (i == 0 || i == WorldWidth - 1 || j == 0 || j == WorldHeight - 1) ? 9 : 0);
+
             var data = InitParse.Parse(m);
-            foreach (var d in data)
+            foreach (var chunk in data)
             {
-                foreach (var p in d.Locations)
+                foreach (var location in chunk.Locations)
                 {
-                    blocks[d.Layer][p.x][p.y] = (int)d.Type;
-                    if (d.Layer == 0 && d.Args.Length > 0)
-                    {
-                        List<int> bdata = new List<int>();
-                        foreach (var o in d.Args)
-                        {
-                            if (o is int) bdata.Add((int)o);
-                            else if (o is uint) bdata.Add((int)((uint)o));
-                        }
-                        blockData[p.x][p.y] = bdata.ToArray();
-                    }
+                    Blocks[location.x, location.y, chunk.Layer] = new BlockData(chunk.Layer, location.x, location.y, (int)chunk.Type, chunk.Args);
                 }
             }
         }
