@@ -737,11 +737,10 @@ namespace EEPhysics
                 }
                 #endregion
             }
-
-
+            
             if (!IsDead)
             {
-                if (IsMe)
+               // if (IsMe)
                 {
                     int mod = 1;
                     bool injump = false;
@@ -839,7 +838,7 @@ namespace EEPhysics
                     {
                         oh = Horizontal;
                         ov = Vertical;
-                        HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, (int)ModifierX, (int)ModifierY, Horizontal, Vertical, GravityMultiplier, spacedown, JustSpaceDown, TickId);
+                       if (IsMe) HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, (int)ModifierX, (int)ModifierY, Horizontal, Vertical, GravityMultiplier, spacedown, JustSpaceDown, TickId);
                     }
                     TickId++;
                     JustSpaceDown = false;
