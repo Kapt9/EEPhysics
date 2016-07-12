@@ -222,7 +222,7 @@ namespace EEPhysics
 
             if (ItemId.IsHalfBlock(current))
             {
-                var rot = (int)HostWorld.GetBlockData(cx, cy)[0];
+                var rot = Convert.ToInt32(HostWorld.GetBlockData(cx, cy)[0]);
 
                 if (rot == 1) cy -= 1;
                 if (rot == 0) cx -= 1;
