@@ -1,10 +1,9 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 using System.Threading;
-using System.Threading.Tasks;
 using PlayerIOClient;
 using EEPhysics;
- 
-namespace Enter_Project_Name
+
+namespace Sample
 {
     class Program
     {
@@ -33,7 +32,7 @@ namespace Enter_Project_Name
             {
                 foreach (var player in World.Players.Values)
                 {
-                    Connection.Send("b", 0, (int) player.X / 16, (int) player.Y / 16, 9);
+                    Connection.Send("b", 0, (int)player.X / 16, (int)player.Y / 16, 9);
                     await Task.Delay(10);
                 }
             }
