@@ -501,13 +501,8 @@ namespace EEPhysics
                     if (!ItemId.IsSolid(tileId)) continue;
                     if (!playerRectangle.IntersectsWith(new Rectangle(x * 16, y * 16, 16, 16))) continue;
                     var rot = 0;
-                    try
-                    {
-                        //TODO: Figure out this.
-                        var data = GetBlockData(x, y);
-                        if (data != null) rot = (int)data[0];
-                    }
-                    catch { }
+                    var data = GetBlockData(x, y);
+                    if (data != null) rot = Convert.ToInt32(data[0]);
 
                     if (tileId == ItemId.OnewayCyan || tileId == ItemId.OnewayPink || tileId == ItemId.OnewayOrange ||
                         tileId == ItemId.OnewayYellow || tileId == ItemId.OnewayGray || tileId == ItemId.OnewayBlue ||
@@ -677,7 +672,7 @@ namespace EEPhysics
                             break;
                         case ItemId.DoorPurple:
                             {
-                                var pid = (int)GetBlockData(x, y)[0];
+                                var pid = Convert.ToInt32(GetBlockData(x, y)[0]);
                                 if (p.Switches[pid])
                                 {
                                     continue;
@@ -686,7 +681,7 @@ namespace EEPhysics
                             break;
                         case ItemId.GatePurple:
                             {
-                                var pid = (int)GetBlockData(x, y)[0];
+                                var pid = Convert.ToInt32(GetBlockData(x, y)[0]);
                                 if (!p.Switches[pid])
                                 {
                                     continue;
@@ -694,25 +689,25 @@ namespace EEPhysics
                             }
                             break;
                         case ItemId.DeathDoor:
-                            if (p.Deaths >= (int)GetBlockData(x, y)[0])
+                            if (p.Deaths >= Convert.ToInt32(GetBlockData(x, y)[0]))
                             {
                                 continue;
                             }
                             break;
                         case ItemId.DeathGate:
-                            if (p.Deaths < (int)GetBlockData(x, y)[0])
+                            if (p.Deaths < Convert.ToInt32(GetBlockData(x, y)[0]))
                             {
                                 continue;
                             }
                             break;
                         case ItemId.TeamDoor:
-                            if (p.Team == (int)GetBlockData(x, y)[0])
+                            if (p.Team == Convert.ToInt32(GetBlockData(x, y)[0]))
                             {
                                 continue;
                             }
                             break;
                         case ItemId.TeamGate:
-                            if (p.Team != (int)GetBlockData(x, y)[0])
+                            if (p.Team != Convert.ToInt32(GetBlockData(x, y)[0]))
                             {
                                 continue;
                             }
@@ -731,14 +726,14 @@ namespace EEPhysics
                             break;
                         case ItemId.CoinDoor:
                         case ItemId.BlueCoinDoor:
-                            if ((int)GetBlockData(x, y)[0] <= p.Coins)
+                            if (Convert.ToInt32(GetBlockData(x, y)[0]) <= p.Coins)
                             {
                                 continue;
                             }
                             break;
                         case ItemId.CoinGate:
                         case ItemId.BlueCoinGate:
-                            if ((int)GetBlockData(x, y)[0] > p.Coins)
+                            if (Convert.ToInt32(GetBlockData(x, y)[0]) > p.Coins)
                             {
                                 continue;
                             }
