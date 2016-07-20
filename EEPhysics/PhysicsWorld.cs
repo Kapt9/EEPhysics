@@ -417,7 +417,7 @@ namespace EEPhysics
                     var block = Blocks[i, ii, 0];
 
                     if (block.Id != 242 && block.Id != 381) continue;
-                    if ((int)block.Args[1] != id) continue;
+                    if (Convert.ToInt32(block.Args[1]) != id) continue;
 
                     p = new Point(i, ii);
                     return true;

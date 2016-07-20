@@ -591,15 +591,15 @@ namespace EEPhysics
                         {
                             Point portalPoint;
                             if (data[2] != data[1] && // target != itself
-                                HostWorld.TryGetPortalById((int)data[2], out portalPoint))
+                                HostWorld.TryGetPortalById(Convert.ToInt32(data[2]), out portalPoint))
                             {
                                 var data2 = HostWorld.GetBlockData(lastPortal.x, lastPortal.y);
                                 var data3 = HostWorld.GetBlockData(portalPoint.x, portalPoint.y);
                                 if (data2 != null && data2.Length == 3 &&
                                     data3 != null && data3.Length == 3)
                                 {
-                                    int rot1 = (int)data2[0];
-                                    int rot2 = (int)data3[0];
+                                    int rot1 = Convert.ToInt32(data2[0]);
+                                    int rot2 = Convert.ToInt32(data3[0]);
                                     if (rot1 < rot2)
                                     {
                                         rot1 += 4;
@@ -737,10 +737,10 @@ namespace EEPhysics
                 }
                 #endregion
             }
-            
+
             if (!IsDead)
             {
-               // if (IsMe)
+                // if (IsMe)
                 {
                     int mod = 1;
                     bool injump = false;
@@ -838,7 +838,7 @@ namespace EEPhysics
                     {
                         oh = Horizontal;
                         ov = Vertical;
-                       if (IsMe) HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, (int)ModifierX, (int)ModifierY, Horizontal, Vertical, GravityMultiplier, spacedown, JustSpaceDown, TickId);
+                        if (IsMe) HostWorld.Connection.Send("m", X, Y, SpeedX, SpeedY, Convert.ToInt32(ModifierX), Convert.ToInt32(ModifierY), Horizontal, Vertical, GravityMultiplier, spacedown, JustSpaceDown, TickId);
                     }
                     TickId++;
                     JustSpaceDown = false;
@@ -947,7 +947,7 @@ namespace EEPhysics
                             }
                             break;
                         case ItemId.SwitchPurple:
-                            var sid = (int)HostWorld.GetBlockData(cx, cy)[0];
+                            var sid = Convert.ToInt32(HostWorld.GetBlockData(cx, cy)[0]);
                             UpdatePurpleSwitches(sid);
                             OnHitSwitch(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
@@ -1205,7 +1205,7 @@ namespace EEPhysics
             }
 
             int imx = ((int)speedX << 8);
-            int imy = ((int)speedX << 8);
+            int imy = ((int)speedY << 8);
             if (imx != 0 || ((current == ItemId.Water || current == ItemId.Mud || current == ItemId.Lava) && !InGodMode))
             {
 
@@ -1280,7 +1280,7 @@ namespace EEPhysics
 
             PlayerOverlaps = HostWorld.PlayerOverlaps(this);
         }
-        
+
         /// <summary>
         /// An array of players you overlap
         /// (Players you move ontop of)
