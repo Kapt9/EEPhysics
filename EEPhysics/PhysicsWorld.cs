@@ -739,15 +739,17 @@ namespace EEPhysics
                             }
                             break;
                         case ItemId.ZombieGate:
-                            /*if (p.Zombie) {
-                                        continue;
-                                    };*/
+                            if (!p.Zombie)
+                            {
+                                continue;
+                            };
                             break;
                         case ItemId.ZombieDoor:
-                            /*if (!p.Zombie) {
-                                        continue;
-                                    };*/
-                            continue;
+                            if (p.Zombie)
+                            {
+                                continue;
+                            };
+                            break;
                         case 61:
                         case 62:
                         case 63:
