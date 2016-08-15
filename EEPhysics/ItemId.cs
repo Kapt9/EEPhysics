@@ -137,7 +137,7 @@
 
         public static bool IsSolid(int blockId)
         {
-            return (9 <= blockId && blockId <= 97 || 122 <= blockId && blockId <= 217 || blockId >= 1001 && blockId <= 2000) && blockId != 83 && blockId != 77;
+            return (9 <= blockId && blockId <= 97 || 122 <= blockId && blockId <= 217 || 1001 <= blockId && blockId <= 2000) && blockId != 83 && blockId != 77;
         }
 
         public static bool IsBackground(int blockId)
