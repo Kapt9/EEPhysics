@@ -2,6 +2,7 @@
 using System.Threading;
 using PlayerIOClient;
 using EEPhysics;
+using System;
 
 namespace Sample
 {
@@ -14,6 +15,16 @@ namespace Sample
         {
             Connection = PlayerIO.QuickConnect.SimpleConnect("everybody-edits-su9rn58o40itdbnw69plyw", "guest", "guest", null).Multiplayer.JoinRoom("PW01", null);
             World = new PhysicsWorld();
+            World.OnPlayerAdded += addArgs =>
+            {
+                addArgs.Player.OnBlockPositionChange += e =>
+                {
+                    Console.WriteLine(e.Player.Name);
+                    Console.WriteLine(e.BlockX);
+                    Console.WriteLine(e.BlockY);
+                    Console.WriteLine(e.BlockId);
+                };
+            };
 
             Connection.OnMessage += (sender, m) =>
             {

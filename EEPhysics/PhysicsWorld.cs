@@ -49,6 +49,9 @@ namespace EEPhysics
         /// </summary>
         public event EventHandler OnTick = delegate { };
 
+        public delegate void PlayerAddEvent(PlayerAddArgs e);
+        public event PlayerAddEvent OnPlayerAdded = delegate { };
+
         public PhysicsWorld()
         {
             AutoStart = true;
@@ -194,7 +197,10 @@ namespace EEPhysics
                             Team = m.GetInt(16)
                         };
 
-                        Players.TryAdd(p.Id, p);
+                        if (Players.TryAdd(p.Id, p))
+                        {
+                            OnPlayerAdded(new PlayerAddArgs { Player = p });
+                        }
                     }
                     break;
                 case "left":
@@ -819,6 +825,14 @@ namespace EEPhysics
             if (PhysicsRunning)
                 StopSimulation();
         }
+    }
+
+    public class PlayerAddArgs
+    {
+        /// <summary>
+        /// The added Player.
+        /// </summary>
+        public PhysicsPlayer Player { get; set; }
     }
 
     public class Rectangle

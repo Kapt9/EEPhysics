@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace EEPhysics
 {
@@ -10,6 +9,7 @@ namespace EEPhysics
         internal PhysicsWorld HostWorld { get; set; }
         internal const int Width = 16;
         internal const int Height = 16;
+
         /// <summary>
         /// The precise player X position.
         /// </summary>
@@ -18,6 +18,16 @@ namespace EEPhysics
         /// The precise player Y position.
         /// </summary>
         public double Y { get; internal set; }
+
+        /// <summary>
+        /// The Block X posistion of the player.
+        /// </summary>
+        public int BlockX => (int)X / 16;
+
+        /// <summary>
+        /// The Block Y posistion of the player.
+        /// </summary>
+        public int BlockY => (int)Y / 16;
 
         private double oldX, oldY, speedX, speedY, modifierX, modifierY;
         private readonly List<Point> gotBlueCoins = new List<Point>();
@@ -134,6 +144,7 @@ namespace EEPhysics
         public int Coins { get; set; }
 
 
+        public delegate void PlayerBlockEvent(PlayerBlockEventArgs e);
         public delegate void PlayerEvent(PlayerEventArgs e);
 
         private readonly Dictionary<int, PlayerEvent> blockIdEvents = new Dictionary<int, PlayerEvent>();
@@ -172,6 +183,7 @@ namespace EEPhysics
         public event PlayerEvent OnHitCyanKey = delegate { };
         public event PlayerEvent OnHitMagentaKey = delegate { };
         public event PlayerEvent OnHitYellowKey = delegate { };
+        public event PlayerBlockEvent OnBlockPositionChange = delegate { };
 
         public event PlayerEvent OnHitPiano = delegate { };
         public event PlayerEvent OnHitDrum = delegate { };
@@ -855,6 +867,14 @@ namespace EEPhysics
                     {
                         e(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                     }
+                    OnBlockPositionChange(new PlayerBlockEventArgs
+                    {
+                        Player = this,
+                        BlockX = cx,
+                        BlockY = cy,
+                        BlockId = current
+                    });
+
 
                     // Might remove specific events soon, because you can make them now with void AddBlockEvent. (except OnGetCoin and OnGetBlueCoin)
                     switch (current)
@@ -1492,6 +1512,29 @@ namespace EEPhysics
         /// Block Y where event happened.
         /// </summary>
         public int BlockY { get; set; }
+    }
+
+    public class PlayerBlockEventArgs
+    {
+        /// <summary>
+        /// Player which caused the event.
+        /// </summary>
+        public PhysicsPlayer Player { get; set; }
+
+        /// <summary>
+        /// Block X where event happened.
+        /// </summary>
+        public int BlockX { get; set; }
+
+        /// <summary>
+        /// Block Y where event happened.
+        /// </summary>
+        public int BlockY { get; set; }
+
+        /// <summary>
+        /// Block ID where event happend.
+        /// </summary>
+        public int BlockId { get; set; }
     }
 
     internal struct Point
