@@ -234,12 +234,20 @@ namespace EEPhysics
 
             if (ItemId.IsHalfBlock(current))
             {
-                var rot = Convert.ToInt32(HostWorld.GetBlockData(cx, cy)[0]);
+                var data = HostWorld.GetBlockData(cx, cy);
+                if (data?.Length > 0)
+                {
+                    var rot = Convert.ToInt32(HostWorld.GetBlockData(cx, cy)[0]);
+                    if (!ItemId.IsBlockRotateable(current))
+                    {
+                        rot = 1;
+                    }
 
-                if (rot == 1) cy -= 1;
-                if (rot == 0) cx -= 1;
+                    if (rot == 1) cy -= 1;
+                    if (rot == 0) cx -= 1;
 
-                current = HostWorld.GetBlock(0, cx, cy);
+                    current = HostWorld.GetBlock(0, cx, cy);
+                }
             }
 
             if (this.tx != -1) UpdateTeamDoors(this.tx, this.ty);
@@ -841,7 +849,7 @@ namespace EEPhysics
                         }
                     }
 
-                    if ((speedX == 0 && !DoubleIsEqual(morx, 0) && !DoubleIsEqual(mox, 0) || speedY == 0 && !DoubleIsEqual(mory, 0) && !DoubleIsEqual(moy, 0)) && ItemId.IsSolid(currentBelow) || current == ItemId.EffectMultiJump)
+                    if ((speedX == 0 && !DoubleIsEqual(morx, 0) && !DoubleIsEqual(mox, 0) || speedY == 0 && !DoubleIsEqual(mory, 0) && !DoubleIsEqual(moy, 0)) && ItemId.IsSolid(currentBelow) || current == ItemId.EffectMultijump)
                     {
                         jumpCount = 0;
                     }
@@ -1030,7 +1038,7 @@ namespace EEPhysics
                                 }
                             }
                             break;
-                        case ItemId.EffectMultiJump:
+                        case ItemId.EffectMultijump:
                             if (!isGodMode)
                             {
                                 var status = HostWorld.GetInt(cx, cy);

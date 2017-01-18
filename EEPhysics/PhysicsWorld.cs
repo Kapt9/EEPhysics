@@ -411,6 +411,7 @@ namespace EEPhysics
         {
             if (x < 0 || x >= WorldWidth || y < 0 || y >= WorldHeight) return null;
             var data = Blocks[x, y, 0].Args;
+
             return data.Length == 0 ? null : data;
         }
 
@@ -730,15 +731,15 @@ namespace EEPhysics
                                 continue;
                             }
                             break;
-                        case ItemId.CoinDoor:
-                        case ItemId.BlueCoinDoor:
+                        case ItemId.Coindoor:
+                        case ItemId.Bluecoindoor:
                             if (Convert.ToInt32(GetBlockData(x, y)[0]) <= p.Coins)
                             {
                                 continue;
                             }
                             break;
-                        case ItemId.CoinGate:
-                        case ItemId.BlueCoinGate:
+                        case ItemId.Coingate:
+                        case ItemId.Bluecoingate:
                             if (Convert.ToInt32(GetBlockData(x, y)[0]) > p.Coins)
                             {
                                 continue;
