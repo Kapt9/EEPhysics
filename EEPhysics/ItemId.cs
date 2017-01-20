@@ -1,6 +1,6 @@
 ﻿namespace EEPhysics
 {
-    internal class ItemId
+    public class ItemId
     {
         public const int Bluecoindoor = 213;
         public const int Bluecoingate = 214;

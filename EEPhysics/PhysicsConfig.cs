@@ -5,7 +5,7 @@ namespace EEPhysics
     /// <summary>
     /// Constant physics variables.
     /// </summary>
-    internal static class PhysicsConfig
+    public static class PhysicsConfig
     {
         public const double MsPerTick = 10;
         public const double VariableMultiplier = 7.752;
