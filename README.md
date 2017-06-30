@@ -2,4 +2,4 @@ EEPhysics
 =========
 Helper library for Everybody Edits that simulates EE physics, allowing to get precise X and Y.
 
-Get from NuGet: `Install-Package EEPhysics`
+[Here is a new updated version of EEPhysics example code.](https://pastebin.com/maiaKcRD)
