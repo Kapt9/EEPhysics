@@ -40,6 +40,7 @@
         public const int EffectLowGravity = 453;
         public const int EffectMultijump = 461;
         public const int EffectProtection = 420;
+        public const int EffectGravity = 1517;
         public const int EffectRun = 419;
         public const int EffectTeam = 423;
         public const int EffectZombie = 422;
@@ -69,6 +70,18 @@
         public const int HalfblockFairytaleGreen = 1076;
         public const int HalfblockFairytaleOrange = 1075;
         public const int HalfblockFairytalePink = 1078;
+
+        public const int HalfblockWhite = 1116;
+        public const int HalfblockGray = 1117;
+        public const int HalfblockBlack = 1118;
+        public const int HalfblockRed = 1119;
+        public const int HalfblockOrange = 1120;
+        public const int HalfblockYellow = 1121;
+        public const int HalfblockGreen = 1122;
+        public const int HalfblockCyan = 1123;
+        public const int HalfblockBlue = 1124;
+        public const int HalfblockPurple = 1125;
+
         public const int Halloween2015Lamp = 458;
         public const int Halloween2015Oneway = 1050;
         public const int Halloween2015WindowCircle = 457;
@@ -153,11 +166,16 @@
         public const int InvisibleLeftArrow = 411;
         public const int InvisibleRightArrow = 413;
         public const int InvisibleUpArrow = 412;
+        public const int InvisibleDownArrow = 1519;
         public const int Piano = 77;
         public const int Drum = 83;
+        public const int Guitar = 1520;
+
+        public const int DownArrow = 1518;
+        public const int GodBlock = 1516;
 
 
-        public static bool IsSolid(int id) => (9 <= id && id <= 97 || 122 <= id && id <= 217 || id >= 1001 && id <= 1499 || id >= 2000) && id != 83 && id != 77;
+        public static bool IsSolid(int id) => (9 <= id && id <= 97 || 122 <= id && id <= 217 || id >= 1001 && id <= 1499 || id >= 2000) && id != 83 && id != 77 && id != 1520;
         public static bool IsBackground(int id)
         {
             return id >= 500 && id <= 999;
@@ -256,6 +274,17 @@
                 case HalfblockChristmas2016PresentWhite:
                 case HalfblockChristmas2016PresentBlue:
                 case HalfblockChristmas2016PresentYellow:
+                case HalfblockWhite:
+                case HalfblockGray:
+                case HalfblockBlack:
+                case HalfblockRed:
+                case HalfblockOrange:
+                case HalfblockYellow:
+                case HalfblockGreen:
+                case HalfblockCyan:
+                case HalfblockBlue:
+                case HalfblockPurple:
+
                     return true;
 
                 default: return false;

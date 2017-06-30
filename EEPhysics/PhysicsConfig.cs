@@ -34,5 +34,6 @@ namespace EEPhysics
         public const int EffectLowGravity = 7;
         public const int EffectFire = 8;
         public const int EffectMultiJump = 9;
+        public const int EffectGravity = 10;
     }
 }

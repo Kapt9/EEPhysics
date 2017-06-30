@@ -50,6 +50,7 @@ namespace EEPhysics
         private Point lastPortal;
         private double mox, moy;
         private int morx, mory;
+        private bool rotateGravitymo, rotateGravitymor;
         private bool isOnFire;
         internal int Overlapy;
         private double mx, my;
@@ -67,6 +68,8 @@ namespace EEPhysics
         public bool DoubleJumpEffect { get; internal set; }
         public bool GravityEffect { get; internal set; }
 
+        public bool FlipGravityEffect { get; internal set; }
+        public int FlipGravity { get; internal set; }
         public bool CursedEffect { get; internal set; }
         public bool IsThrusting { get; internal set; }
         public bool Zombie { get; internal set; }
@@ -187,6 +190,7 @@ namespace EEPhysics
 
         public event PlayerEvent OnHitPiano = delegate { };
         public event PlayerEvent OnHitDrum = delegate { };
+        public event PlayerEvent OnHitGuitar = delegate { };
         public event PlayerEvent OnHitSwitch = delegate { };
         public event PlayerEvent OnHitDiamond = delegate { };
         public event PlayerEvent OnHitCake = delegate { };
@@ -195,6 +199,9 @@ namespace EEPhysics
         public event PlayerEvent OnHitCheckpoint = delegate { };
 
         public event PlayerEvent OnDie = delegate { };
+
+        public event PlayerEvent OnHitGravityEffect = delegate { };
+        public event PlayerEvent OnHitGodBlock = delegate { };
 
 
         public PhysicsPlayer(int id, string name)
@@ -209,6 +216,7 @@ namespace EEPhysics
 
         internal void Tick()
         {
+            double temp = 0;
             double tx;
             double ty;
             bool spacedown = SpaceDown;
@@ -256,7 +264,26 @@ namespace EEPhysics
             if (current == 1 || current == 411) currentBelow = HostWorld.GetBlock(0, cx - 1, cy);
             else if (current == 2 || current == 412) currentBelow = HostWorld.GetBlock(0, cx, cy - 1);
             else if (current == 3 || current == 413) currentBelow = HostWorld.GetBlock(0, cx + 1, cy);
-            else currentBelow = HostWorld.GetBlock(0, cx, cy + 1);
+            else if (current == ItemId.InvisibleDownArrow || current == ItemId.DownArrow) currentBelow = HostWorld.GetBlock(0, cx, cy + 1);
+            else
+            {
+
+                switch (FlipGravity)
+                {
+                    case 0:
+                        currentBelow = HostWorld.GetBlock(0, cx, cy + 1);
+                        break;
+                    case 1:
+                        currentBelow = HostWorld.GetBlock(0, cx - 1, cy);
+                        break;
+                    case 2:
+                        currentBelow = HostWorld.GetBlock(0, cx, cy - 1);
+                        break;
+                    default:
+                        currentBelow = HostWorld.GetBlock(0, cx + 1, cy);
+                        break;
+                }
+            }
 
             queue.Enqueue(current);
             if (current == 4 || current == 414 || ItemId.IsClimbable(current))
@@ -282,7 +309,8 @@ namespace EEPhysics
             {
                 onFireDeath = 200;
             }
-
+            rotateGravitymo = true;
+            rotateGravitymor = true;
             if (IsDead)
             {
                 Horizontal = 0;
@@ -314,16 +342,25 @@ namespace EEPhysics
                         case ItemId.InvisibleLeftArrow:
                             morx = -gravity;
                             mory = 0;
+                            rotateGravitymor = false;
                             break;
                         case 2:
                         case ItemId.InvisibleUpArrow:
                             morx = 0;
                             mory = -gravity;
+                            rotateGravitymor = false;
                             break;
                         case 3:
                         case ItemId.InvisibleRightArrow:
                             morx = gravity;
                             mory = 0;
+                            rotateGravitymor = false;
+                            break;
+                        case ItemId.DownArrow:
+                        case ItemId.InvisibleDownArrow:
+                            morx = 0;
+                            mory = gravity;
+                            rotateGravitymor = false;
                             break;
                         case ItemId.SpeedLeft:
                         case ItemId.SpeedRight:
@@ -394,16 +431,25 @@ namespace EEPhysics
                         case ItemId.InvisibleLeftArrow:
                             mox = -gravity;
                             moy = 0;
+                            rotateGravitymo = false;
                             break;
                         case 2:
                         case ItemId.InvisibleUpArrow:
                             mox = 0;
                             moy = -gravity;
+                            rotateGravitymo = false;
                             break;
                         case 3:
                         case ItemId.InvisibleRightArrow:
                             mox = gravity;
                             moy = 0;
+                            rotateGravitymo = false;
+                            break;
+                        case ItemId.DownArrow:
+                        case ItemId.InvisibleDownArrow:
+                            mox = 0;
+                            moy = gravity;
+                            rotateGravitymo = false;
                             break;
                         case ItemId.SpeedLeft:
                         case ItemId.SpeedRight:
@@ -433,7 +479,61 @@ namespace EEPhysics
                     }
                 }
             }
-
+            switch (FlipGravity)
+            {
+                case 1:
+                    if (rotateGravitymo)
+                    {
+                        temp = mox;
+                        mox = -moy;
+                        moy = temp;
+                    }
+                    if (rotateGravitymor)
+                    {
+                        temp = morx;
+                        morx = -mory;
+                        mory = (int)temp;
+                    }
+                    break;
+                case 2:
+                    if (rotateGravitymo)
+                    {
+                        mox = -mox;
+                        moy = -moy;
+                    }
+                    if (rotateGravitymor)
+                    {
+                        morx = -morx;
+                        mory = -mory;
+                    }
+                    break;
+                case 3:
+                    if (rotateGravitymo)
+                    {
+                        temp = mox;
+                        mox = moy;
+                        moy = -temp;
+                    }
+                    if (rotateGravitymor)
+                    {
+                        temp = morx;
+                        morx = mory;
+                        mory = -(int)temp;
+                    }
+                    break;
+                case 4:
+                    if (rotateGravitymo)
+                    {
+                        mox = 0;
+                        moy = 0;
+                    }
+                    if (rotateGravitymor)
+                    {
+                        this.morx = 0;
+                        this.mory = 0;
+                    }
+                    break;
+            }
             if (moy == PhysicsConfig.WaterBuoyancy || moy == PhysicsConfig.MudBuoyancy || moy == PhysicsConfig.LavaBuoyancy)
             {
                 mx = Horizontal;
@@ -804,47 +904,29 @@ namespace EEPhysics
                     }
                     if (injump && !HasLevitation)
                     {
-                        if ((maxJumps > 0 || jumpCount < maxJumps))
+                        if (jumpCount < maxJumps)
                         {
                             if (SpeedX == 0 && morx != 0 && mox != 0 && (X % 16 == 0 || X % 8 == 0))
                             {
-                                var skipJumpX = false;
-                                if (jumpCount == 0 && speedX != 0 && ItemId.IsSolid(currentBelow))
+                                if (maxJumps < 1000)
                                 {
-                                    if (maxJumps == 1)
-                                    {
-                                        skipJumpX = true;
-                                    }
-                                    else jumpCount += 2;
+                                    jumpCount = jumpCount + 1;
                                 }
-                                else jumpCount++;
+                                SpeedX -= morx * PhysicsConfig.JumpHeight * JumpMultiplier;
+                                changed = true;
+                                lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
 
-                                if (!skipJumpX)
-                                {
-                                    SpeedX -= morx * PhysicsConfig.JumpHeight * JumpMultiplier;
-                                    changed = true;
-                                    lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
-                                }
                             }
                             if (SpeedY == 0 && mory != 0 && moy != 0 && (Y % 16 == 0 || Y % 8 == 0))
                             {
-                                var skipJumpY = false;
-                                if (jumpCount == 0 && speedY != 0 && ItemId.IsSolid(currentBelow))
+                                if (maxJumps < 1000)
                                 {
-                                    if (maxJumps == 1)
-                                    {
-                                        skipJumpY = true;
-                                    }
-                                    else jumpCount += 2;
+                                    jumpCount = jumpCount + 1;
                                 }
-                                else jumpCount++;
+                                SpeedY -= mory * PhysicsConfig.JumpHeight * JumpMultiplier;
+                                changed = true;
+                                lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
 
-                                if (!skipJumpY)
-                                {
-                                    SpeedY -= mory * PhysicsConfig.JumpHeight * JumpMultiplier;
-                                    changed = true;
-                                    lastJump = HostWorld.Sw.ElapsedMilliseconds * mod;
-                                }
                             }
                         }
                     }
@@ -985,6 +1067,9 @@ namespace EEPhysics
                         case ItemId.Drum:
                             OnHitDrum(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             break;
+                        case ItemId.Guitar:
+                            OnHitGuitar(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
+                            break;
                         case ItemId.Diamond:
                             OnHitDiamond(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
                             if (IsMe && HostWorld.Connected && !InGodMode)
@@ -1022,6 +1107,13 @@ namespace EEPhysics
                             if (IsMe && HostWorld.Connected && !InGodMode)
                             {
                                 HostWorld.Connection.Send("levelcomplete", cx, cy);
+                            }
+                            break;
+                        case ItemId.GodBlock:
+                            if (!isGodMode) OnHitGodBlock(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
+                            if (IsMe && HostWorld.Connected && !InGodMode)
+                            {
+                                HostWorld.Connection.Send("godblocktouch", cx, cy);
                             }
                             break;
 
@@ -1127,6 +1219,19 @@ namespace EEPhysics
                                     Zombie = status;
 
                                     if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectZombie);
+                                }
+                            }
+                            break;
+                        case ItemId.EffectGravity:
+                            if (!isGodMode)
+                            {
+                                OnHitGravityEffect(new PlayerEventArgs { Player = this, BlockX = cx, BlockY = cy });
+                                var status = HostWorld.GetOnStatus(cx, cy);
+                                if (GravityEffect != status)
+                                {
+                                    GravityEffect = status;
+
+                                    if (IsMe && HostWorld.Connected && !InGodMode) HostWorld.Connection.Send("effect", cx, cy, PhysicsConfig.EffectGravity);
                                 }
                             }
                             break;
@@ -1457,6 +1562,7 @@ namespace EEPhysics
                 case PhysicsConfig.EffectProtection: isInvulnerable = active; break;
                 case PhysicsConfig.EffectCurse: CursedEffect = active; break;
                 case PhysicsConfig.EffectZombie: Zombie = active; break;
+                case PhysicsConfig.EffectGravity: FlipGravityEffect = active; break;
             }
         }
 

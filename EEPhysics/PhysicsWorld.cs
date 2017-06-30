@@ -293,7 +293,18 @@ namespace EEPhysics
                 case "effect":
                     {
                         PhysicsPlayer p;
-                        if (Players.TryGetValue(m.GetInt(0), out p)) p.SetEffect(m.GetInt(1), m.GetBoolean(2));
+                        if (Players.TryGetValue(m.GetInt(0), out p))
+                        {
+                            p.SetEffect(m.GetInt(1), m.GetBoolean(2));
+                            if (m.Count == 4)
+                            {
+                                if (m.GetInt(1) == 10) p.FlipGravity = m.GetInt(3);
+                            }
+                            else
+                            {
+                                if (m.GetInt(1) == 10) p.FlipGravity = 0;
+                            }
+                        }
                     }
                     break;
                 case "team":
@@ -789,6 +800,7 @@ namespace EEPhysics
                             break;
                         case 83:
                         case 77:
+                        case 1520:
                             continue;
                     }
 
